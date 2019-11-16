@@ -14,9 +14,13 @@ import de.jeisfeld.pi.gpio.PwmOutputArray;
  */
 public class BreathingRgbLed {
 	/**
-	 * Flag indicating if the LED is switched on.
+	 * The variation intensities.
 	 */
-	private boolean mIsRunning = false;
+	private static final double[] MODES = {-1, 0.8, 0.4, 0.2, 0.1, 0.05}; // MAGIC_NUMBER
+	/**
+	 * The current mode.
+	 */
+	private int mMode = 0;
 
 	/**
 	 * Main method.
@@ -25,7 +29,7 @@ public class BreathingRgbLed {
 	 * @throws InterruptedException if interrupted
 	 */
 	public static void main(final String[] args) throws InterruptedException {
-		new BreathingRgbLed().run();
+		new BreathingRgbLed().run(); // MAGIC_NUMBER
 	}
 
 	/**
@@ -41,7 +45,7 @@ public class BreathingRgbLed {
 		button.addListener(new DigitalInput.OnStableStateChangeListener() {
 			@Override
 			public void handleTriggerOn() {
-				mIsRunning = !mIsRunning;
+				mMode = (mMode + 1) % BreathingRgbLed.MODES.length;
 			}
 
 			@Override
@@ -56,19 +60,20 @@ public class BreathingRgbLed {
 				try {
 					Runtime.getRuntime().exec("sudo shutdown -h now");
 				}
-				catch (IOException e) {
+				catch (final IOException e) {
 					e.printStackTrace();
 				}
 			}
 		});
 
-		Random random = new Random();
+		final Random random = new Random();
 		while (true) {
-			if (mIsRunning) {
-				long duration = 10 + random.nextInt(200); // MAGIC_NUMBER
-				double targetRed = random.nextDouble();
-				double targetGreen = random.nextDouble() * targetRed * 0.6; // MAGIC_NUMBER
-				double targetBlue = random.nextDouble() * targetGreen * 0.3; // MAGIC_NUMBER
+			final double variation = BreathingRgbLed.MODES[mMode];
+			if (variation >= 0) {
+				final long duration = 10 + random.nextInt(200); // MAGIC_NUMBER
+				final double targetRed = 1 - variation * random.nextDouble();
+				final double targetGreen = targetRed * (0.5 + (random.nextDouble() - 0.5) * variation) * 0.8; // MAGIC_NUMBER
+				final double targetBlue = targetGreen * (0.5 + (random.nextDouble() - 0.5) * variation) * 0.4; // MAGIC_NUMBER
 				led.moveToValue(duration, targetRed, targetGreen, targetBlue);
 			}
 			else {
