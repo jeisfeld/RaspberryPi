@@ -29,7 +29,7 @@ public class PwmOutput {
 	/**
 	 * Flag indicating the default value of this output.
 	 */
-	private boolean mIsHigh;
+	private final boolean mIsHigh;
 	/**
 	 * The corresponding PIN Output.
 	 */
@@ -46,13 +46,13 @@ public class PwmOutput {
 	 * @param isHigh Flag indicating the default value of this output.
 	 */
 	public PwmOutput(final Pin pin, final boolean isHigh) {
-		this.mIsHigh = isHigh;
+		mIsHigh = isHigh;
 		if (RaspiPin.GPIO_01.equals(pin)) {
-			mPinOutput = GpioFactory.getInstance().provisionPwmOutputPin(pin, isHigh ? STEPS_HARD : 0);
+			mPinOutput = GpioFactory.getInstance().provisionPwmOutputPin(pin, isHigh ? PwmOutput.STEPS_HARD : 0);
 			mIsSoft = false;
 		}
 		else {
-			mPinOutput = GpioFactory.getInstance().provisionSoftPwmOutputPin(pin, isHigh ? STEPS_SOFT : 0);
+			mPinOutput = GpioFactory.getInstance().provisionSoftPwmOutputPin(pin, isHigh ? PwmOutput.STEPS_SOFT : 0);
 			mIsSoft = true;
 		}
 		ShutdownUtil.prepareShutdown(mPinOutput);
@@ -66,7 +66,7 @@ public class PwmOutput {
 	 * @return The corresponding digital outputs.
 	 */
 	public static PwmOutput[] createPwmOutputs(final boolean isHigh, final Pin... pins) {
-		PwmOutput[] result = new PwmOutput[pins.length];
+		final PwmOutput[] result = new PwmOutput[pins.length];
 		for (int i = 0; i < pins.length; i++) {
 			result[i] = new PwmOutput(pins[i], isHigh);
 		}
@@ -76,12 +76,12 @@ public class PwmOutput {
 	/**
 	 * Set the value of the PWM output.
 	 *
-	 * @param value The value to be set. 0 corresponds to the default value.
+	 * @param dutyCycle The duty cycle to be set - the percentage of "on" status.
 	 */
-	public void setValue(final double value) {
-		mValue = value;
+	public void setValue(final double dutyCycle) {
+		mValue = dutyCycle;
 		if (!ShutdownUtil.isShutdown()) {
-			mPinOutput.setPwm((int) ((mIsHigh ? 1 - mValue : mValue) * (mIsSoft ? STEPS_SOFT : STEPS_HARD)));
+			mPinOutput.setPwm((int) ((mIsHigh ? 1 - mValue : mValue) * (mIsSoft ? PwmOutput.STEPS_SOFT : PwmOutput.STEPS_HARD)));
 		}
 	}
 
@@ -101,15 +101,16 @@ public class PwmOutput {
 	 * @param duration The duration.
 	 */
 	public void moveToValue(final double targetValue, final long duration) {
-		long startTime = System.currentTimeMillis();
-		double startValue = mValue;
-		int steps = (int) Math.min(Math.abs(targetValue - startValue) * (mIsSoft ? STEPS_SOFT : STEPS_HARD), duration / MIN_STEP_DURATION);
+		final long startTime = System.currentTimeMillis();
+		final double startValue = mValue;
+		final int steps = (int) Math.min(Math.abs(targetValue - startValue) * (mIsSoft ? PwmOutput.STEPS_SOFT : PwmOutput.STEPS_HARD),
+				duration / PwmOutput.MIN_STEP_DURATION);
 
 		for (int i = 1; i <= steps; i++) {
-			sleepIfRequired(startTime + duration * i / steps - System.currentTimeMillis());
+			PwmOutput.sleepIfRequired(startTime + duration * i / steps - System.currentTimeMillis());
 			setValue(startValue + (targetValue - startValue) * i / steps);
 		}
-		sleepIfRequired(startTime + duration - System.currentTimeMillis());
+		PwmOutput.sleepIfRequired(startTime + duration - System.currentTimeMillis());
 	}
 
 	/**
@@ -122,7 +123,7 @@ public class PwmOutput {
 			try {
 				Thread.sleep(duration);
 			}
-			catch (InterruptedException e) {
+			catch (final InterruptedException e) {
 				// Ignore
 			}
 		}

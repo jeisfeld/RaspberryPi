@@ -27,4 +27,4 @@ if [ -d "$HOME/.local/bin" ] ; then
 fi
 
 # Uncomment the following line for running background task on startup
-/home/je/bin/startbackground
+#/home/je/bin/startbackground

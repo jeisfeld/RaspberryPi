@@ -38,9 +38,9 @@ public class BreathingRgbLed {
 	 * @throws InterruptedException if interrupted
 	 */
 	private void run() throws InterruptedException {
-		final PwmOutputArray led = new PwmOutputArray(true, RaspiPin.GPIO_00, RaspiPin.GPIO_01, RaspiPin.GPIO_02);
+		final PwmOutputArray led = new PwmOutputArray(true, RaspiPin.GPIO_00, RaspiPin.GPIO_05, RaspiPin.GPIO_02);
 
-		final DigitalInput button = new DigitalInput(RaspiPin.GPIO_05, false);
+		final DigitalInput button = new DigitalInput(RaspiPin.GPIO_01, true);
 
 		button.addListener(new DigitalInput.OnStableStateChangeListener() {
 			@Override
