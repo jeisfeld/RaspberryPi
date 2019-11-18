@@ -47,7 +47,7 @@ public class ControlledBreathingRgbLed {
 
 		final Random random = new Random();
 		while (true) {
-			double variation = device.read(Pcf8591.CHANNEL_1);
+			double variation = device.read(Pcf8591.CHANNEL_1); // Typical good value: 0.5
 			variation = variation * variation;
 			double rulerBrightness = device.read(Pcf8591.CHANNEL_0);
 			double randomForBrightness = random.nextDouble() - 0.5; // MAGIC_NUMBER
@@ -58,7 +58,7 @@ public class ControlledBreathingRgbLed {
 			switch (mMode) {
 			case 1:
 				// Mode 1: uses color temperature
-				double rulerTemperature = device.read(Pcf8591.CHANNEL_2) * 2 + 6.8; // MAGIC_NUMBER
+				double rulerTemperature = device.read(Pcf8591.CHANNEL_2) * 2 + 6.8; // MAGIC_NUMBER. Good value: 0.3 -> 7.4
 				double logTemperature = rulerTemperature + (random.nextDouble() - 0.5) * variation; // MAGIC_NUMBER
 
 				Color color = ControlledBreathingRgbLed.convertColorTemperature(Math.exp(logTemperature), brightness);
