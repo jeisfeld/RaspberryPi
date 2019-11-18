@@ -33,7 +33,7 @@ public class Analog {
 		final Pcf8591 device = new Pcf8591();
 
 		while (true) {
-			final int response = device.read();
+			final int response = device.readByte();
 			// SYSTEMOUT:OFF
 			System.out.println("Read value: " + response);
 			// SYSTEMOUT:ON

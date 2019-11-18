@@ -40,6 +40,10 @@ public class Pcf8591 {
 	 */
 	public static final byte CHANNEL_3 = 3;
 	/**
+	 * The divisor required to transform between byte and double values.
+	 */
+	private static final double DIVISOR = 255.0;
+	/**
 	 * The PCF8591 device.
 	 */
 	private final I2CDevice mDevice;
@@ -47,6 +51,10 @@ public class Pcf8591 {
 	 * The used channel.
 	 */
 	private final Byte mChannel;
+	/**
+	 * The minimum positive value to be used. Smaller values will be interpreted as 0.
+	 */
+	private int mMinValue = 1;
 
 	/**
 	 * Initialize the PCF8591 Analog/Digital Wandler.
@@ -55,20 +63,54 @@ public class Pcf8591 {
 	 * @throws UnsupportedBusNumberException if BUS is not valid
 	 */
 	public Pcf8591() throws UnsupportedBusNumberException, IOException {
-		this(Pcf8591.CHANNEL_0);
+		this(1);
+	}
+
+	/**
+	 * Initialize the PCF8591 Analog/Digital Wandler.
+	 *
+	 * @param minValue The minimum positive value to be used. Smaller values will be interpreted as 0.
+	 * @throws IOException in case of I/O issues
+	 * @throws UnsupportedBusNumberException if BUS is not valid
+	 */
+	public Pcf8591(final int minValue) throws UnsupportedBusNumberException, IOException {
+		this(Pcf8591.CHANNEL_0, minValue);
 	}
 
 	/**
 	 * Initialize the PCF8591 Analog/Digital Wandler for a fixed input channel.
 	 *
 	 * @param inputChannel the used input channel.
+	 * @param minValue The minimum positive value to be used. Smaller values will be interpreted as 0.
 	 * @throws IOException in case of I/O issues
 	 * @throws UnsupportedBusNumberException if BUS is not valid
 	 */
-	public Pcf8591(final byte inputChannel) throws UnsupportedBusNumberException, IOException {
+	public Pcf8591(final byte inputChannel, final int minValue) throws UnsupportedBusNumberException, IOException {
 		final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
 		mDevice = bus.getDevice(Pcf8591.PCF8591_ADDR);
 		mChannel = inputChannel;
+		mMinValue = minValue;
+	}
+
+	/**
+	 * Read a value from the device.
+	 *
+	 * @param channel The channel where ti read.
+	 * @return the read value in range 0...1
+	 * @throws IOException issuew when reading
+	 */
+	public double read(final byte channel) throws IOException {
+		return readByte(channel) / Pcf8591.DIVISOR;
+	}
+
+	/**
+	 * Read a byte from the default channel of the device.
+	 *
+	 * @return the read value in range 0...1
+	 * @throws IOException issuew when reading
+	 */
+	public double read() throws IOException {
+		return read(mChannel);
 	}
 
 	/**
@@ -78,8 +120,10 @@ public class Pcf8591 {
 	 * @return the read byte
 	 * @throws IOException issuew when reading
 	 */
-	public int read(final byte channel) throws IOException {
-		return mDevice.read(Pcf8591.PCF8591_CMD_READ[channel]);
+	public int readByte(final byte channel) throws IOException {
+		mDevice.read(Pcf8591.PCF8591_CMD_READ[channel]);
+		final int value = mDevice.read();
+		return value < mMinValue ? 0 : value;
 	}
 
 	/**
@@ -88,8 +132,8 @@ public class Pcf8591 {
 	 * @return the read byte
 	 * @throws IOException issuew when reading
 	 */
-	public int read() throws IOException {
-		return read(mChannel);
+	public int readByte() throws IOException {
+		return readByte(mChannel);
 	}
 
 	/**
