@@ -4,6 +4,7 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
@@ -14,11 +15,11 @@ public class DigitalInput {
 	/**
 	 * The corresponding PIN Input.
 	 */
-	private GpioPinDigitalInput mPinInput;
+	private final GpioPinDigitalInput mPinInput;
 	/**
 	 * Flag indicating if this is pullUp input (i.e. by default high).
 	 */
-	private boolean mIsPullUp;
+	private final boolean mIsPullUp;
 
 	/**
 	 * Create a digital input for a PIN.
@@ -27,9 +28,18 @@ public class DigitalInput {
 	 * @param isPullUp Flag indicating if this is pullUp input (i.e. by default high).
 	 */
 	public DigitalInput(final Pin pin, final boolean isPullUp) {
-		this.mIsPullUp = isPullUp;
+		mIsPullUp = isPullUp;
 		mPinInput = GpioFactory.getInstance().provisionDigitalInputPin(pin, isPullUp ? PinPullResistance.PULL_UP : PinPullResistance.PULL_DOWN);
 		ShutdownUtil.prepareShutdown(mPinInput);
+	}
+
+	/**
+	 * Get the value of the input.
+	 *
+	 * @return true if in non-default state.
+	 */
+	public boolean getValue() {
+		return mPinInput.getState() == (mIsPullUp ? PinState.LOW : PinState.HIGH);
 	}
 
 	/**
@@ -88,8 +98,9 @@ public class DigitalInput {
 					if (event.getState().isHigh() ^ mIsPullUp) {
 						mTriggerStartTime = System.currentTimeMillis();
 						new Thread() {
-							private long mLocalTriggerStartTime = System.currentTimeMillis();
+							private final long mLocalTriggerStartTime = System.currentTimeMillis();
 
+							@Override
 							public void run() {
 								try {
 									Thread.sleep(listener.mDuration);
@@ -151,7 +162,7 @@ public class DigitalInput {
 		/**
 		 * The duration of the long press.
 		 */
-		private long mDuration;
+		private final long mDuration;
 
 		/**
 		 * Constructor.
@@ -166,7 +177,7 @@ public class DigitalInput {
 		 * Constructor.
 		 */
 		public OnLongPressListener() {
-			this(DEFAULT_TRIGGER_DURATION);
+			this(OnLongPressListener.DEFAULT_TRIGGER_DURATION);
 		}
 
 		/**
