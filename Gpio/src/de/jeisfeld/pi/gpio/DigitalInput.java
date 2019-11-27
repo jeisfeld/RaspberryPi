@@ -98,7 +98,7 @@ public class DigitalInput {
 					if (event.getState().isHigh() ^ mIsPullUp) {
 						mTriggerStartTime = System.currentTimeMillis();
 						new Thread() {
-							private final long mLocalTriggerStartTime = System.currentTimeMillis();
+							private final long mLocalTriggerStartTime = mTriggerStartTime;
 
 							@Override
 							public void run() {

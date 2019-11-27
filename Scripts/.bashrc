@@ -112,5 +112,5 @@ if ! shopt -oq posix; then
   fi
 fi
 
-. .bashrc2
+. ~/.bashrc2
 

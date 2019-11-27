@@ -26,5 +26,3 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-# Uncomment the following line for running background task on startup
-/home/je/bin/startbackground
