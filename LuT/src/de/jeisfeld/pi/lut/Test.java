@@ -2,6 +2,8 @@ package de.jeisfeld.pi.lut;
 
 import java.io.IOException;
 
+import de.jeisfeld.pi.lut.Sender.ReadType;
+
 /**
  * Test class for LuT framework.
  */
@@ -15,7 +17,7 @@ public class Test { // SUPPRESS_CHECKSTYLE
 	 */
 	public static void main(final String[] args) throws IOException, InterruptedException { // SUPPRESS_CHECKSTYLE
 		// SYSTEMOUT:OFF
-		Test.test1();
+		Test.test3();
 	}
 
 	/**
@@ -49,7 +51,7 @@ public class Test { // SUPPRESS_CHECKSTYLE
 		long lastTime = System.currentTimeMillis();
 
 		while (true) {
-			ButtonStatus status = sender.readInputs();
+			ButtonStatus status = sender.readInputs(ReadType.ALL);
 			long newTime = System.currentTimeMillis();
 			System.out.println(status + " - " + (newTime - lastTime));
 			lastTime = newTime;
@@ -69,7 +71,7 @@ public class Test { // SUPPRESS_CHECKSTYLE
 		long lastTime = System.currentTimeMillis();
 
 		while (true) {
-			ButtonStatus status = sender.readInputs();
+			ButtonStatus status = sender.readInputs(ReadType.ANALOG);
 			int power = status.getControl1Value();
 			int frequency = status.getControl2Value();
 

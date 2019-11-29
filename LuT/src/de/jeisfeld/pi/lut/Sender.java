@@ -113,32 +113,33 @@ public final class Sender {
 	/**
 	 * Read the inputs of the eWeb.
 	 *
+	 * @param readType Restrict the inputs which should be read.
 	 * @return The status of the inputs.
 	 * @throws IOException issues with connection
 	 */
-	public ButtonStatus readInputs() throws IOException {
+	public ButtonStatus readInputs(final ReadType readType) throws IOException {
 		if (mSerial.isClosed()) {
 			return null;
 		}
 
-		boolean digitalResultRetrieved = false;
-		boolean analogResultRetrieved = false;
+		boolean digitalResultRequired = readType.isDigitalRequired();
+		boolean analogResultRequired = readType.isAnalogRequired();
 		ButtonStatus result = new ButtonStatus();
 		do {
-			if (!digitalResultRetrieved) {
+			if (digitalResultRequired) {
 				mSerial.write("S\r");
 			}
-			if (!analogResultRetrieved) {
+			if (analogResultRequired) {
 				mSerial.write("A\r");
 			}
 			String input = new String(mSerial.read());
 			if (input == null || input.length() < 2) {
 				input = new String(mSerial.read());
 			}
-			digitalResultRetrieved = digitalResultRetrieved || result.setDigitalResult(input);
-			analogResultRetrieved = analogResultRetrieved || result.setAnalogResult(input);
+			digitalResultRequired = digitalResultRequired && !result.setDigitalResult(input);
+			analogResultRequired = analogResultRequired && !result.setAnalogResult(input);
 		}
-		while (!digitalResultRetrieved || !analogResultRetrieved && !mSerial.isClosed());
+		while (digitalResultRequired || analogResultRequired && !mSerial.isClosed());
 
 		return result;
 	}
@@ -152,6 +153,43 @@ public final class Sender {
 	 */
 	public ChannelSender getChannelSender(final int channel) throws IOException {
 		return new ChannelSender(this, channel);
+	}
+
+	/**
+	 * Specify the data inputs to be read.
+	 */
+	public enum ReadType {
+		/**
+		 * Only digital inputs.
+		 */
+		DIGITAL,
+		/**
+		 * Only analog inputs.
+		 */
+		ANALOG,
+		/**
+		 * All inputs.
+		 */
+		ALL;
+
+		/**
+		 * Check if digital inputs should be read.
+		 *
+		 * @return True if digital inputs should be read.
+		 */
+		public boolean isDigitalRequired() {
+			return this == DIGITAL || this == ALL;
+		}
+
+		/**
+		 * Check if analog inputs should be read.
+		 *
+		 * @return True if analog inputs should be read.
+		 */
+		public boolean isAnalogRequired() {
+			return this == ANALOG || this == ALL;
+		}
+
 	}
 
 }
