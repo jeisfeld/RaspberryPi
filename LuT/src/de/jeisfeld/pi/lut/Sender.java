@@ -2,6 +2,7 @@ package de.jeisfeld.pi.lut;
 
 import java.io.IOException;
 
+import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.serial.Baud;
 import com.pi4j.io.serial.DataBits;
 import com.pi4j.io.serial.FlowControl;
@@ -16,10 +17,6 @@ import com.pi4j.io.serial.StopBits;
  */
 public final class Sender {
 	/**
-	 * The serial port used for sending.
-	 */
-	private final Serial mSerial = SerialFactory.createInstance();
-	/**
 	 * The singleton instance of this class.
 	 */
 	private static Sender mInstance = null;
@@ -27,6 +24,10 @@ public final class Sender {
 	 * The default serial port used.
 	 */
 	private static final String DEFAULT_PORT = "/dev/serial0";
+	/**
+	 * The serial port used for sending.
+	 */
+	private final Serial mSerial = SerialFactory.createInstance();
 
 	/**
 	 * Constructor for default port.
@@ -76,6 +77,7 @@ public final class Sender {
 	public void close() throws IOException {
 		mSerial.discardAll();
 		mSerial.close();
+		GpioFactory.getInstance().shutdown();
 	}
 
 	/**
@@ -87,16 +89,13 @@ public final class Sender {
 	 * @throws InterruptedException when interrupted
 	 */
 	public void write(final String message, final long duration) throws IOException, InterruptedException {
+		if (mSerial.isClosed()) {
+			return;
+		}
 		boolean done = false;
 		final long startTime = System.currentTimeMillis();
 		mSerial.write(message + "\r");
 		while (!done) {
-			String result;
-			do {
-				result = new String(mSerial.read());
-			}
-			while (result == null || !result.contains("OK"));
-
 			final long remainingTime = duration - (System.currentTimeMillis() - startTime);
 			if (remainingTime < 2000) { // MAGIC_NUMBER
 				if (remainingTime > 0) {
@@ -118,23 +117,28 @@ public final class Sender {
 	 * @throws IOException issues with connection
 	 */
 	public ButtonStatus readInputs() throws IOException {
+		if (mSerial.isClosed()) {
+			return null;
+		}
+
+		boolean digitalResultRetrieved = false;
+		boolean analogResultRetrieved = false;
 		ButtonStatus result = new ButtonStatus();
-
-		mSerial.write("S\r");
-		String digitalResult;
 		do {
-			digitalResult = new String(mSerial.read());
+			if (!digitalResultRetrieved) {
+				mSerial.write("S\r");
+			}
+			if (!analogResultRetrieved) {
+				mSerial.write("A\r");
+			}
+			String input = new String(mSerial.read());
+			if (input == null || input.length() < 2) {
+				input = new String(mSerial.read());
+			}
+			digitalResultRetrieved = digitalResultRetrieved || result.setDigitalResult(input);
+			analogResultRetrieved = analogResultRetrieved || result.setAnalogResult(input);
 		}
-		while (digitalResult == null || !digitalResult.startsWith("S"));
-		result.setDigitalResult(digitalResult);
-
-		mSerial.write("A\r");
-		String analogResult;
-		do {
-			analogResult = new String(mSerial.read());
-		}
-		while (analogResult == null || !analogResult.startsWith("A"));
-		result.setAnalogResult(analogResult);
+		while (!digitalResultRetrieved || !analogResultRetrieved && !mSerial.isClosed());
 
 		return result;
 	}

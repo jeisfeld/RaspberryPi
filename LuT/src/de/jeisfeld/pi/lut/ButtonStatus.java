@@ -74,30 +74,42 @@ public final class ButtonStatus {
 	 * Set the digital results from the serial String.
 	 *
 	 * @param resultString The serial response String read from eWeb.
+	 * @return true if successful
 	 */
-	protected void setDigitalResult(final String resultString) {
-		if (resultString.startsWith("S") && resultString.length() >= 3) { // MAGIC_NUMBER
-			mIsButton1Pressed = resultString.charAt(1) == '1';
-			mIsButton2Pressed = resultString.charAt(2) == '1';
+	protected boolean setDigitalResult(final String resultString) {
+		if (resultString.contains("S")) {
+			int index = resultString.indexOf("S");
+			int newLineIndex = resultString.indexOf('\r', index);
+			String reducedResultString = resultString.substring(index + 1, newLineIndex);
+			if (reducedResultString.length() >= 2) { // MAGIC_NUMBER
+				mIsButton1Pressed = reducedResultString.charAt(0) == '1';
+				mIsButton2Pressed = reducedResultString.charAt(1) == '1';
+			}
+			return true;
 		}
+		return false;
 	}
 
 	/**
 	 * Set the analog results from the serial String.
 	 *
 	 * @param resultString The serial response String read from eWeb.
+	 * @return true if successful
 	 */
-	protected void setAnalogResult(final String resultString) {
-		if (resultString.startsWith("A")) {
-			int newLineIndex = resultString.indexOf('\r');
-			String reducedResultString = resultString.substring(1, newLineIndex);
+	protected boolean setAnalogResult(final String resultString) {
+		if (resultString.contains("A")) {
+			int index = resultString.indexOf("A");
+			int newLineIndex = resultString.indexOf('\r', index);
+			String reducedResultString = resultString.substring(index + 1, newLineIndex);
 			String[] controlValues = reducedResultString.split(";");
 			if (controlValues.length >= 3) { // MAGIC_NUMBER
 				mControl1Value = Integer.parseInt(controlValues[0]);
 				mControl2Value = Integer.parseInt(controlValues[1]);
 				mControl3Value = Integer.parseInt(controlValues[2]);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	@Override
