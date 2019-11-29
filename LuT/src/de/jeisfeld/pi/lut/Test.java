@@ -67,26 +67,23 @@ public class Test { // SUPPRESS_CHECKSTYLE
 	private static void test3() throws IOException, InterruptedException {
 		Sender sender = Sender.getInstance();
 		ChannelSender channelSender = sender.getChannelSender(1);
-		double cyclePoint = Math.PI;
-		long lastTime = System.currentTimeMillis();
+		double cyclePoint = 0;
 
 		while (true) {
 			ButtonStatus status = sender.readInputs(ReadType.ANALOG);
 			int power = status.getControl1Value();
 			int frequency = status.getControl2Value();
+			int minPower = (status.getControl3Value() * power) / 255; // MAGIC_NUMBER
 
-			int value = (int) ((1 - Math.cos(cyclePoint)) / 2 * power);
+			int value = (int) ((1 - Math.cos(2 * Math.PI * cyclePoint)) / 2 * (power - minPower) + minPower);
 
-			System.out.println(power + " - " + frequency + " - " + value);
+			System.out.println(power + " - " + minPower + " - " + frequency + " - " + value);
 
-			channelSender.lob(value, 0); // MAGIC_NUMBER
-
-			long newTime = System.currentTimeMillis();
-			long timeDiff = newTime - lastTime;
-			lastTime = newTime;
+			channelSender.lob(value, 0);
 
 			if (frequency > 0) {
-				cyclePoint += 0.02 * timeDiff / frequency; // MAGIC_NUMBER
+				int factor = (frequency + 9) / 10; // MAGIC_NUMBER
+				cyclePoint = (Math.round(cyclePoint * 2 * factor) + 1.0) / 2 / factor;
 			}
 			else {
 				cyclePoint = Math.PI;
