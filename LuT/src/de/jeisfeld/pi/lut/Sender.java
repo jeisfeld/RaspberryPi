@@ -91,11 +91,17 @@ public final class Sender {
 		final long startTime = System.currentTimeMillis();
 		mSerial.write(message + "\r");
 		while (!done) {
-			Thread.sleep(100); // MAGIC_NUMBER - wait for response and then ignore response
-			mSerial.discardInput();
+			String result;
+			do {
+				result = new String(mSerial.read());
+			}
+			while (result == null || !result.contains("OK"));
+
 			final long remainingTime = duration - (System.currentTimeMillis() - startTime);
 			if (remainingTime < 2000) { // MAGIC_NUMBER
-				Thread.sleep(remainingTime);
+				if (remainingTime > 0) {
+					Thread.sleep(remainingTime);
+				}
 				done = true;
 			}
 			else {
@@ -105,6 +111,41 @@ public final class Sender {
 		}
 	}
 
+	/**
+	 * Read the inputs of the eWeb.
+	 *
+	 * @return The status of the inputs.
+	 * @throws IOException issues with connection
+	 */
+	public ButtonStatus readInputs() throws IOException {
+		ButtonStatus result = new ButtonStatus();
+
+		mSerial.write("S\r");
+		String digitalResult;
+		do {
+			digitalResult = new String(mSerial.read());
+		}
+		while (digitalResult == null || !digitalResult.startsWith("S"));
+		result.setDigitalResult(digitalResult);
+
+		mSerial.write("A\r");
+		String analogResult;
+		do {
+			analogResult = new String(mSerial.read());
+		}
+		while (analogResult == null || !analogResult.startsWith("A"));
+		result.setAnalogResult(analogResult);
+
+		return result;
+	}
+
+	/**
+	 * Get a channel sender for a channel.
+	 *
+	 * @param channel The channel.
+	 * @return The channel sender.
+	 * @throws IOException issues with connection
+	 */
 	public ChannelSender getChannelSender(final int channel) throws IOException {
 		return new ChannelSender(this, channel);
 	}

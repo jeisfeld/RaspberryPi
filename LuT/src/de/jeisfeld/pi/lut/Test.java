@@ -13,13 +13,32 @@ public class Test { // SUPPRESS_CHECKSTYLE
 	 * @throws InterruptedException if interrupted
 	 */
 	public static void main(final String[] args) throws IOException, InterruptedException { // SUPPRESS_CHECKSTYLE
-		ChannelSender sender = Sender.getInstance().getChannelSender(1);
+		Sender sender = Sender.getInstance();
+		ChannelSender channelSender = sender.getChannelSender(1);
+		double cyclePoint = 0;
+		long lastTime = System.currentTimeMillis();
 
-		sender.lob((byte) 1, (byte) 49, 5000); // MAGIC_NUMBER
+		while (true) {
+			ButtonStatus status = sender.readInputs();
+			int power = status.getControl1Value();
+			int frequency = status.getControl2Value();
 
-		Thread.sleep(1000); // MAGIC_NUMBER
-		sender.lobOff();
-		sender.close();
+			int value = (int) ((1 - Math.cos(cyclePoint)) / 2 * power);
+
+			channelSender.lob(value, 10); // MAGIC_NUMBER
+
+			long newTime = System.currentTimeMillis();
+			long timeDiff = newTime - lastTime;
+			lastTime = newTime;
+
+			if (frequency > 0) {
+				cyclePoint += 0.02 * timeDiff / frequency;
+			}
+			else {
+				cyclePoint = Math.PI;
+			}
+
+		}
 	}
 
 }

@@ -9,11 +9,11 @@ public class ChannelSender {
 	/**
 	 * The Sender used by this ChannelSender.
 	 */
-	private Sender mSender;
+	private final Sender mSender;
 	/**
 	 * The channel number.
 	 */
-	private int mChannel;
+	private final int mChannel;
 
 	/**
 	 * Duration of fixed chung in varying signals.
@@ -28,8 +28,8 @@ public class ChannelSender {
 	 * @throws IOException issues with connection.
 	 */
 	public ChannelSender(final Sender sender, final int channel) throws IOException {
-		this.mSender = sender;
-		this.mChannel = channel;
+		mSender = sender;
+		mChannel = channel;
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class ChannelSender {
 	 * @throws IOException issues with connection
 	 * @throws InterruptedException Thread interrupted
 	 */
-	public void lob(final byte power, final long duration) throws IOException, InterruptedException {
+	public void lob(final int power, final long duration) throws IOException, InterruptedException {
 		mSender.write("L" + mChannel + "P" + power, duration);
 	}
 
@@ -53,7 +53,7 @@ public class ChannelSender {
 	 * @throws IOException issues with connection
 	 * @throws InterruptedException Thread interrupted.
 	 */
-	public void lob(final byte startPower, final byte endPower, final long duration) throws IOException, InterruptedException {
+	public void lob(final int startPower, final int endPower, final long duration) throws IOException, InterruptedException {
 		long stepCount = duration / 200; // MAGIC_NUMBER
 		if (stepCount <= 1) {
 			lob(endPower, duration);
@@ -74,7 +74,7 @@ public class ChannelSender {
 	 * @throws InterruptedException Thread interrupted.
 	 */
 	public void lobOff() throws IOException, InterruptedException {
-		mSender.write("L" + mChannel, CHUNK_DURATION);
+		mSender.write("L" + mChannel, ChannelSender.CHUNK_DURATION);
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class ChannelSender {
 	 * @throws InterruptedException Thread interrupted.
 	 */
 	public void tadelOff() throws IOException, InterruptedException {
-		mSender.write("T" + mChannel, CHUNK_DURATION);
+		mSender.write("T" + mChannel, ChannelSender.CHUNK_DURATION);
 	}
 
 	/**
