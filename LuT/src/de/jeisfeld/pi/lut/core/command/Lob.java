@@ -33,4 +33,9 @@ public class Lob implements WriteCommand {
 	public final boolean overrides(final WriteCommand other) {
 		return other instanceof Lob && ((Lob) other).mChannel == mChannel;
 	}
+
+	@Override
+	public final String toString() {
+		return getSerialString();
+	}
 }

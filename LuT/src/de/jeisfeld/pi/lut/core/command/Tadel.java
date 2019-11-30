@@ -45,4 +45,9 @@ public class Tadel implements WriteCommand {
 	public final boolean overrides(final WriteCommand other) {
 		return other instanceof Tadel && ((Tadel) other).mChannel == mChannel;
 	}
+
+	@Override
+	public final String toString() {
+		return getSerialString();
+	}
 }

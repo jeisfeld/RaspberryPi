@@ -19,7 +19,30 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 	 */
 	public static void main(final String[] args) throws IOException, InterruptedException { // SUPPRESS_CHECKSTYLE
 		// SYSTEMOUT:OFF
-		LobTest.test3();
+		LobTest.test(3); // MAGIC_NUMBER
+	}
+
+	/**
+	 * Execute test.
+	 *
+	 * @param i test id.
+	 * @throws IOException connection issues
+	 * @throws InterruptedException if interrupted
+	 */
+	private static void test(final int i) throws IOException, InterruptedException {
+		switch (i) {
+		case 1:
+			LobTest.test1();
+			break;
+		case 2:
+			LobTest.test2();
+			break;
+		case 3: // MAGIC_NUMBER
+			LobTest.test3();
+			break;
+		default:
+			break;
+		}
 	}
 
 	/**

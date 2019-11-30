@@ -42,11 +42,14 @@ public class CommandProcessor {
 	 * The list of commands waiting to be processed.
 	 */
 	private final List<WriteCommand> mQueuedCommands = new ArrayList<>();
-
 	/**
 	 * Flag indicating if the processor is closed.
 	 */
 	private boolean mIsClosed = false;
+	/**
+	 * Flag indicating if the thread is running.
+	 */
+	private boolean mIsThreadRunning;
 
 	/**
 	 * Create a command processor.
@@ -172,6 +175,15 @@ public class CommandProcessor {
 	}
 
 	/**
+	 * Get information if the processing thread is running.
+	 *
+	 * @return True if the processing thread is running.
+	 */
+	protected boolean isThreadRunning() {
+		return mIsThreadRunning;
+	}
+
+	/**
 	 * The thread processing the command queue.
 	 */
 	private class ProcessingThread extends Thread {
@@ -182,6 +194,7 @@ public class CommandProcessor {
 
 		@Override
 		public void run() {
+			mIsThreadRunning = true;
 			while (!mIsClosed || mQueuedCommands.size() > 0) {
 				try {
 					List<Command> commandsForProcessing = new ArrayList<>();
@@ -204,14 +217,9 @@ public class CommandProcessor {
 					ioe.printStackTrace();
 				}
 			}
-			try {
-				mSender.doClose();
-			}
-			catch (InterruptedException e) {
-				// ignore
-			}
-			catch (IOException ioe) {
-				ioe.printStackTrace();
+			synchronized (mSender) {
+				mIsThreadRunning = false;
+				mSender.notifyAll();
 			}
 		}
 	}

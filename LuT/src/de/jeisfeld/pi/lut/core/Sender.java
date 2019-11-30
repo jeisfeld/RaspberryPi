@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.serial.Baud;
 import com.pi4j.io.serial.DataBits;
 import com.pi4j.io.serial.FlowControl;
@@ -15,6 +14,7 @@ import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialConfig;
 import com.pi4j.io.serial.SerialFactory;
 import com.pi4j.io.serial.StopBits;
+import com.pi4j.io.serial.impl.SerialImpl;
 
 import de.jeisfeld.pi.lut.core.command.Lob;
 import de.jeisfeld.pi.lut.core.command.Tadel;
@@ -84,11 +84,13 @@ public final class Sender {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				try {
-					close();
-				}
-				catch (IllegalStateException | IOException | InterruptedException e) {
-					// do nothing
+				if (!mIsClosed) {
+					try {
+						close();
+					}
+					catch (IllegalStateException | IOException | InterruptedException e) {
+						// do nothing
+					}
 				}
 			}
 		});
@@ -116,25 +118,28 @@ public final class Sender {
 	public void close() throws IOException, InterruptedException {
 		List<WriteCommand> finalCommands = new ArrayList<>();
 		for (Integer channel : mChannelSenders.keySet()) {
-			finalCommands.add(new Lob(channel, 0));
 			finalCommands.add(new Tadel(channel, 0, 0, 0));
+			finalCommands.add(new Lob(channel, 0));
 		}
 		mCommandProcessor.close(finalCommands);
-	}
-
-	/**
-	 * Close the sender.
-	 *
-	 * @throws IOException issues with connection
-	 * @throws InterruptedException when interrupted
-	 */
-	protected void doClose() throws IOException, InterruptedException {
+		synchronized (this) {
+			while (mCommandProcessor.isThreadRunning()) {
+				wait();
+			}
+		}
 		synchronized (mSerial) {
 			mIsClosed = true;
-			mSerial.close();
+			if (!mSerial.isClosed()) {
+				mSerial.close();
+			}
+		}
+		// remove serial port listener
+		if (mSerial instanceof SerialImpl) {
+			((SerialImpl) mSerial).removeSerialListener();
 		}
 
-		GpioFactory.getInstance().shutdown();
+		// perform shutdown of any monitoring threads
+		SerialFactory.shutdown();
 	}
 
 	/**
