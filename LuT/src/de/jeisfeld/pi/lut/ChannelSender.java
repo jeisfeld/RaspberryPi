@@ -16,9 +16,9 @@ public class ChannelSender {
 	private final int mChannel;
 
 	/**
-	 * Duration of fixed chung in varying signals.
+	 * Duration of fixed chunk in varying signals.
 	 */
-	private static final int CHUNK_DURATION = 200;
+	private static final int CHUNK_DURATION = 100;
 
 	/**
 	 * Constructor for a ChannelSender.
@@ -74,7 +74,11 @@ public class ChannelSender {
 	 * @throws InterruptedException Thread interrupted.
 	 */
 	public void lobOff() throws IOException, InterruptedException {
-		mSender.write("L" + mChannel, ChannelSender.CHUNK_DURATION);
+		mSender.writeFinal("L" + mChannel);
+		Thread.sleep(ChannelSender.CHUNK_DURATION);
+		mSender.writeFinal("L" + mChannel);
+		Thread.sleep(ChannelSender.CHUNK_DURATION);
+		mSender.writeFinal("L" + mChannel);
 	}
 
 	/**
@@ -87,7 +91,7 @@ public class ChannelSender {
 	 * @throws IOException issues with connection
 	 * @throws InterruptedException Thread interrupted.
 	 */
-	public void tadel(final byte power, final byte frequency, final byte wave, final long duration)
+	public void tadel(final int power, final int frequency, final int wave, final long duration)
 			throws IOException, InterruptedException {
 		mSender.write("T" + mChannel + "P" + power + "F" + frequency + "W" + wave, duration);
 	}
@@ -104,7 +108,7 @@ public class ChannelSender {
 	 * @throws IOException issues with connection
 	 * @throws InterruptedException Thread interrupted.
 	 */
-	public void tadel(final byte startPower, final byte endPower, final byte startFrequency, final byte endFrequency, final byte wave,
+	public void tadel(final int startPower, final int endPower, final int startFrequency, final int endFrequency, final int wave,
 			final long duration) throws IOException, InterruptedException {
 		long stepCount = duration / 200; // MAGIC_NUMBER
 		if (stepCount <= 1) {
@@ -127,7 +131,11 @@ public class ChannelSender {
 	 * @throws InterruptedException Thread interrupted.
 	 */
 	public void tadelOff() throws IOException, InterruptedException {
-		mSender.write("T" + mChannel, ChannelSender.CHUNK_DURATION);
+		mSender.writeFinal("T" + mChannel);
+		Thread.sleep(ChannelSender.CHUNK_DURATION);
+		mSender.writeFinal("T" + mChannel);
+		Thread.sleep(ChannelSender.CHUNK_DURATION);
+		mSender.writeFinal("T" + mChannel);
 	}
 
 	/**

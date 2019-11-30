@@ -1,6 +1,8 @@
 package de.jeisfeld.pi.lut;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.serial.Baud;
@@ -28,6 +30,14 @@ public final class Sender {
 	 * The serial port used for sending.
 	 */
 	private final Serial mSerial = SerialFactory.createInstance();
+	/**
+	 * A list of channel senders that has been created.
+	 */
+	private final Map<Integer, ChannelSender> mChannelSenders = new HashMap<>();
+	/**
+	 * Flag indicating if the sender is closed.
+	 */
+	private boolean mIsClosed = false;
 
 	/**
 	 * Constructor for default port.
@@ -54,6 +64,18 @@ public final class Sender {
 				.flowControl(FlowControl.NONE);
 
 		mSerial.open(config);
+
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				try {
+					close();
+				}
+				catch (IllegalStateException | IOException | InterruptedException e) {
+					// do nothing
+				}
+			}
+		});
 	}
 
 	/**
@@ -73,11 +95,59 @@ public final class Sender {
 	 * Close the sender.
 	 *
 	 * @throws IOException issues with connection
+	 * @throws InterruptedException when interrupted
 	 */
-	public void close() throws IOException {
-		mSerial.discardAll();
-		mSerial.close();
+	public void close() throws IOException, InterruptedException {
+		mIsClosed = true;
+		if (!mSerial.isClosed()) {
+			for (ChannelSender channelSender : mChannelSenders.values()) {
+				channelSender.lobOff();
+				channelSender.tadelOff();
+			}
+			synchronized (mSerial) {
+				mSerial.close();
+			}
+		}
 		GpioFactory.getInstance().shutdown();
+	}
+
+	/**
+	 * Write a message.
+	 *
+	 * @param message The message
+	 * @throws IOException issues with connection
+	 */
+	private void write(final String message) throws IOException {
+		synchronized (mSerial) {
+			if (!mIsClosed) {
+				mSerial.write(message + "\r");
+			}
+		}
+	}
+
+	/**
+	 * Write a message in shutdown sequence.
+	 *
+	 * @param message The message
+	 * @throws IOException issues with connection
+	 */
+	protected void writeFinal(final String message) throws IOException {
+		mSerial.write(message + "\r");
+	}
+
+	/**
+	 * Read a message.
+	 *
+	 * @return the read message.
+	 * @throws IOException issues with connection
+	 */
+	private String read() throws IOException {
+		synchronized (mSerial) {
+			if (!mIsClosed) {
+				return new String(mSerial.read());
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -89,12 +159,12 @@ public final class Sender {
 	 * @throws InterruptedException when interrupted
 	 */
 	public void write(final String message, final long duration) throws IOException, InterruptedException {
-		if (mSerial.isClosed()) {
-			return;
+		if (mIsClosed) {
+			Thread.sleep(duration);
 		}
 		boolean done = false;
 		final long startTime = System.currentTimeMillis();
-		mSerial.write(message + "\r");
+		write(message);
 		while (!done) {
 			final long remainingTime = duration - (System.currentTimeMillis() - startTime);
 			if (remainingTime < 2000) { // MAGIC_NUMBER
@@ -105,7 +175,7 @@ public final class Sender {
 			}
 			else {
 				Thread.sleep(1000); // MAGIC_NUMBER
-				mSerial.write("\r");
+				write("");
 			}
 		}
 	}
@@ -118,7 +188,7 @@ public final class Sender {
 	 * @throws IOException issues with connection
 	 */
 	public ButtonStatus readInputs(final ReadType readType) throws IOException {
-		if (mSerial.isClosed()) {
+		if (mIsClosed) {
 			return null;
 		}
 
@@ -127,14 +197,14 @@ public final class Sender {
 		ButtonStatus result = new ButtonStatus();
 		do {
 			if (digitalResultRequired) {
-				mSerial.write("S\r");
+				write("S");
 			}
 			if (analogResultRequired) {
-				mSerial.write("A\r");
+				write("A");
 			}
-			String input = new String(mSerial.read());
+			String input = read();
 			if (input == null || input.length() < 2) {
-				input = new String(mSerial.read());
+				input = read();
 			}
 			digitalResultRequired = digitalResultRequired && !result.setDigitalResult(input);
 			analogResultRequired = analogResultRequired && !result.setAnalogResult(input);
@@ -151,8 +221,13 @@ public final class Sender {
 	 * @return The channel sender.
 	 * @throws IOException issues with connection
 	 */
-	public ChannelSender getChannelSender(final int channel) throws IOException {
-		return new ChannelSender(this, channel);
+	public ChannelSender getChannelSender(final Integer channel) throws IOException {
+		ChannelSender result = mChannelSenders.get(channel);
+		if (result == null) {
+			result = new ChannelSender(this, channel);
+			mChannelSenders.put(channel, result);
+		}
+		return result;
 	}
 
 	/**

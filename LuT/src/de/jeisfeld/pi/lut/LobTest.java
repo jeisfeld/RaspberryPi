@@ -7,7 +7,7 @@ import de.jeisfeld.pi.lut.Sender.ReadType;
 /**
  * Test class for LuT framework.
  */
-public class Test { // SUPPRESS_CHECKSTYLE
+public class LobTest { // SUPPRESS_CHECKSTYLE
 	/**
 	 * Main method.
 	 *
@@ -17,7 +17,7 @@ public class Test { // SUPPRESS_CHECKSTYLE
 	 */
 	public static void main(final String[] args) throws IOException, InterruptedException { // SUPPRESS_CHECKSTYLE
 		// SYSTEMOUT:OFF
-		Test.test3();
+		LobTest.test3();
 	}
 
 	/**
@@ -31,7 +31,7 @@ public class Test { // SUPPRESS_CHECKSTYLE
 		ChannelSender channelSender = sender.getChannelSender(1);
 
 		int maxSignal = 100; // MAGIC_NUMBER
-		int delay = 20; // MAGIC_NUMBER
+		int delay = 50; // MAGIC_NUMBER
 
 		for (int power = 1; power < maxSignal; power++) {
 			System.out.println("                                       " + power);
@@ -71,6 +71,10 @@ public class Test { // SUPPRESS_CHECKSTYLE
 
 		while (true) {
 			ButtonStatus status = sender.readInputs(ReadType.ANALOG);
+			if (status == null) {
+				Thread.sleep(100); // MAGIC_NUMBER
+				return;
+			}
 			int power = status.getControl1Value();
 			int frequency = status.getControl2Value();
 			int minPower = (status.getControl3Value() * power) / 255; // MAGIC_NUMBER
@@ -86,7 +90,7 @@ public class Test { // SUPPRESS_CHECKSTYLE
 				cyclePoint = (Math.round(cyclePoint * 2 * factor) + 1.0) / 2 / factor;
 			}
 			else {
-				cyclePoint = Math.PI;
+				cyclePoint = 0.5; // MAGIC_NUMBER
 			}
 		}
 	}

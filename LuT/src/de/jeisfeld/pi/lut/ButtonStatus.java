@@ -77,7 +77,7 @@ public final class ButtonStatus {
 	 * @return true if successful
 	 */
 	protected boolean setDigitalResult(final String resultString) {
-		if (resultString.contains("S")) {
+		if (resultString != null && resultString.contains("S")) {
 			int index = resultString.indexOf("S");
 			int newLineIndex = resultString.indexOf('\r', index);
 			String reducedResultString = resultString.substring(index + 1, newLineIndex);
@@ -97,7 +97,7 @@ public final class ButtonStatus {
 	 * @return true if successful
 	 */
 	protected boolean setAnalogResult(final String resultString) {
-		if (resultString.contains("A")) {
+		if (resultString != null && resultString.contains("A")) {
 			int index = resultString.indexOf("A");
 			int newLineIndex = resultString.indexOf('\r', index);
 			String reducedResultString = resultString.substring(index + 1, newLineIndex);
