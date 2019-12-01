@@ -1,4 +1,4 @@
-package de.jeisfeld.pi.lut;
+package de.jeisfeld.pi.lut.core;
 
 /**
  * Status of eWeb buttons.
@@ -13,6 +13,10 @@ public final class ButtonStatus {
 	 */
 	private boolean mIsButton2Pressed;
 	/**
+	 * Flag indicating if buttons are updated.
+	 */
+	private boolean mIsDigitalUpdated;
+	/**
 	 * Value of control 1.
 	 */
 	private int mControl1Value;
@@ -24,6 +28,10 @@ public final class ButtonStatus {
 	 * Value of control 3.
 	 */
 	private int mControl3Value;
+	/**
+	 * Flag indicating if controls are updated.
+	 */
+	private boolean mIsAnalogUpdated;
 
 	/**
 	 * Get information if button 1 is pressed.
@@ -71,12 +79,31 @@ public final class ButtonStatus {
 	}
 
 	/**
+	 * Update values from other ButtonStatus.
+	 *
+	 * @param other The other ButtonStatus.
+	 */
+	public void updateWith(final ButtonStatus other) {
+		if (other.mIsDigitalUpdated) {
+			mIsButton1Pressed = other.mIsButton1Pressed;
+			mIsButton2Pressed = other.mIsButton2Pressed;
+			mIsDigitalUpdated = true;
+		}
+		if (other.mIsAnalogUpdated) {
+			mControl1Value = other.mControl1Value;
+			mControl2Value = other.mControl2Value;
+			mControl3Value = other.mControl3Value;
+			mIsAnalogUpdated = true;
+		}
+	}
+
+	/**
 	 * Set the digital results from the serial String.
 	 *
 	 * @param resultString The serial response String read from eWeb.
 	 * @return true if successful
 	 */
-	protected boolean setDigitalResult(final String resultString) {
+	public boolean setDigitalResult(final String resultString) {
 		if (resultString != null && resultString.contains("S")) {
 			int index = resultString.indexOf("S");
 			int newLineIndex = resultString.indexOf('\r', index);
@@ -84,6 +111,7 @@ public final class ButtonStatus {
 			if (reducedResultString.length() >= 2) { // MAGIC_NUMBER
 				mIsButton1Pressed = reducedResultString.charAt(0) == '1';
 				mIsButton2Pressed = reducedResultString.charAt(1) == '1';
+				mIsDigitalUpdated = true;
 			}
 			return true;
 		}
@@ -96,7 +124,7 @@ public final class ButtonStatus {
 	 * @param resultString The serial response String read from eWeb.
 	 * @return true if successful
 	 */
-	protected boolean setAnalogResult(final String resultString) {
+	public boolean setAnalogResult(final String resultString) {
 		if (resultString != null && resultString.contains("A")) {
 			int index = resultString.indexOf("A");
 			int newLineIndex = resultString.indexOf('\r', index);
@@ -106,6 +134,7 @@ public final class ButtonStatus {
 				mControl1Value = Integer.parseInt(controlValues[0]);
 				mControl2Value = Integer.parseInt(controlValues[1]);
 				mControl3Value = Integer.parseInt(controlValues[2]);
+				mIsAnalogUpdated = true;
 				return true;
 			}
 		}

@@ -1,6 +1,9 @@
-package de.jeisfeld.pi.lut;
+package de.jeisfeld.pi.lut.core;
 
 import java.io.IOException;
+
+import de.jeisfeld.pi.lut.core.command.Lob;
+import de.jeisfeld.pi.lut.core.command.Tadel;
 
 /**
  * Sender for a specific LuT channel.
@@ -14,11 +17,6 @@ public class ChannelSender {
 	 * The channel number.
 	 */
 	private final int mChannel;
-
-	/**
-	 * Duration of fixed chunk in varying signals.
-	 */
-	private static final int CHUNK_DURATION = 100;
 
 	/**
 	 * Constructor for a ChannelSender.
@@ -41,7 +39,7 @@ public class ChannelSender {
 	 * @throws InterruptedException Thread interrupted
 	 */
 	public void lob(final int power, final long duration) throws IOException, InterruptedException {
-		mSender.write("L" + mChannel + "P" + power, duration);
+		mSender.processCommands(duration, new Lob(mChannel, power));
 	}
 
 	/**
@@ -54,7 +52,7 @@ public class ChannelSender {
 	 * @throws InterruptedException Thread interrupted.
 	 */
 	public void lob(final int startPower, final int endPower, final long duration) throws IOException, InterruptedException {
-		long stepCount = duration / 200; // MAGIC_NUMBER
+		long stepCount = duration / Sender.SEND_DURATION;
 		if (stepCount <= 1) {
 			lob(endPower, duration);
 		}
@@ -65,20 +63,6 @@ public class ChannelSender {
 				lob(power, stepDuration);
 			}
 		}
-	}
-
-	/**
-	 * Switch the "Lob" off.
-	 *
-	 * @throws IOException issues with connection
-	 * @throws InterruptedException Thread interrupted.
-	 */
-	public void lobOff() throws IOException, InterruptedException {
-		mSender.writeFinal("L" + mChannel);
-		Thread.sleep(ChannelSender.CHUNK_DURATION);
-		mSender.writeFinal("L" + mChannel);
-		Thread.sleep(ChannelSender.CHUNK_DURATION);
-		mSender.writeFinal("L" + mChannel);
 	}
 
 	/**
@@ -93,7 +77,7 @@ public class ChannelSender {
 	 */
 	public void tadel(final int power, final int frequency, final int wave, final long duration)
 			throws IOException, InterruptedException {
-		mSender.write("T" + mChannel + "P" + power + "F" + frequency + "W" + wave, duration);
+		mSender.processCommands(duration, new Tadel(mChannel, power, frequency, wave));
 	}
 
 	/**
@@ -122,32 +106,6 @@ public class ChannelSender {
 				tadel(power, frequency, wave, stepDuration);
 			}
 		}
-	}
-
-	/**
-	 * Switch the "Tadel" off.
-	 *
-	 * @throws IOException issues with connection
-	 * @throws InterruptedException Thread interrupted.
-	 */
-	public void tadelOff() throws IOException, InterruptedException {
-		mSender.writeFinal("T" + mChannel);
-		Thread.sleep(ChannelSender.CHUNK_DURATION);
-		mSender.writeFinal("T" + mChannel);
-		Thread.sleep(ChannelSender.CHUNK_DURATION);
-		mSender.writeFinal("T" + mChannel);
-	}
-
-	/**
-	 * Close the channel sender.
-	 *
-	 * @throws IOException issues with connection
-	 * @throws InterruptedException Thread interrupted.
-	 */
-	public void close() throws IOException, InterruptedException {
-		lobOff();
-		tadelOff();
-		mSender.close();
 	}
 
 }

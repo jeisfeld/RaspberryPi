@@ -2,7 +2,9 @@ package de.jeisfeld.pi.lut;
 
 import java.io.IOException;
 
-import de.jeisfeld.pi.lut.Sender.ReadType;
+import de.jeisfeld.pi.lut.core.ButtonStatus;
+import de.jeisfeld.pi.lut.core.ChannelSender;
+import de.jeisfeld.pi.lut.core.Sender;
 
 /**
  * Test class for LuT framework.
@@ -31,7 +33,7 @@ public class TadelTest { // SUPPRESS_CHECKSTYLE
 		ChannelSender channelSender = sender.getChannelSender(1);
 
 		while (true) {
-			ButtonStatus status = sender.readInputs(ReadType.ANALOG);
+			ButtonStatus status = sender.getButtonStatus();
 			int power = status.getControl1Value();
 			int frequency = status.getControl2Value();
 			int wave = status.getControl3Value();

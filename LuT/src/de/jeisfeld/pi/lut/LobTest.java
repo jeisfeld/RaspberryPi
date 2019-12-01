@@ -2,7 +2,9 @@ package de.jeisfeld.pi.lut;
 
 import java.io.IOException;
 
-import de.jeisfeld.pi.lut.Sender.ReadType;
+import de.jeisfeld.pi.lut.core.ButtonStatus;
+import de.jeisfeld.pi.lut.core.ChannelSender;
+import de.jeisfeld.pi.lut.core.Sender;
 
 /**
  * Test class for LuT framework.
@@ -45,16 +47,15 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 	 * Reading the input as fast as possible.
 	 *
 	 * @throws IOException connection issues
+	 * @throws InterruptedException if interrupted
 	 */
-	private static void test2() throws IOException {
+	private static void test2() throws IOException, InterruptedException {
 		Sender sender = Sender.getInstance();
-		long lastTime = System.currentTimeMillis();
 
 		while (true) {
-			ButtonStatus status = sender.readInputs(ReadType.ALL);
-			long newTime = System.currentTimeMillis();
-			System.out.println(status + " - " + (newTime - lastTime));
-			lastTime = newTime;
+			ButtonStatus status = sender.getButtonStatus();
+			System.out.println(status);
+			Thread.sleep(100); // MAGIC_NUMBER
 		}
 	}
 
@@ -70,11 +71,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 		double cyclePoint = 0;
 
 		while (true) {
-			ButtonStatus status = sender.readInputs(ReadType.ANALOG);
-			if (status == null) {
-				Thread.sleep(100); // MAGIC_NUMBER
-				return;
-			}
+			ButtonStatus status = sender.getButtonStatus();
 			int power = status.getControl1Value();
 			int frequency = status.getControl2Value();
 			int minPower = (status.getControl3Value() * power) / 255; // MAGIC_NUMBER
@@ -83,7 +80,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 
 			System.out.println(power + " - " + minPower + " - " + frequency + " - " + value);
 
-			channelSender.lob(value, 0);
+			channelSender.lob(value, Sender.SEND_DURATION);
 
 			if (frequency > 0) {
 				int factor = (frequency + 9) / 10; // MAGIC_NUMBER

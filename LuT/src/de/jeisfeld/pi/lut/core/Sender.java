@@ -1,7 +1,9 @@
-package de.jeisfeld.pi.lut;
+package de.jeisfeld.pi.lut.core;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.pi4j.io.gpio.GpioFactory;
@@ -13,6 +15,10 @@ import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialConfig;
 import com.pi4j.io.serial.SerialFactory;
 import com.pi4j.io.serial.StopBits;
+
+import de.jeisfeld.pi.lut.core.command.Lob;
+import de.jeisfeld.pi.lut.core.command.Tadel;
+import de.jeisfeld.pi.lut.core.command.WriteCommand;
 
 /**
  * The generic sender for LuT devices.
@@ -27,6 +33,11 @@ public final class Sender {
 	 */
 	private static final String DEFAULT_PORT = "/dev/serial0";
 	/**
+	 * The duration of a send command in ms.
+	 */
+	public static final int SEND_DURATION = 200;
+
+	/**
 	 * The serial port used for sending.
 	 */
 	private final Serial mSerial = SerialFactory.createInstance();
@@ -38,6 +49,10 @@ public final class Sender {
 	 * Flag indicating if the sender is closed.
 	 */
 	private boolean mIsClosed = false;
+	/**
+	 * The command processor used by this class.
+	 */
+	private final CommandProcessor mCommandProcessor;
 
 	/**
 	 * Constructor for default port.
@@ -64,6 +79,7 @@ public final class Sender {
 				.flowControl(FlowControl.NONE);
 
 		mSerial.open(config);
+		mCommandProcessor = new CommandProcessor(this);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -92,23 +108,102 @@ public final class Sender {
 	}
 
 	/**
-	 * Close the sender.
+	 * Close the sender and the command processor.
 	 *
 	 * @throws IOException issues with connection
 	 * @throws InterruptedException when interrupted
 	 */
 	public void close() throws IOException, InterruptedException {
-		mIsClosed = true;
-		if (!mSerial.isClosed()) {
-			for (ChannelSender channelSender : mChannelSenders.values()) {
-				channelSender.lobOff();
-				channelSender.tadelOff();
+		List<WriteCommand> finalCommands = new ArrayList<>();
+		for (Integer channel : mChannelSenders.keySet()) {
+			finalCommands.add(new Lob(channel, 0));
+			finalCommands.add(new Tadel(channel, 0, 0, 0));
+		}
+		mCommandProcessor.close(finalCommands);
+	}
+
+	/**
+	 * Close the sender.
+	 *
+	 * @throws IOException issues with connection
+	 * @throws InterruptedException when interrupted
+	 */
+	protected void doClose() throws IOException, InterruptedException {
+		synchronized (mSerial) {
+			mIsClosed = true;
+			mSerial.close();
+		}
+
+		GpioFactory.getInstance().shutdown();
+	}
+
+	/**
+	 * Put commands in the command queue. If they query for response, then wait for the response.
+	 *
+	 * @param commands The commands.
+	 */
+	public void processCommands(final WriteCommand... commands) {
+		processCommands(true, commands);
+	}
+
+	/**
+	 * Put commands in the command queue. If they query for response, then wait for the response.
+	 *
+	 * @param doOverride flag indicating if commands on same channel should be overridden.
+	 * @param commands The commands.
+	 */
+	public void processCommands(final boolean doOverride, final WriteCommand... commands) {
+		mCommandProcessor.processCommands(doOverride, commands);
+	}
+
+	/**
+	 * Write to the sender, in repeated way.
+	 *
+	 * @param duration The duration. If duration is at least Sender.SEND_DURATION, then it is ensured that each command will be processed, otherwise
+	 *            they may be suppressed.
+	 * @param commands the commands
+	 */
+	public void processCommands(final long duration, final WriteCommand... commands) {
+		if (mIsClosed) {
+			return;
+		}
+		boolean doOverride = duration < Sender.SEND_DURATION * commands.length;
+
+		boolean done = false;
+		final long startTime = System.currentTimeMillis();
+		processCommands(doOverride, commands);
+		while (!done) {
+			final long remainingTime = duration - (System.currentTimeMillis() - startTime);
+			if (remainingTime < 2000) { // MAGIC_NUMBER
+				if (remainingTime > 0) {
+					try {
+						Thread.sleep(remainingTime);
+					}
+					catch (InterruptedException e) {
+						// do nothing
+					}
+				}
+				done = true;
 			}
-			synchronized (mSerial) {
-				mSerial.close();
+			else {
+				try {
+					Thread.sleep(1000); // MAGIC_NUMBER
+				}
+				catch (InterruptedException e) {
+					// do nothing
+				}
+				processCommands(doOverride, commands);
 			}
 		}
-		GpioFactory.getInstance().shutdown();
+	}
+
+	/**
+	 * Get the button status.
+	 *
+	 * @return The button status.
+	 */
+	public ButtonStatus getButtonStatus() {
+		return mCommandProcessor.getButtonStatus();
 	}
 
 	/**
@@ -117,7 +212,7 @@ public final class Sender {
 	 * @param message The message
 	 * @throws IOException issues with connection
 	 */
-	private void write(final String message) throws IOException {
+	protected void write(final String message) throws IOException {
 		synchronized (mSerial) {
 			if (!mIsClosed) {
 				mSerial.write(message + "\r");
@@ -126,92 +221,18 @@ public final class Sender {
 	}
 
 	/**
-	 * Write a message in shutdown sequence.
-	 *
-	 * @param message The message
-	 * @throws IOException issues with connection
-	 */
-	protected void writeFinal(final String message) throws IOException {
-		mSerial.write(message + "\r");
-	}
-
-	/**
 	 * Read a message.
 	 *
 	 * @return the read message.
 	 * @throws IOException issues with connection
 	 */
-	private String read() throws IOException {
+	protected String read() throws IOException {
 		synchronized (mSerial) {
 			if (!mIsClosed) {
 				return new String(mSerial.read());
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Write to the sender, in repeated way.
-	 *
-	 * @param message The message to be written.
-	 * @param duration The total duration of sending. Message will be repeated every second.
-	 * @throws IOException issues with connection
-	 * @throws InterruptedException when interrupted
-	 */
-	public void write(final String message, final long duration) throws IOException, InterruptedException {
-		if (mIsClosed) {
-			Thread.sleep(duration);
-		}
-		boolean done = false;
-		final long startTime = System.currentTimeMillis();
-		write(message);
-		while (!done) {
-			final long remainingTime = duration - (System.currentTimeMillis() - startTime);
-			if (remainingTime < 2000) { // MAGIC_NUMBER
-				if (remainingTime > 0) {
-					Thread.sleep(remainingTime);
-				}
-				done = true;
-			}
-			else {
-				Thread.sleep(1000); // MAGIC_NUMBER
-				write("");
-			}
-		}
-	}
-
-	/**
-	 * Read the inputs of the eWeb.
-	 *
-	 * @param readType Restrict the inputs which should be read.
-	 * @return The status of the inputs.
-	 * @throws IOException issues with connection
-	 */
-	public ButtonStatus readInputs(final ReadType readType) throws IOException {
-		if (mIsClosed) {
-			return null;
-		}
-
-		boolean digitalResultRequired = readType.isDigitalRequired();
-		boolean analogResultRequired = readType.isAnalogRequired();
-		ButtonStatus result = new ButtonStatus();
-		do {
-			if (digitalResultRequired) {
-				write("S");
-			}
-			if (analogResultRequired) {
-				write("A");
-			}
-			String input = read();
-			if (input == null || input.length() < 2) {
-				input = read();
-			}
-			digitalResultRequired = digitalResultRequired && !result.setDigitalResult(input);
-			analogResultRequired = analogResultRequired && !result.setAnalogResult(input);
-		}
-		while (digitalResultRequired || analogResultRequired && !mSerial.isClosed());
-
-		return result;
 	}
 
 	/**
@@ -228,43 +249,6 @@ public final class Sender {
 			mChannelSenders.put(channel, result);
 		}
 		return result;
-	}
-
-	/**
-	 * Specify the data inputs to be read.
-	 */
-	public enum ReadType {
-		/**
-		 * Only digital inputs.
-		 */
-		DIGITAL,
-		/**
-		 * Only analog inputs.
-		 */
-		ANALOG,
-		/**
-		 * All inputs.
-		 */
-		ALL;
-
-		/**
-		 * Check if digital inputs should be read.
-		 *
-		 * @return True if digital inputs should be read.
-		 */
-		public boolean isDigitalRequired() {
-			return this == DIGITAL || this == ALL;
-		}
-
-		/**
-		 * Check if analog inputs should be read.
-		 *
-		 * @return True if analog inputs should be read.
-		 */
-		public boolean isAnalogRequired() {
-			return this == ANALOG || this == ALL;
-		}
-
 	}
 
 }
