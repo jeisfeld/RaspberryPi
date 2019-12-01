@@ -18,8 +18,14 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 	 * @throws InterruptedException if interrupted
 	 */
 	public static void main(final String[] args) throws IOException, InterruptedException { // SUPPRESS_CHECKSTYLE
+		int testNo = 1;
+
+		if (args.length > 0) {
+			testNo = Integer.parseInt(args[0]);
+		}
+
 		// SYSTEMOUT:OFF
-		LobTest.test(3); // MAGIC_NUMBER
+		LobTest.test(testNo); // MAGIC_NUMBER
 	}
 
 	/**
@@ -37,10 +43,8 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 		case 2:
 			LobTest.test2();
 			break;
-		case 3: // MAGIC_NUMBER
-			LobTest.test3();
-			break;
 		default:
+			LobTest.test3();
 			break;
 		}
 	}

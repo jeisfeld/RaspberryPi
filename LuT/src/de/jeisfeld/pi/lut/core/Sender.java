@@ -2,9 +2,12 @@ package de.jeisfeld.pi.lut.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.pi4j.io.serial.Baud;
 import com.pi4j.io.serial.DataBits;
@@ -16,7 +19,11 @@ import com.pi4j.io.serial.SerialFactory;
 import com.pi4j.io.serial.StopBits;
 import com.pi4j.io.serial.impl.SerialImpl;
 
+import de.jeisfeld.pi.lut.core.command.AnalogRead;
+import de.jeisfeld.pi.lut.core.command.Command;
+import de.jeisfeld.pi.lut.core.command.DigitalRead;
 import de.jeisfeld.pi.lut.core.command.Lob;
+import de.jeisfeld.pi.lut.core.command.ReadCommand;
 import de.jeisfeld.pi.lut.core.command.Tadel;
 import de.jeisfeld.pi.lut.core.command.WriteCommand;
 
@@ -36,6 +43,14 @@ public final class Sender {
 	 * The duration of a send command in ms.
 	 */
 	public static final int SEND_DURATION = 200;
+	/**
+	 * The Pattern used for processing the response.
+	 */
+	private static final Pattern RESPONSE_PATTERN = Pattern.compile("^(.*?)(OK|FAILED)(.*)$", Pattern.DOTALL);
+	/**
+	 * A list with both read commands.
+	 */
+	private static final List<Command> ALL_READ_COMMADS = Arrays.asList(new Command[] {new AnalogRead(), new DigitalRead()});
 
 	/**
 	 * The serial port used for sending.
@@ -46,13 +61,29 @@ public final class Sender {
 	 */
 	private final Map<Integer, ChannelSender> mChannelSenders = new HashMap<>();
 	/**
+	 * Flag indicating if the processing thread is closing.
+	 */
+	private boolean mIsClosing = false;
+	/**
 	 * Flag indicating if the sender is closed.
 	 */
 	private boolean mIsClosed = false;
 	/**
-	 * The command processor used by this class.
+	 * Flag indicating if the thread is running.
 	 */
-	private final CommandProcessor mCommandProcessor;
+	private boolean mIsThreadRunning;
+	/**
+	 * The last button status.
+	 */
+	private final ButtonStatus mButtonStatus = new ButtonStatus();
+	/**
+	 * The list of commands currently in process.
+	 */
+	private final List<Command> mProcessingCommands = new ArrayList<>();
+	/**
+	 * The list of commands waiting to be processed.
+	 */
+	private final List<WriteCommand> mQueuedCommands = new ArrayList<>();
 
 	/**
 	 * Constructor for default port.
@@ -79,7 +110,6 @@ public final class Sender {
 				.flowControl(FlowControl.NONE);
 
 		mSerial.open(config);
-		mCommandProcessor = new CommandProcessor(this);
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -94,6 +124,16 @@ public final class Sender {
 				}
 			}
 		});
+
+		try {
+			// Do initial read, so that ButtonStatus is initialized on first read.
+			doProcessCommands(Sender.ALL_READ_COMMADS);
+		}
+		catch (IOException e) {
+			// ignore
+		}
+
+		new ProcessingThread().start();
 	}
 
 	/**
@@ -121,9 +161,15 @@ public final class Sender {
 			finalCommands.add(new Tadel(channel, 0, 0, 0));
 			finalCommands.add(new Lob(channel, 0));
 		}
-		mCommandProcessor.close(finalCommands);
+
+		synchronized (mQueuedCommands) {
+			mQueuedCommands.clear();
+			mQueuedCommands.addAll(finalCommands);
+		}
+		mIsClosing = true;
+
 		synchronized (this) {
-			while (mCommandProcessor.isThreadRunning()) {
+			while (mIsThreadRunning) {
 				wait();
 			}
 		}
@@ -143,12 +189,57 @@ public final class Sender {
 	}
 
 	/**
-	 * Put commands in the command queue. If they query for response, then wait for the response.
+	 * Process a list of commands.
 	 *
-	 * @param commands The commands.
+	 * @param commands The commands to be processed.
+	 * @return The result.
+	 * @throws IOException issues with connection.
 	 */
-	public void processCommands(final WriteCommand... commands) {
-		processCommands(true, commands);
+	private ButtonStatus doProcessCommands(final List<Command> commands) throws IOException {
+		synchronized (mProcessingCommands) {
+			if (commands.size() > 2) {
+				throw new RuntimeException("Max number of parallel commands is " + 2);
+			}
+			if (commands.size() == 2 && commands.get(1) instanceof WriteCommand) {
+				throw new RuntimeException("Second command may be only read command");
+			}
+
+			for (Command command : commands) {
+				mProcessingCommands.add(command);
+			}
+
+			for (Command command : commands) {
+				write(command.getSerialString());
+			}
+
+			ButtonStatus buttonStatus = new ButtonStatus();
+
+			int missingResponses = commands.size();
+			do {
+				String input = read();
+				while (input != null) {
+					Matcher matcher = Sender.RESPONSE_PATTERN.matcher(input);
+					if (!matcher.find()) {
+						break;
+					}
+					missingResponses--;
+					String response = matcher.group(1);
+					input = matcher.group(3); // MAGIC_NUMBER
+
+					for (Command command : commands) {
+						if (command instanceof ReadCommand) {
+							((ReadCommand) command).processResponse(response, buttonStatus);
+						}
+					}
+
+				}
+			}
+			while (missingResponses > 0);
+			mButtonStatus.updateWith(buttonStatus);
+
+			mProcessingCommands.clear();
+			return buttonStatus;
+		}
 	}
 
 	/**
@@ -157,8 +248,35 @@ public final class Sender {
 	 * @param doOverride flag indicating if commands on same channel should be overridden.
 	 * @param commands The commands.
 	 */
-	public void processCommands(final boolean doOverride, final WriteCommand... commands) {
-		mCommandProcessor.processCommands(doOverride, commands);
+	protected void processCommands(final boolean doOverride, final WriteCommand... commands) {
+		if (mIsClosed) {
+			return;
+		}
+		synchronized (mQueuedCommands) {
+			for (WriteCommand command : commands) {
+				boolean isOverride = false;
+				if (doOverride) {
+					for (WriteCommand other : mQueuedCommands) {
+						if (command.overrides(other)) {
+							mQueuedCommands.set(mQueuedCommands.indexOf(other), command);
+							isOverride = true;
+						}
+					}
+				}
+				if (!isOverride) {
+					mQueuedCommands.add(command);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Put commands in the command queue. If they query for response, then wait for the response.
+	 *
+	 * @param commands The commands.
+	 */
+	public void processCommands(final WriteCommand... commands) {
+		processCommands(true, commands);
 	}
 
 	/**
@@ -169,7 +287,7 @@ public final class Sender {
 	 * @param commands the commands
 	 */
 	public void processCommands(final long duration, final WriteCommand... commands) {
-		if (mIsClosed) {
+		if (mIsClosing) {
 			return;
 		}
 		boolean doOverride = duration < Sender.SEND_DURATION * commands.length;
@@ -208,7 +326,7 @@ public final class Sender {
 	 * @return The button status.
 	 */
 	public ButtonStatus getButtonStatus() {
-		return mCommandProcessor.getButtonStatus();
+		return mButtonStatus;
 	}
 
 	/**
@@ -254,6 +372,47 @@ public final class Sender {
 			mChannelSenders.put(channel, result);
 		}
 		return result;
+	}
+
+	/**
+	 * The thread processing the command queue.
+	 */
+	private class ProcessingThread extends Thread {
+		/**
+		 * Storage for the next read command that might be processed.
+		 */
+		private ReadCommand mNextReadCommand = new AnalogRead();
+
+		@Override
+		public void run() {
+			mIsThreadRunning = true;
+			while (!mIsClosing || mQueuedCommands.size() > 0) {
+				try {
+					List<Command> commandsForProcessing = new ArrayList<>();
+
+					synchronized (mQueuedCommands) {
+						if (mQueuedCommands.size() == 0) {
+							commandsForProcessing = Sender.ALL_READ_COMMADS;
+						}
+						else {
+							commandsForProcessing.add(mQueuedCommands.get(0));
+							mQueuedCommands.remove(0);
+							commandsForProcessing.add(mNextReadCommand);
+							mNextReadCommand = mNextReadCommand instanceof AnalogRead ? new DigitalRead() : new AnalogRead();
+						}
+
+					}
+					doProcessCommands(commandsForProcessing);
+				}
+				catch (IOException ioe) {
+					ioe.printStackTrace();
+				}
+			}
+			synchronized (Sender.this) {
+				mIsThreadRunning = false;
+				Sender.this.notifyAll();
+			}
+		}
 	}
 
 }

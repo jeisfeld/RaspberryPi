@@ -39,7 +39,7 @@ public class TadelTest { // SUPPRESS_CHECKSTYLE
 			int wave = status.getControl3Value();
 
 			System.out.println(power + " - " + frequency + " - " + wave);
-			channelSender.tadel(power, frequency, wave, 100); // MAGIC_NUMBER
+			channelSender.tadel(power, frequency, wave, Sender.SEND_DURATION);
 		}
 	}
 
