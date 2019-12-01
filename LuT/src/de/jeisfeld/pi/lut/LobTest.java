@@ -3,6 +3,7 @@ package de.jeisfeld.pi.lut;
 import java.io.IOException;
 
 import de.jeisfeld.pi.lut.core.ButtonStatus;
+import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
 import de.jeisfeld.pi.lut.core.ChannelSender;
 import de.jeisfeld.pi.lut.core.Sender;
 
@@ -43,6 +44,9 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 		case 2:
 			LobTest.test2();
 			break;
+		case 4: // MAGIC_NUMBER
+			LobTest.test4();
+			break;
 		default:
 			LobTest.test3();
 			break;
@@ -71,7 +75,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 	}
 
 	/**
-	 * Reading the input as fast as possible.
+	 * Reading the input.
 	 *
 	 * @throws IOException connection issues
 	 * @throws InterruptedException if interrupted
@@ -119,4 +123,41 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 		}
 	}
 
+	/**
+	 * Test button listeners.
+	 *
+	 * @throws IOException connection issues
+	 * @throws InterruptedException if interrupted
+	 */
+	private static void test4() throws IOException, InterruptedException {
+		Sender sender = Sender.getInstance();
+
+		sender.setButton1Listener(new ButtonListener() {
+			@Override
+			public void handleButtonUp() {
+				System.out.println("Button 1 up");
+			}
+
+			@Override
+			public void handleButtonDown() {
+				System.out.println("Button 1 down");
+			}
+		});
+
+		sender.setButton2Listener(new ButtonListener() {
+			@Override
+			public void handleButtonUp() {
+				System.out.println("Button 2 up");
+			}
+
+			@Override
+			public void handleButtonDown() {
+				System.out.println("Button 2 down");
+			}
+		});
+
+		while (true) {
+			Thread.sleep(100); // MAGIC_NUMBER
+		}
+	}
 }

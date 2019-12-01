@@ -32,6 +32,14 @@ public final class ButtonStatus {
 	 * Flag indicating if controls are updated.
 	 */
 	private boolean mIsAnalogUpdated;
+	/**
+	 * Listener for button 1.
+	 */
+	private ButtonListener mButton1Listener = null;
+	/**
+	 * Listener for button 2.
+	 */
+	private ButtonListener mButton2Listener = null;
 
 	/**
 	 * Get information if button 1 is pressed.
@@ -79,14 +87,68 @@ public final class ButtonStatus {
 	}
 
 	/**
+	 * Set listener for button 1.
+	 *
+	 * @param listener The listener.
+	 */
+	protected void setButton1Listener(final ButtonListener listener) {
+		mButton1Listener = listener;
+	}
+
+	/**
+	 * Set listener for button 2.
+	 *
+	 * @param listener The listener.
+	 */
+	protected void setButton2Listener(final ButtonListener listener) {
+		mButton2Listener = listener;
+	}
+
+	/**
+	 * Set the value of button1 pressing and trigger listener if applicable.
+	 *
+	 * @param isButton1Pressed new value.
+	 */
+	private void setButton1Pressed(final boolean isButton1Pressed) {
+		if (mButton1Listener != null && isButton1Pressed != mIsButton1Pressed) {
+			if (isButton1Pressed) {
+				mButton1Listener.handleButtonDown();
+			}
+			else {
+				mButton1Listener.handleButtonUp();
+			}
+		}
+
+		mIsButton1Pressed = isButton1Pressed;
+	}
+
+	/**
+	 * Set the value of button2 pressing and trigger listener if applicable.
+	 *
+	 * @param isButton2Pressed new value.
+	 */
+	private void setButton2Pressed(final boolean isButton2Pressed) {
+		if (mButton2Listener != null && isButton2Pressed != mIsButton2Pressed) {
+			if (isButton2Pressed) {
+				mButton2Listener.handleButtonDown();
+			}
+			else {
+				mButton2Listener.handleButtonUp();
+			}
+		}
+
+		mIsButton2Pressed = isButton2Pressed;
+	}
+
+	/**
 	 * Update values from other ButtonStatus.
 	 *
 	 * @param other The other ButtonStatus.
 	 */
 	public void updateWith(final ButtonStatus other) {
 		if (other.mIsDigitalUpdated) {
-			mIsButton1Pressed = other.mIsButton1Pressed;
-			mIsButton2Pressed = other.mIsButton2Pressed;
+			setButton1Pressed(other.mIsButton1Pressed);
+			setButton2Pressed(other.mIsButton2Pressed);
 			mIsDigitalUpdated = true;
 		}
 		if (other.mIsAnalogUpdated) {
@@ -109,8 +171,8 @@ public final class ButtonStatus {
 			int newLineIndex = resultString.indexOf('\r', index);
 			String reducedResultString = resultString.substring(index + 1, newLineIndex);
 			if (reducedResultString.length() >= 2) { // MAGIC_NUMBER
-				mIsButton1Pressed = reducedResultString.charAt(0) == '1';
-				mIsButton2Pressed = reducedResultString.charAt(1) == '1';
+				setButton1Pressed(reducedResultString.charAt(0) == '1');
+				setButton2Pressed(reducedResultString.charAt(1) == '1');
 				mIsDigitalUpdated = true;
 			}
 			return true;
@@ -146,4 +208,18 @@ public final class ButtonStatus {
 		return mIsButton1Pressed + "," + mIsButton2Pressed + "," + mControl1Value + "," + mControl2Value + "," + mControl3Value;
 	}
 
+	/**
+	 * A listener for button press or release.
+	 */
+	public interface ButtonListener {
+		/**
+		 * Callback in case of a clear "on" trigger.
+		 */
+		void handleButtonDown();
+
+		/**
+		 * Callback in case of a clear "off" trigger.
+		 */
+		void handleButtonUp();
+	}
 }

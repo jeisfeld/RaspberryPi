@@ -19,6 +19,7 @@ import com.pi4j.io.serial.SerialFactory;
 import com.pi4j.io.serial.StopBits;
 import com.pi4j.io.serial.impl.SerialImpl;
 
+import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
 import de.jeisfeld.pi.lut.core.command.AnalogRead;
 import de.jeisfeld.pi.lut.core.command.Command;
 import de.jeisfeld.pi.lut.core.command.DigitalRead;
@@ -192,10 +193,9 @@ public final class Sender {
 	 * Process a list of commands.
 	 *
 	 * @param commands The commands to be processed.
-	 * @return The result.
 	 * @throws IOException issues with connection.
 	 */
-	private ButtonStatus doProcessCommands(final List<Command> commands) throws IOException {
+	private void doProcessCommands(final List<Command> commands) throws IOException {
 		synchronized (mProcessingCommands) {
 			if (commands.size() > 2) {
 				throw new RuntimeException("Max number of parallel commands is " + 2);
@@ -238,7 +238,6 @@ public final class Sender {
 			mButtonStatus.updateWith(buttonStatus);
 
 			mProcessingCommands.clear();
-			return buttonStatus;
 		}
 	}
 
@@ -327,6 +326,24 @@ public final class Sender {
 	 */
 	public ButtonStatus getButtonStatus() {
 		return mButtonStatus;
+	}
+
+	/**
+	 * Set listener for button 1.
+	 *
+	 * @param listener The listener.
+	 */
+	public void setButton1Listener(final ButtonListener listener) {
+		mButtonStatus.setButton1Listener(listener);
+	}
+
+	/**
+	 * Set listener for button 2.
+	 *
+	 * @param listener The listener.
+	 */
+	public void setButton2Listener(final ButtonListener listener) {
+		mButtonStatus.setButton2Listener(listener);
 	}
 
 	/**
