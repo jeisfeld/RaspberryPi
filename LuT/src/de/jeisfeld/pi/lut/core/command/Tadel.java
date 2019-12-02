@@ -32,16 +32,30 @@ public class Tadel implements WriteCommand {
 	/**
 	 * Create a Tadel.
 	 *
+	 * @param channel The channel.
+	 * @param power The power.
+	 * @param frequency The frequency.
+	 * @param wave The waveform.
+	 * @param duration The duration.
+	 */
+	public Tadel(final int channel, final int power, final int frequency, final int wave, final long duration) {
+		mChannel = channel;
+		mPower = power;
+		mFrequency = frequency;
+		mWave = wave;
+		mDuration = duration;
+	}
+
+	/**
+	 * Create a Tadel.
+	 *
 	 * @param channel the channel.
 	 * @param power The power
 	 * @param frequency The frequency
 	 * @param wave The waveform
 	 */
 	public Tadel(final int channel, final int power, final int frequency, final int wave) {
-		mChannel = channel;
-		mPower = power;
-		mFrequency = frequency;
-		mWave = wave;
+		this(channel, power, frequency, wave, 0);
 	}
 
 	@Override

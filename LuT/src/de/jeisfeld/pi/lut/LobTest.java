@@ -67,9 +67,10 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 		int delay = 50; // MAGIC_NUMBER
 
 		for (int power = 1; power < maxSignal; power++) {
-			System.out.println("                                       " + power);
 			channelSender.lob(power, delay);
 		}
+
+		channelSender.lob(1, maxSignal, delay * maxSignal);
 
 		sender.close();
 	}

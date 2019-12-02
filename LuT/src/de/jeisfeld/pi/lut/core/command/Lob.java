@@ -24,12 +24,24 @@ public class Lob implements WriteCommand {
 	/**
 	 * Create a Lob.
 	 *
+	 * @param channel The channel.
+	 * @param power The power.
+	 * @param duration The duration.
+	 */
+	public Lob(final int channel, final int power, final long duration) {
+		mChannel = channel;
+		mPower = power;
+		mDuration = duration;
+	}
+
+	/**
+	 * Create a Lob.
+	 *
 	 * @param channel the channel.
 	 * @param power The power
 	 */
 	public Lob(final int channel, final int power) {
-		mChannel = channel;
-		mPower = power;
+		this(channel, power, 0);
 	}
 
 	@Override

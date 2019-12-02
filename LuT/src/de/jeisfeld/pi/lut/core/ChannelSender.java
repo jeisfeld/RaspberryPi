@@ -40,8 +40,7 @@ public class ChannelSender {
 	 */
 	public void lob(final int power, final long duration) throws IOException, InterruptedException {
 		long startTime = System.currentTimeMillis(); // SUPPRESS_CHECKSTYLE
-		Lob lob = new Lob(mChannel, power);
-		lob.setDuration(duration);
+		Lob lob = new Lob(mChannel, power, duration);
 		if (duration > Sender.SEND_DURATION) {
 			lob.setNoOverride();
 		}
@@ -88,8 +87,7 @@ public class ChannelSender {
 	public void tadel(final int power, final int frequency, final int wave, final long duration)
 			throws IOException, InterruptedException {
 		long startTime = System.currentTimeMillis(); // SUPPRESS_CHECKSTYLE
-		Tadel tadel = new Tadel(mChannel, power, frequency, wave);
-		tadel.setDuration(duration);
+		Tadel tadel = new Tadel(mChannel, power, frequency, wave, duration);
 		if (duration > Sender.SEND_DURATION) {
 			tadel.setNoOverride();
 		}

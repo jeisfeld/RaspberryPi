@@ -419,6 +419,7 @@ public final class Sender {
 					doProcessCommands(commandsForProcessing);
 					if (triggerCommand != null) {
 						mLastCommand = triggerCommand;
+						mLastCommand.setDuration(0);
 						mLastRetriggerTime = System.currentTimeMillis();
 					}
 					long remainingTime = expectedDuration - System.currentTimeMillis() + timeBefore;
