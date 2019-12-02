@@ -39,7 +39,17 @@ public class ChannelSender {
 	 * @throws InterruptedException Thread interrupted
 	 */
 	public void lob(final int power, final long duration) throws IOException, InterruptedException {
-		mSender.processCommands(duration, new Lob(mChannel, power));
+		long startTime = System.currentTimeMillis(); // SUPPRESS_CHECKSTYLE
+		Lob lob = new Lob(mChannel, power);
+		lob.setDuration(duration);
+		if (duration > Sender.SEND_DURATION) {
+			lob.setNoOverride();
+		}
+		mSender.processCommands(lob);
+		long remainingTime = duration - System.currentTimeMillis() + startTime;
+		if (remainingTime > 0) {
+			Thread.sleep(remainingTime);
+		}
 	}
 
 	/**
@@ -77,7 +87,17 @@ public class ChannelSender {
 	 */
 	public void tadel(final int power, final int frequency, final int wave, final long duration)
 			throws IOException, InterruptedException {
-		mSender.processCommands(duration, new Tadel(mChannel, power, frequency, wave));
+		long startTime = System.currentTimeMillis(); // SUPPRESS_CHECKSTYLE
+		Tadel tadel = new Tadel(mChannel, power, frequency, wave);
+		tadel.setDuration(duration);
+		if (duration > Sender.SEND_DURATION) {
+			tadel.setNoOverride();
+		}
+		mSender.processCommands(tadel);
+		long remainingTime = duration - System.currentTimeMillis() + startTime;
+		if (remainingTime > 0) {
+			Thread.sleep(remainingTime);
+		}
 	}
 
 	/**

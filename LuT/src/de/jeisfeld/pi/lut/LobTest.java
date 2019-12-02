@@ -19,7 +19,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 	 * @throws InterruptedException if interrupted
 	 */
 	public static void main(final String[] args) throws IOException, InterruptedException { // SUPPRESS_CHECKSTYLE
-		int testNo = 1;
+		int testNo = 3; // MAGIC_NUMBER
 
 		if (args.length > 0) {
 			testNo = Integer.parseInt(args[0]);
@@ -98,7 +98,30 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 	 */
 	private static void test3() throws IOException, InterruptedException {
 		Sender sender = Sender.getInstance();
-		ChannelSender channelSender = sender.getChannelSender(1);
+		ChannelSender[] channelSenders = {sender.getChannelSender(0), sender.getChannelSender(1)};
+		ChannelSender[] channelSenderHolder = new ChannelSender[1];
+		channelSenderHolder[0] = channelSenders[0];
+
+		sender.setButton1Listener(new ButtonListener() {
+			@Override
+			public void handleButtonUp() {
+				// do nothing
+			}
+
+			@Override
+			public void handleButtonDown() {
+				System.out.println("------------- Switching channel -------------");
+				ChannelSender oldChannelSender = channelSenderHolder[0];
+				channelSenderHolder[0] = oldChannelSender == channelSenders[0] ? channelSenders[1] : channelSenders[0];
+				try {
+					oldChannelSender.lob(0, 0);
+				}
+				catch (IOException | InterruptedException e) {
+					// do nothing
+				}
+			}
+		});
+
 		double cyclePoint = 0;
 
 		while (true) {
@@ -111,7 +134,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 
 			System.out.println(power + " - " + minPower + " - " + frequency + " - " + value);
 
-			channelSender.lob(value, Sender.SEND_DURATION);
+			channelSenderHolder[0].lob(value, Sender.SEND_DURATION);
 
 			if (frequency > 0) {
 				int factor = (frequency + 9) / 10; // MAGIC_NUMBER

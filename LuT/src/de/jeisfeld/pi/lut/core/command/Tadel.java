@@ -20,6 +20,14 @@ public class Tadel implements WriteCommand {
 	 * The wave.
 	 */
 	private final int mWave;
+	/**
+	 * The duration.
+	 */
+	private long mDuration = 0;
+	/**
+	 * The override flag.
+	 */
+	private boolean mIsOverride = true;
 
 	/**
 	 * Create a Tadel.
@@ -47,7 +55,27 @@ public class Tadel implements WriteCommand {
 	}
 
 	@Override
+	public final void setDuration(final long duration) {
+		mDuration = duration;
+	}
+
+	@Override
+	public final long getDuration() {
+		return mDuration;
+	}
+
+	@Override
 	public final String toString() {
-		return getSerialString();
+		return getSerialString() + " - " + mDuration;
+	}
+
+	@Override
+	public final void setNoOverride() {
+		mIsOverride = false;
+	}
+
+	@Override
+	public final boolean isOverride() {
+		return mIsOverride;
 	}
 }

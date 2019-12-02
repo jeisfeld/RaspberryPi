@@ -11,4 +11,31 @@ public interface WriteCommand extends Command {
 	 * @return If the current command overrides an other command.
 	 */
 	boolean overrides(WriteCommand other);
+
+	/**
+	 * Set the duration.
+	 *
+	 * @param duration The duration
+	 */
+	void setDuration(long duration);
+
+	/**
+	 * Get the duration.
+	 *
+	 * @return The duration.
+	 */
+	long getDuration();
+
+	/**
+	 * Set flag to do no override, but queue behind other commands.
+	 */
+	void setNoOverride();
+
+	/**
+	 * Get information if override of queued commands should be done.
+	 *
+	 * @return the override flag.
+	 */
+	boolean isOverride();
+
 }

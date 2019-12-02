@@ -1,17 +1,9 @@
 package de.jeisfeld.pi.lut.core.command;
 
 /**
- * Command for sending Lob.
+ * Command for waiting in a controlled way.
  */
-public class Lob implements WriteCommand {
-	/**
-	 * The channel.
-	 */
-	private final int mChannel;
-	/**
-	 * The power.
-	 */
-	private final int mPower;
+public class Wait implements WriteCommand {
 	/**
 	 * The duration.
 	 */
@@ -19,27 +11,25 @@ public class Lob implements WriteCommand {
 	/**
 	 * The override flag.
 	 */
-	private boolean mIsOverride = true;
+	private boolean mIsOverride = false;
 
 	/**
-	 * Create a Lob.
+	 * Create a Wait.
 	 *
-	 * @param channel the channel.
-	 * @param power The power
+	 * @param duration The duration.
 	 */
-	public Lob(final int channel, final int power) {
-		mChannel = channel;
-		mPower = power;
+	public Wait(final long duration) {
+		mDuration = duration;
 	}
 
 	@Override
 	public final String getSerialString() {
-		return "L" + mChannel + "P" + mPower;
+		return null;
 	}
 
 	@Override
 	public final boolean overrides(final WriteCommand other) {
-		return other instanceof Lob && ((Lob) other).mChannel == mChannel;
+		return false;
 	}
 
 	@Override
@@ -54,7 +44,7 @@ public class Lob implements WriteCommand {
 
 	@Override
 	public final String toString() {
-		return getSerialString() + " - " + mDuration;
+		return "WAIT - " + mDuration;
 	}
 
 	@Override

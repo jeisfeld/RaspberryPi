@@ -26,6 +26,7 @@ import de.jeisfeld.pi.lut.core.command.DigitalRead;
 import de.jeisfeld.pi.lut.core.command.Lob;
 import de.jeisfeld.pi.lut.core.command.ReadCommand;
 import de.jeisfeld.pi.lut.core.command.Tadel;
+import de.jeisfeld.pi.lut.core.command.Wait;
 import de.jeisfeld.pi.lut.core.command.WriteCommand;
 
 /**
@@ -41,9 +42,18 @@ public final class Sender {
 	 */
 	private static final String DEFAULT_PORT = "/dev/serial0";
 	/**
-	 * The duration of a send command in ms.
+	 * The duration of a send command in ms. It is always above 200ms, the rest is buffer.
 	 */
-	public static final int SEND_DURATION = 200;
+	public static final int SEND_DURATION = 205;
+	/**
+	 * The duration of a query command in ms. It is always above 100ms, the rest is buffer.
+	 */
+	public static final int QUERY_DURATION = 105;
+	/**
+	 * Delay before forcing retrigger.
+	 */
+	public static final int FORCED_RETRIGGER_DELAY = 2000;
+
 	/**
 	 * The Pattern used for processing the response.
 	 */
@@ -164,10 +174,10 @@ public final class Sender {
 		}
 
 		synchronized (mQueuedCommands) {
+			mIsClosing = true;
 			mQueuedCommands.clear();
 			mQueuedCommands.addAll(finalCommands);
 		}
-		mIsClosing = true;
 
 		synchronized (this) {
 			while (mIsThreadRunning) {
@@ -208,13 +218,15 @@ public final class Sender {
 				mProcessingCommands.add(command);
 			}
 
+			int missingResponses = 0;
 			for (Command command : commands) {
 				write(command.getSerialString());
+				if (command.getSerialString() != null) {
+					missingResponses++;
+				}
 			}
 
 			ButtonStatus buttonStatus = new ButtonStatus();
-
-			int missingResponses = commands.size();
 			do {
 				String input = read();
 				while (input != null) {
@@ -244,17 +256,16 @@ public final class Sender {
 	/**
 	 * Put commands in the command queue. If they query for response, then wait for the response.
 	 *
-	 * @param doOverride flag indicating if commands on same channel should be overridden.
 	 * @param commands The commands.
 	 */
-	protected void processCommands(final boolean doOverride, final WriteCommand... commands) {
-		if (mIsClosed) {
+	public void processCommands(final WriteCommand... commands) {
+		if (mIsClosing) {
 			return;
 		}
 		synchronized (mQueuedCommands) {
 			for (WriteCommand command : commands) {
 				boolean isOverride = false;
-				if (doOverride) {
+				if (command.isOverride()) {
 					for (WriteCommand other : mQueuedCommands) {
 						if (command.overrides(other)) {
 							mQueuedCommands.set(mQueuedCommands.indexOf(other), command);
@@ -265,56 +276,6 @@ public final class Sender {
 				if (!isOverride) {
 					mQueuedCommands.add(command);
 				}
-			}
-		}
-	}
-
-	/**
-	 * Put commands in the command queue. If they query for response, then wait for the response.
-	 *
-	 * @param commands The commands.
-	 */
-	public void processCommands(final WriteCommand... commands) {
-		processCommands(true, commands);
-	}
-
-	/**
-	 * Write to the sender, in repeated way.
-	 *
-	 * @param duration The duration. If duration is at least Sender.SEND_DURATION, then it is ensured that each command will be processed, otherwise
-	 *            they may be suppressed.
-	 * @param commands the commands
-	 */
-	public void processCommands(final long duration, final WriteCommand... commands) {
-		if (mIsClosing) {
-			return;
-		}
-		boolean doOverride = duration < Sender.SEND_DURATION * commands.length;
-
-		boolean done = false;
-		final long startTime = System.currentTimeMillis();
-		processCommands(doOverride, commands);
-		while (!done) {
-			final long remainingTime = duration - (System.currentTimeMillis() - startTime);
-			if (remainingTime < 2000) { // MAGIC_NUMBER
-				if (remainingTime > 0) {
-					try {
-						Thread.sleep(remainingTime);
-					}
-					catch (InterruptedException e) {
-						// do nothing
-					}
-				}
-				done = true;
-			}
-			else {
-				try {
-					Thread.sleep(1000); // MAGIC_NUMBER
-				}
-				catch (InterruptedException e) {
-					// do nothing
-				}
-				processCommands(doOverride, commands);
 			}
 		}
 	}
@@ -354,7 +315,7 @@ public final class Sender {
 	 */
 	protected void write(final String message) throws IOException {
 		synchronized (mSerial) {
-			if (!mIsClosed) {
+			if (!mIsClosed && message != null) {
 				mSerial.write(message + "\r");
 			}
 		}
@@ -399,27 +360,84 @@ public final class Sender {
 		 * Storage for the next read command that might be processed.
 		 */
 		private ReadCommand mNextReadCommand = new AnalogRead();
+		/**
+		 * The last retrigger time.
+		 */
+		private long mLastRetriggerTime = System.currentTimeMillis();
+		/**
+		 * The last command.
+		 */
+		private WriteCommand mLastCommand = null;
 
 		@Override
 		public void run() {
 			mIsThreadRunning = true;
 			while (!mIsClosing || mQueuedCommands.size() > 0) {
 				try {
+					long timeBefore = System.currentTimeMillis(); // SUPPRESS_CHECKSTYLE
+					long expectedDuration = 0;
+					WriteCommand triggerCommand = null;
 					List<Command> commandsForProcessing = new ArrayList<>();
 
 					synchronized (mQueuedCommands) {
 						if (mQueuedCommands.size() == 0) {
-							commandsForProcessing = Sender.ALL_READ_COMMADS;
+							if (mLastCommand != null && System.currentTimeMillis() - mLastRetriggerTime > Sender.FORCED_RETRIGGER_DELAY) {
+								commandsForProcessing.add(mLastCommand);
+								mLastRetriggerTime = System.currentTimeMillis();
+								commandsForProcessing.add(mNextReadCommand);
+								mNextReadCommand = mNextReadCommand instanceof AnalogRead ? new DigitalRead() : new AnalogRead();
+							}
+							else {
+								commandsForProcessing = Sender.ALL_READ_COMMADS;
+							}
 						}
 						else {
-							commandsForProcessing.add(mQueuedCommands.get(0));
+							WriteCommand nextCommand = mQueuedCommands.get(0);
+							expectedDuration = nextCommand.getDuration();
+							if (nextCommand.getSerialString() == null) { // This is wait command
+								if (expectedDuration > Sender.SEND_DURATION && mLastCommand != null
+										&& System.currentTimeMillis() - mLastRetriggerTime > Sender.FORCED_RETRIGGER_DELAY) {
+									commandsForProcessing.add(mLastCommand);
+									mLastRetriggerTime = System.currentTimeMillis();
+									commandsForProcessing.add(mNextReadCommand);
+									mNextReadCommand = mNextReadCommand instanceof AnalogRead ? new DigitalRead() : new AnalogRead();
+								}
+								else if (expectedDuration > Sender.QUERY_DURATION) {
+									commandsForProcessing = Sender.ALL_READ_COMMADS;
+								}
+							}
+							else {
+								commandsForProcessing.add(nextCommand);
+								commandsForProcessing.add(mNextReadCommand);
+								mNextReadCommand = mNextReadCommand instanceof AnalogRead ? new DigitalRead() : new AnalogRead();
+								triggerCommand = nextCommand;
+							}
 							mQueuedCommands.remove(0);
-							commandsForProcessing.add(mNextReadCommand);
-							mNextReadCommand = mNextReadCommand instanceof AnalogRead ? new DigitalRead() : new AnalogRead();
 						}
 
 					}
 					doProcessCommands(commandsForProcessing);
+					if (triggerCommand != null) {
+						mLastCommand = triggerCommand;
+						mLastRetriggerTime = System.currentTimeMillis();
+					}
+					long remainingTime = expectedDuration - System.currentTimeMillis() + timeBefore;
+					if (remainingTime > 0) {
+						if (remainingTime > Sender.QUERY_DURATION) {
+							synchronized (mQueuedCommands) {
+								mQueuedCommands.add(0, new Wait(remainingTime));
+							}
+						}
+						else {
+							try {
+								Thread.sleep(remainingTime);
+							}
+							catch (InterruptedException e) {
+								// ignore
+							}
+						}
+
+					}
 				}
 				catch (IOException ioe) {
 					ioe.printStackTrace();
