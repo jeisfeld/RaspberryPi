@@ -6,6 +6,7 @@ import de.jeisfeld.pi.lut.core.ButtonStatus;
 import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
 import de.jeisfeld.pi.lut.core.ChannelSender;
 import de.jeisfeld.pi.lut.core.Sender;
+import de.jeisfeld.pi.lut.core.ShutdownListener;
 
 /**
  * Test class for LuT framework.
@@ -50,22 +51,7 @@ public class TadelTest { // SUPPRESS_CHECKSTYLE
 			}
 		});
 
-		sender.setButton2Listener(new ButtonListener() {
-			@Override
-			public void handleButtonUp() {
-				// do nothing
-			}
-
-			@Override
-			public void handleButtonDown() {
-				try {
-					Runtime.getRuntime().exec("sudo shutdown -h now");
-				}
-				catch (IOException e) {
-					// ignore
-				}
-			}
-		});
+		sender.setButton2Listener(new ShutdownListener());
 
 		while (true) {
 			ButtonStatus status = sender.getButtonStatus();
@@ -75,7 +61,7 @@ public class TadelTest { // SUPPRESS_CHECKSTYLE
 
 			System.out.println(power + " - " + frequency + " - " + wave);
 			if (TadelTest.mIsActive) {
-				channelSender.tadel(power, frequency, wave, Sender.SEND_DURATION);
+				channelSender.tadel(power, frequency, wave);
 			}
 			else {
 				channelSender.tadel(0, 0, 0, Sender.SEND_DURATION);

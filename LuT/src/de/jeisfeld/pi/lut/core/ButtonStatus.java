@@ -5,6 +5,10 @@ package de.jeisfeld.pi.lut.core;
  */
 public final class ButtonStatus {
 	/**
+	 * The max value of controls.
+	 */
+	public static final int MAX_CONTROL_VALUE = 255;
+	/**
 	 * Flag indicating if button 1 is pressed.
 	 */
 	private boolean mIsButton1Pressed;

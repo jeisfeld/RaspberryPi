@@ -52,6 +52,17 @@ public class ChannelSender {
 	}
 
 	/**
+	 * Send a fixed "Lob" message for standard duration, which is the real runtime.
+	 *
+	 * @param power The power to be used.
+	 * @throws IOException issues with connection
+	 * @throws InterruptedException Thread interrupted
+	 */
+	public void lob(final int power) throws IOException, InterruptedException {
+		lob(power, Sender.SEND_DURATION);
+	}
+
+	/**
 	 * Send a varying "Lob" message.
 	 *
 	 * @param startPower The start power.
@@ -99,6 +110,20 @@ public class ChannelSender {
 	}
 
 	/**
+	 * Send a fixed "Tadel" message for standard duration, which is the real runtime.
+	 *
+	 * @param power The power
+	 * @param frequency The frequency
+	 * @param wave The waveform
+	 * @throws IOException issues with connection
+	 * @throws InterruptedException Thread interrupted.
+	 */
+	public void tadel(final int power, final int frequency, final int wave)
+			throws IOException, InterruptedException {
+		tadel(power, frequency, wave, Sender.SEND_DURATION);
+	}
+
+	/**
 	 * Send a varying "Tadel" message.
 	 *
 	 * @param startPower The start power
@@ -124,6 +149,15 @@ public class ChannelSender {
 				tadel(power, frequency, wave, stepDuration);
 			}
 		}
+	}
+
+	/**
+	 * Get the button status.
+	 *
+	 * @return The button status.
+	 */
+	public ButtonStatus getButtonStatus() {
+		return mSender.getButtonStatus();
 	}
 
 }

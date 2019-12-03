@@ -137,13 +137,13 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 			ButtonStatus status = sender.getButtonStatus();
 			int power = status.getControl1Value();
 			int frequency = status.getControl2Value();
-			int minPower = (status.getControl3Value() * power) / 255; // MAGIC_NUMBER
+			int minPower = (status.getControl3Value() * power) / ButtonStatus.MAX_CONTROL_VALUE;
 
 			int value = (int) ((1 - Math.cos(2 * Math.PI * cyclePoint)) / 2 * (power - minPower) + minPower);
 
 			System.out.println(power + " - " + minPower + " - " + frequency + " - " + value);
 
-			channelSenderHolder[0].lob(value, Sender.SEND_DURATION);
+			channelSenderHolder[0].lob(value);
 
 			if (frequency > 0) {
 				int factor = (frequency + 9) / 10; // MAGIC_NUMBER
@@ -202,7 +202,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 	 */
 	private static void test5(final long duration) throws IOException, InterruptedException {
 		Sender sender = Sender.getInstance();
-		ChannelSender channelSender = sender.getChannelSender(1);
+		ChannelSender channelSender = sender.getChannelSender(0);
 
 		channelSender.lob(100, duration); // MAGIC_NUMBER
 
