@@ -26,17 +26,18 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 		}
 
 		// SYSTEMOUT:OFF
-		LobTest.test(testNo); // MAGIC_NUMBER
+		LobTest.test(testNo, args); // MAGIC_NUMBER
 	}
 
 	/**
 	 * Execute test.
 	 *
 	 * @param i test id.
+	 * @param args the original command line arguments
 	 * @throws IOException connection issues
 	 * @throws InterruptedException if interrupted
 	 */
-	private static void test(final int i) throws IOException, InterruptedException {
+	private static void test(final int i, final String[] args) throws IOException, InterruptedException {
 		switch (i) {
 		case 1:
 			LobTest.test1();
@@ -46,6 +47,13 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 			break;
 		case 4: // MAGIC_NUMBER
 			LobTest.test4();
+			break;
+		case 5: // MAGIC_NUMBER
+			long duration = 1000; // MAGIC_NUMBER
+			if (args.length >= 2) {
+				duration = Long.parseLong(args[1]);
+			}
+			LobTest.test5(duration);
 			break;
 		default:
 			LobTest.test3();
@@ -183,5 +191,21 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 		while (true) {
 			Thread.sleep(100); // MAGIC_NUMBER
 		}
+	}
+
+	/**
+	 * Test of sending single lob signal.
+	 *
+	 * @param duration the duration of the signal.
+	 * @throws IOException connection issues
+	 * @throws InterruptedException if interrupted
+	 */
+	private static void test5(final long duration) throws IOException, InterruptedException {
+		Sender sender = Sender.getInstance();
+		ChannelSender channelSender = sender.getChannelSender(1);
+
+		channelSender.lob(100, duration); // MAGIC_NUMBER
+
+		sender.close();
 	}
 }

@@ -423,7 +423,7 @@ public final class Sender {
 						mLastRetriggerTime = System.currentTimeMillis();
 					}
 					long remainingTime = expectedDuration - System.currentTimeMillis() + timeBefore;
-					if (remainingTime > 0) {
+					if (remainingTime > 0 && !mIsClosing) {
 						if (remainingTime > Sender.QUERY_DURATION) {
 							synchronized (mQueuedCommands) {
 								mQueuedCommands.add(0, new Wait(remainingTime));
