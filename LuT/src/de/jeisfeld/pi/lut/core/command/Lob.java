@@ -30,7 +30,7 @@ public class Lob implements WriteCommand {
 	 */
 	public Lob(final int channel, final int power, final long duration) {
 		mChannel = channel;
-		mPower = power;
+		mPower = WriteCommand.makeByte(power);
 		mDuration = duration;
 	}
 

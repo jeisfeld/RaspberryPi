@@ -2,15 +2,15 @@ package de.jeisfeld.pi.lut.core;
 
 import java.io.IOException;
 
-import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
+import de.jeisfeld.pi.lut.core.ButtonStatus.OnLongPressListener;
 
 /**
- * A button listener that shuts down the device when pressing the button.
+ * A button listener that shuts down the device when long pressing the button.
  */
-public class ShutdownListener implements ButtonListener {
+public class ShutdownListener extends OnLongPressListener {
 
 	@Override
-	public final void handleButtonDown() {
+	public final void handleLongTrigger() {
 		try {
 			Runtime.getRuntime().exec("sudo shutdown -h now");
 		}
@@ -18,10 +18,4 @@ public class ShutdownListener implements ButtonListener {
 			// ignore
 		}
 	}
-
-	@Override
-	public void handleButtonUp() {
-		// do nothing.
-	}
-
 }

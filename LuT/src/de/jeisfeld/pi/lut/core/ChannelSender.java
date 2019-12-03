@@ -1,7 +1,5 @@
 package de.jeisfeld.pi.lut.core;
 
-import java.io.IOException;
-
 import de.jeisfeld.pi.lut.core.command.Lob;
 import de.jeisfeld.pi.lut.core.command.Tadel;
 
@@ -23,9 +21,8 @@ public class ChannelSender {
 	 *
 	 * @param sender The sender to be used.
 	 * @param channel The channel to be used.
-	 * @throws IOException issues with connection.
 	 */
-	public ChannelSender(final Sender sender, final int channel) throws IOException {
+	public ChannelSender(final Sender sender, final int channel) {
 		mSender = sender;
 		mChannel = channel;
 	}
@@ -35,13 +32,12 @@ public class ChannelSender {
 	 *
 	 * @param power The power to be used.
 	 * @param duration The duration of the message in ms.
-	 * @throws IOException issues with connection
 	 * @throws InterruptedException Thread interrupted
 	 */
-	public void lob(final int power, final long duration) throws IOException, InterruptedException {
+	public void lob(final int power, final long duration) throws InterruptedException {
 		long startTime = System.currentTimeMillis(); // SUPPRESS_CHECKSTYLE
 		Lob lob = new Lob(mChannel, power, duration);
-		if (duration > Sender.SEND_DURATION) {
+		if (duration >= Sender.SEND_DURATION) {
 			lob.setNoOverride();
 		}
 		mSender.processCommands(lob);
@@ -55,11 +51,14 @@ public class ChannelSender {
 	 * Send a fixed "Lob" message for standard duration, which is the real runtime.
 	 *
 	 * @param power The power to be used.
-	 * @throws IOException issues with connection
-	 * @throws InterruptedException Thread interrupted
 	 */
-	public void lob(final int power) throws IOException, InterruptedException {
-		lob(power, Sender.SEND_DURATION);
+	public void lob(final int power) {
+		try {
+			lob(power, Sender.SEND_DURATION);
+		}
+		catch (InterruptedException e) {
+			// ignore
+		}
 	}
 
 	/**
@@ -68,10 +67,9 @@ public class ChannelSender {
 	 * @param startPower The start power.
 	 * @param endPower The end power.
 	 * @param duration The duration.
-	 * @throws IOException issues with connection
 	 * @throws InterruptedException Thread interrupted.
 	 */
-	public void lob(final int startPower, final int endPower, final long duration) throws IOException, InterruptedException {
+	public void lob(final int startPower, final int endPower, final long duration) throws InterruptedException {
 		long stepCount = duration / Sender.SEND_DURATION;
 		if (stepCount <= 1) {
 			lob(endPower, duration);
@@ -92,14 +90,12 @@ public class ChannelSender {
 	 * @param frequency The frequency
 	 * @param wave The waveform
 	 * @param duration The duration
-	 * @throws IOException issues with connection
 	 * @throws InterruptedException Thread interrupted.
 	 */
-	public void tadel(final int power, final int frequency, final int wave, final long duration)
-			throws IOException, InterruptedException {
+	public void tadel(final int power, final int frequency, final int wave, final long duration) throws InterruptedException {
 		long startTime = System.currentTimeMillis(); // SUPPRESS_CHECKSTYLE
 		Tadel tadel = new Tadel(mChannel, power, frequency, wave, duration);
-		if (duration > Sender.SEND_DURATION) {
+		if (duration >= Sender.SEND_DURATION) {
 			tadel.setNoOverride();
 		}
 		mSender.processCommands(tadel);
@@ -115,12 +111,14 @@ public class ChannelSender {
 	 * @param power The power
 	 * @param frequency The frequency
 	 * @param wave The waveform
-	 * @throws IOException issues with connection
-	 * @throws InterruptedException Thread interrupted.
 	 */
-	public void tadel(final int power, final int frequency, final int wave)
-			throws IOException, InterruptedException {
-		tadel(power, frequency, wave, Sender.SEND_DURATION);
+	public void tadel(final int power, final int frequency, final int wave) {
+		try {
+			tadel(power, frequency, wave, Sender.SEND_DURATION);
+		}
+		catch (InterruptedException e) {
+			// ignore
+		}
 	}
 
 	/**
@@ -132,11 +130,10 @@ public class ChannelSender {
 	 * @param endFrequency The end frequency
 	 * @param wave the waveform
 	 * @param duration The duration
-	 * @throws IOException issues with connection
 	 * @throws InterruptedException Thread interrupted.
 	 */
 	public void tadel(final int startPower, final int endPower, final int startFrequency, final int endFrequency, final int wave,
-			final long duration) throws IOException, InterruptedException {
+			final long duration) throws InterruptedException {
 		long stepCount = duration / 200; // MAGIC_NUMBER
 		if (stepCount <= 1) {
 			tadel(endPower, endFrequency, wave, duration);
@@ -159,5 +156,4 @@ public class ChannelSender {
 	public ButtonStatus getButtonStatus() {
 		return mSender.getButtonStatus();
 	}
-
 }

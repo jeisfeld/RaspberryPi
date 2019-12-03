@@ -1,5 +1,7 @@
 package de.jeisfeld.pi.lut.core.command;
 
+import de.jeisfeld.pi.lut.core.ButtonStatus;
+
 /**
  * A command without response.
  */
@@ -38,4 +40,7 @@ public interface WriteCommand extends Command {
 	 */
 	boolean isOverride();
 
+	static int makeByte(final int value) {
+		return Math.min(ButtonStatus.MAX_CONTROL_VALUE, Math.max(0, value));
+	}
 }

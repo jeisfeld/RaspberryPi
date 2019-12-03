@@ -40,9 +40,9 @@ public class Tadel implements WriteCommand {
 	 */
 	public Tadel(final int channel, final int power, final int frequency, final int wave, final long duration) {
 		mChannel = channel;
-		mPower = power;
-		mFrequency = frequency;
-		mWave = wave;
+		mPower = WriteCommand.makeByte(power);
+		mFrequency = WriteCommand.makeByte(frequency);
+		mWave = WriteCommand.makeByte(wave);
 		mDuration = duration;
 	}
 

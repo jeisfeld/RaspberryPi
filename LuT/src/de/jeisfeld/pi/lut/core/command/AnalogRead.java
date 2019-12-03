@@ -17,4 +17,8 @@ public class AnalogRead implements ReadCommand {
 		buttonStatus.setAnalogResult(response);
 	}
 
+	@Override
+	public final String toString() {
+		return getSerialString();
+	}
 }

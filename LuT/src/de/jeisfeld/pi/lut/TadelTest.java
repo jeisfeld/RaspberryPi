@@ -37,21 +37,16 @@ public class TadelTest { // SUPPRESS_CHECKSTYLE
 	 */
 	private static void test1() throws IOException, InterruptedException {
 		Sender sender = Sender.getInstance();
-		ChannelSender channelSender = sender.getChannelSender(1);
+		ChannelSender channelSender = sender.getChannelSender(0);
 
 		sender.setButton1Listener(new ButtonListener() {
-			@Override
-			public void handleButtonUp() {
-				// do nothing
-			}
-
 			@Override
 			public void handleButtonDown() {
 				TadelTest.mIsActive = !TadelTest.mIsActive;
 			}
 		});
 
-		sender.setButton2Listener(new ShutdownListener());
+		sender.setButton2LongPressListener(new ShutdownListener());
 
 		while (true) {
 			ButtonStatus status = sender.getButtonStatus();

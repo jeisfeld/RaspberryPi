@@ -44,6 +44,14 @@ public final class ButtonStatus {
 	 * Listener for button 2.
 	 */
 	private ButtonListener mButton2Listener = null;
+	/**
+	 * Long press Listener for button 1.
+	 */
+	private OnLongPressListener mButton1LongPressListener = null;
+	/**
+	 * Long press Listener for button 2.
+	 */
+	private OnLongPressListener mButton2LongPressListener = null;
 
 	/**
 	 * Get information if button 1 is pressed.
@@ -109,21 +117,60 @@ public final class ButtonStatus {
 	}
 
 	/**
+	 * Set long press listener for button 1.
+	 *
+	 * @param listener The listener.
+	 */
+	protected void setButton1LongPressListener(final OnLongPressListener listener) {
+		mButton1LongPressListener = listener;
+		mButton1LongPressListener.mButtonNo = 1;
+	}
+
+	/**
+	 * Set long press listener for button 2.
+	 *
+	 * @param listener The listener.
+	 */
+	protected void setButton2LongPressListener(final OnLongPressListener listener) {
+		mButton2LongPressListener = listener;
+		mButton2LongPressListener.mButtonNo = 2;
+	}
+
+	/**
 	 * Set the value of button1 pressing and trigger listener if applicable.
 	 *
 	 * @param isButton1Pressed new value.
 	 */
 	private void setButton1Pressed(final boolean isButton1Pressed) {
-		if (mButton1Listener != null && isButton1Pressed != mIsButton1Pressed) {
-			if (isButton1Pressed) {
-				mButton1Listener.handleButtonDown();
+		if (isButton1Pressed != mIsButton1Pressed) {
+			if (mButton1Listener != null) {
+				new Thread() {
+					@Override
+					public void run() {
+						if (isButton1Pressed) {
+							mButton1Listener.handleButtonDown();
+						}
+						else {
+							mButton1Listener.handleButtonUp();
+						}
+					}
+				}.start();
 			}
-			else {
-				mButton1Listener.handleButtonUp();
+			if (mButton1LongPressListener != null) {
+				new Thread() {
+					@Override
+					public void run() {
+						if (isButton1Pressed) {
+							mButton1LongPressListener.getNewWaitingThread(ButtonStatus.this).start();
+						}
+						else {
+							mButton1LongPressListener.reset();
+						}
+					}
+				}.start();
 			}
+			mIsButton1Pressed = isButton1Pressed;
 		}
-
-		mIsButton1Pressed = isButton1Pressed;
 	}
 
 	/**
@@ -132,16 +179,35 @@ public final class ButtonStatus {
 	 * @param isButton2Pressed new value.
 	 */
 	private void setButton2Pressed(final boolean isButton2Pressed) {
-		if (mButton2Listener != null && isButton2Pressed != mIsButton2Pressed) {
-			if (isButton2Pressed) {
-				mButton2Listener.handleButtonDown();
+		if (isButton2Pressed != mIsButton2Pressed) {
+			if (mButton2Listener != null) {
+				new Thread() {
+					@Override
+					public void run() {
+						if (isButton2Pressed) {
+							mButton2Listener.handleButtonDown();
+						}
+						else {
+							mButton2Listener.handleButtonUp();
+						}
+					}
+				}.start();
 			}
-			else {
-				mButton2Listener.handleButtonUp();
+			if (mButton2LongPressListener != null) {
+				new Thread() {
+					@Override
+					public void run() {
+						if (isButton2Pressed) {
+							mButton2LongPressListener.getNewWaitingThread(ButtonStatus.this).start();
+						}
+						else {
+							mButton2LongPressListener.reset();
+						}
+					}
+				}.start();
 			}
+			mIsButton2Pressed = isButton2Pressed;
 		}
-
-		mIsButton2Pressed = isButton2Pressed;
 	}
 
 	/**
@@ -224,6 +290,113 @@ public final class ButtonStatus {
 		/**
 		 * Callback in case of a clear "off" trigger.
 		 */
-		void handleButtonUp();
+		default void handleButtonUp() {
+			// do nothing
+		}
+	}
+
+	/**
+	 * A listener for long press to a button.
+	 */
+	public abstract static class OnLongPressListener {
+		/**
+		 * The default duration of a long press.
+		 */
+		private static final int DEFAULT_TRIGGER_DURATION = 2500;
+
+		/**
+		 * The duration of the long press.
+		 */
+		private final long mDuration;
+		/**
+		 * The last start time of a trigger.
+		 */
+		private Long mTriggerStartTime;
+		/**
+		 * The referring button number.
+		 */
+		private int mButtonNo;
+
+		/**
+		 * Constructor.
+		 *
+		 * @param duration The duration of the long press.
+		 */
+		public OnLongPressListener(final long duration) {
+			mDuration = duration;
+		}
+
+		/**
+		 * Constructor.
+		 */
+		public OnLongPressListener() {
+			this(OnLongPressListener.DEFAULT_TRIGGER_DURATION);
+		}
+
+		/**
+		 * Callback called in case of a long "on" trigger.
+		 */
+		public abstract void handleLongTrigger();
+
+		/**
+		 * Get a thread waiting for long press.
+		 *
+		 * @param buttonStatus The referring ButtonStatus.
+		 * @return a WaitingThread.
+		 */
+		private WaitingThread getNewWaitingThread(final ButtonStatus buttonStatus) {
+			return new WaitingThread(buttonStatus);
+		}
+
+		/**
+		 * Reset, so that the ongoing threads will not trigger any more.
+		 */
+		private void reset() {
+			mTriggerStartTime = null;
+		}
+
+		/**
+		 * The thread used for waiting for long press.
+		 */
+		private final class WaitingThread extends Thread {
+			/**
+			 * The start time of the thread.
+			 */
+			private final long mLocalTriggerStartTime;
+			/**
+			 * The referring buttonStatus.
+			 */
+			private final ButtonStatus mButtonStatus;
+
+			/**
+			 * A thread waiting for long press.
+			 *
+			 * @param buttonStatus The referring ButtonStatus.
+			 */
+			private WaitingThread(final ButtonStatus buttonStatus) {
+				super();
+				mTriggerStartTime = System.currentTimeMillis();
+				mLocalTriggerStartTime = mTriggerStartTime;
+				mButtonStatus = buttonStatus;
+			}
+
+			private boolean isButtonPressed() {
+				return mButtonNo == 2 ? mButtonStatus.isButton2Pressed() : mButtonStatus.isButton1Pressed();
+			}
+
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(mDuration);
+				}
+				catch (InterruptedException e) {
+					// ignore
+				}
+				if (mTriggerStartTime != null && mTriggerStartTime == mLocalTriggerStartTime && isButtonPressed()) {
+					handleLongTrigger();
+				}
+			}
+		}
+
 	}
 }

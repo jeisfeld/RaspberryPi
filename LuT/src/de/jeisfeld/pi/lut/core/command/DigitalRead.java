@@ -17,4 +17,8 @@ public class DigitalRead implements ReadCommand {
 		buttonStatus.setDigitalResult(response);
 	}
 
+	@Override
+	public final String toString() {
+		return getSerialString();
+	}
 }

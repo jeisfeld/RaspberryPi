@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import de.jeisfeld.pi.lut.core.ButtonStatus;
 import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
+import de.jeisfeld.pi.lut.core.ButtonStatus.OnLongPressListener;
 import de.jeisfeld.pi.lut.core.ChannelSender;
 import de.jeisfeld.pi.lut.core.Sender;
 
@@ -69,7 +70,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 	 */
 	private static void test1() throws IOException, InterruptedException {
 		Sender sender = Sender.getInstance();
-		ChannelSender channelSender = sender.getChannelSender(1);
+		ChannelSender channelSender = sender.getChannelSender(0);
 
 		int maxSignal = 100; // MAGIC_NUMBER
 		int delay = 50; // MAGIC_NUMBER
@@ -113,11 +114,6 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 
 		sender.setButton1Listener(new ButtonListener() {
 			@Override
-			public void handleButtonUp() {
-				// do nothing
-			}
-
-			@Override
 			public void handleButtonDown() {
 				System.out.println("------------- Switching channel -------------");
 				ChannelSender oldChannelSender = channelSenderHolder[0];
@@ -125,7 +121,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 				try {
 					oldChannelSender.lob(0, 0);
 				}
-				catch (IOException | InterruptedException e) {
+				catch (InterruptedException e) {
 					// do nothing
 				}
 			}
@@ -185,6 +181,20 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 			@Override
 			public void handleButtonDown() {
 				System.out.println("Button 2 down");
+			}
+		});
+
+		sender.setButton1LongPressListener(new OnLongPressListener() {
+			@Override
+			public void handleLongTrigger() {
+				System.out.println("Button 1 long press");
+			}
+		});
+
+		sender.setButton2LongPressListener(new OnLongPressListener() {
+			@Override
+			public void handleLongTrigger() {
+				System.out.println("Button 2 long press");
 			}
 		});
 

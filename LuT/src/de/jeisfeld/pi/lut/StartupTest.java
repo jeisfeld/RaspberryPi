@@ -30,7 +30,7 @@ public class StartupTest { // SUPPRESS_CHECKSTYLE
 	private static void test1() throws IOException, InterruptedException {
 		Sender sender = Sender.getInstance();
 
-		sender.setButton2Listener(new ShutdownListener());
+		sender.setButton2LongPressListener(new ShutdownListener());
 
 		while (true) {
 			Thread.sleep(100); // MAGIC_NUMBER

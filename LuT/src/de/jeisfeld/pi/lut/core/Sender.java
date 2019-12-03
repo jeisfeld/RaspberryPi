@@ -20,6 +20,7 @@ import com.pi4j.io.serial.StopBits;
 import com.pi4j.io.serial.impl.SerialImpl;
 
 import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
+import de.jeisfeld.pi.lut.core.ButtonStatus.OnLongPressListener;
 import de.jeisfeld.pi.lut.core.command.AnalogRead;
 import de.jeisfeld.pi.lut.core.command.Command;
 import de.jeisfeld.pi.lut.core.command.DigitalRead;
@@ -235,6 +236,7 @@ public final class Sender {
 						break;
 					}
 					missingResponses--;
+
 					String response = matcher.group(1);
 					input = matcher.group(3); // MAGIC_NUMBER
 
@@ -248,7 +250,6 @@ public final class Sender {
 			}
 			while (missingResponses > 0);
 			mButtonStatus.updateWith(buttonStatus);
-
 			mProcessingCommands.clear();
 		}
 	}
@@ -305,6 +306,24 @@ public final class Sender {
 	 */
 	public void setButton2Listener(final ButtonListener listener) {
 		mButtonStatus.setButton2Listener(listener);
+	}
+
+	/**
+	 * Set long press listener for button 1.
+	 *
+	 * @param listener The listener.
+	 */
+	public void setButton1LongPressListener(final OnLongPressListener listener) {
+		mButtonStatus.setButton1LongPressListener(listener);
+	}
+
+	/**
+	 * Set long press listener for button 2.
+	 *
+	 * @param listener The listener.
+	 */
+	public void setButton2LongPressListener(final OnLongPressListener listener) {
+		mButtonStatus.setButton2LongPressListener(listener);
 	}
 
 	/**
