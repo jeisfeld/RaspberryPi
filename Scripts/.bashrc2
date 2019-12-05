@@ -1,1 +1,3 @@
+alias dir='ls -al'
 ~/bin/disablescreentimeout
+

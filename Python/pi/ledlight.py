@@ -16,7 +16,7 @@ HEIGHT = 8
 LED_COUNT = WIDTH * HEIGHT  # Number of LED pixels.
 LED_PIN = 18  # GPIO pin connected to the pixels (18 uses PWM!).
 # LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
-LED_BRIGHTNESS = 255  # Set to 0 for darkest and 255 for brightest
+LED_BRIGHTNESS = 100  # Set to 0 for darkest and 255 for brightest
 LED_CHANNEL = 0  # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
 
@@ -56,7 +56,7 @@ def moveToColor(strip, temperature1, brightness1, temperature2, brightness2, dur
 
 
 def moveToMatrix(strip, matrix1, matrix2, duration):
-    steps = max(min(duration * 400, 100), 1)
+    steps = int(max(min(duration * 400, 100), 1))
     sleepDuration = duration / steps
     
     for i in range(1, steps + 1):
@@ -68,7 +68,7 @@ def moveToMatrix(strip, matrix1, matrix2, duration):
 
 
 def getRandomColor():
-    return convertColorTemperature(int(exp(7 + 2 * random())), random() * 0.8 + 0.2)
+    return convertColorTemperature(int(exp(7 + random())), random() * 0.8 + 0.2)
 
 
 def getRandomMatrix():
