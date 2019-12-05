@@ -7,8 +7,6 @@ Created on 28.11.2019
 from colormatrix.Color import Color
 from colormatrix.AbstractMatrix import AbstractMatrix
 from math import sqrt
-from colormatrix.ColorTemperature import convertColorTemperature
-
 
 class ColorMatrix(AbstractMatrix):
     '''

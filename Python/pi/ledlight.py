@@ -2,12 +2,10 @@
 #
 # Test 64x64 LED display
 
-from colormatrix.LedDisplay import getStrip, colorFill
-from colormatrix.Color import Color
-from colormatrix.AbstractMatrix import matrixFill, moveToMatrix
+from colormatrix.LedDisplay import getStrip
 from colormatrix.ColorMatrix import ColorMatrix
-from math import exp
-from colormatrix.ColorTemperature import convertColorTemperature
+from colormatrix.MatrixAnimator import MatrixAnimator
+from colormatrix.ColorTemperature import getRandomColor
 from random import randrange, random
 
 # LED strip configuration:
@@ -16,15 +14,17 @@ LED_PIN = 18  # GPIO pin connected to the pixels (18 uses PWM!).
 LED_BRIGHTNESS = 100  # Set to 0 for darkest and 255 for brightest
 LED_CHANNEL = 0  # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
+MIN_TEMP = 1000
+MAX_TEMP = 4000
+MIN_BR = 0.2
+MAX_BR = 1
 
-def getRandomColor():
-    return convertColorTemperature(int(exp(7 + random())), random() * 0.8 + 0.2)
 
 
 def getRandomMatrix():
-    matrix = ColorMatrix(getRandomColor())
+    matrix = ColorMatrix(getRandomColor(MIN_TEMP, MAX_TEMP, MIN_BR, MAX_BR))
     for _ in range(randrange(1, 5)):
-        matrix.setColor(7 * random(), 7 * random(), getRandomColor())
+        matrix.setColor(7 * random(), 7 * random(), getRandomColor(MIN_TEMP, MAX_TEMP, MIN_BR, MAX_BR))
     return matrix
 
 
@@ -35,14 +35,12 @@ if __name__ == '__main__':
     # Intialize the library (must be called once before other functions).
     strip.begin()
     
-    matrix = getRandomMatrix()
-    matrixFill(strip, matrix)
+    
+    matrixAnimator = MatrixAnimator(strip)
+    matrixAnimator.start()
     
     try:
         while True:
-            newMatrix = getRandomMatrix()
-            moveToMatrix(strip, matrix, newMatrix, 1 + 5 * random())
-            matrix = newMatrix
-
+            matrixAnimator.moveToMatrix(getRandomMatrix(), 1 + 2 * random())
     except KeyboardInterrupt:
-        colorFill(strip, Color(0, 0, 0))
+        matrixAnimator.stop()

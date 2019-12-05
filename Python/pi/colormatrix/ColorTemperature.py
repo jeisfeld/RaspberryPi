@@ -1,5 +1,6 @@
 from colormatrix.Color import Color
-from math import log
+from math import log, exp
+from random import random
 
 kelvin_table = {
     1000: (255, 56, 0),
@@ -139,6 +140,11 @@ def convertColorTemperature(temperature, brightness):
         ensureInRange255((color1[1] * factor + color2[1] * (1 - factor)) * brightness),
         ensureInRange255((color1[2] * factor + color2[2] * (1 - factor)) * brightness)
         )
+
+def getRandomColor(minTemperature, maxTemperature, minBrightness, maxBrightness):
+    return convertColorTemperature(int(exp(log(minTemperature) + random()* (log(maxTemperature) - log(minTemperature)))), 
+                                   minBrightness + random() * (maxBrightness - minBrightness))
+
 
 def convertToRange255(value):
     if value < 0:

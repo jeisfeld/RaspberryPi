@@ -3,12 +3,11 @@
 # Test 64x64 LED display
 
 from colormatrix.LedDisplay import getStrip, colorFill
-from colormatrix.Color import Color
+from colormatrix.Color import Color, BLACK
 from colormatrix.AbstractMatrix import matrixFill, moveToMatrix
 from colormatrix.MotiveMatrix import MotiveMatrix
-from math import exp
-from colormatrix.ColorTemperature import convertColorTemperature
-from random import random
+from colormatrix.ColorTemperature import getRandomColor
+from colormatrix.MatrixAnimator import MatrixAnimator
 
 # LED strip configuration:
 LED_PIN = 18  # GPIO pin connected to the pixels (18 uses PWM!).
@@ -16,12 +15,14 @@ LED_PIN = 18  # GPIO pin connected to the pixels (18 uses PWM!).
 LED_BRIGHTNESS = 150  # Set to 0 for darkest and 255 for brightest
 LED_CHANNEL = 0  # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
+MIN_TEMP = 1000
+MAX_TEMP = 4000
+
 DARKRED = Color(20, 0, 0)
 DARKESTYELLOW = Color(10, 10, 0)
 DARKYELLOW = Color(50, 50, 0)
 GREEN = Color(0, 96, 0)
 BROWN = Color(40, 25, 0)
-BLACK = Color(0, 0, 0)
 
 CANDLES = [
     [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, DARKESTYELLOW, DARKESTYELLOW],
@@ -47,13 +48,9 @@ TREE = MotiveMatrix([
 
 
 
-def getRandomColor(factor):
-    return convertColorTemperature(int(exp(7 + random())), random() * factor)
-
-
 def setCandleColorsOneColumn(matrix, x, y):
-    color1 = getRandomColor(0.2)
-    color2 = color1 + getRandomColor(0.4)
+    color1 = getRandomColor(MIN_TEMP, MAX_TEMP, 0, 0.2)
+    color2 = color1 + getRandomColor(MIN_TEMP, MAX_TEMP, 0, 0.4)
     matrix.setColor(x, y, DARKESTYELLOW + color1)
     matrix.setColor(x, y + 1, DARKYELLOW + color2)
 
@@ -84,18 +81,18 @@ if __name__ == '__main__':
     # Intialize the library (must be called once before other functions).
     strip.begin()
     
-    matrix = getCandleMatrix()
+    matrixAnimator = MatrixAnimator(strip)
+    matrixAnimator.setMatrix(getCandleMatrix())
+    matrixAnimator.start()
+
     matrix2 = TREE
-    matrix2 = getCandleMatrix()
-    matrixFill(strip, matrix)
     
     try:
         while True:
-#            moveToMatrix(strip, matrix, matrix2, 1)
-#            moveToMatrix(strip, matrix2, matrix, 1)
+#            matrixAnimator.moveToMatrix(matrix2, 1)
+#            matrixAnimator.moveToMatrix(getCandleMatrix(), 1)
             newMatrix = getCandleMatrix()
-            moveToMatrix(strip, matrix, newMatrix, 0.1)
-            matrix = newMatrix
+            matrixAnimator.moveToMatrix(getCandleMatrix() , 0.1)
 
     except KeyboardInterrupt:
-        colorFill(strip, Color(0, 0, 0))
+        matrixAnimator.stop()
