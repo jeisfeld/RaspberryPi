@@ -30,7 +30,7 @@ class MatrixAnimator(Thread):
         self._matrix = matrix
         
     def moveToMatrix(self, newMatrix, duration):
-        self._moveData = ( time(), duration, newMatrix)
+        self._moveData = (time(), duration, newMatrix)
         sleep(duration)
         self._matrix = newMatrix
         self._moveData = None
@@ -45,11 +45,9 @@ class MatrixAnimator(Thread):
         else:
             return self._matrix
         
-        
     def run(self):
         while not self._stopped:
             self.getCurrentMatrix().display(self._strip)
-            sleep(0.02)
+            sleep(0.002)
         colorFill(self._strip, BLACK)
-        
         
