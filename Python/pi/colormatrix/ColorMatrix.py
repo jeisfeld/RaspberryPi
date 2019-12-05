@@ -4,12 +4,13 @@ Created on 28.11.2019
 @author: Joerg
 '''
 
-from Color import Color
+from colormatrix.Color import Color
+from colormatrix.AbstractMatrix import AbstractMatrix
 from math import sqrt
-from colorTemperature import convertColorTemperature
+from colormatrix.ColorTemperature import convertColorTemperature
 
 
-class ColorMatrix(object):
+class ColorMatrix(AbstractMatrix):
     '''
     classdocs
     '''
@@ -40,16 +41,3 @@ class ColorMatrix(object):
             result += color * weight
         
         return result / sumweights
-    
-    def getCombinedColor(self, other, quota, x, y):
-        colorself = self.getColor(x, y)
-        colorother = other.getColor(x, y)
-        return colorother * quota + colorself * (1 - quota)
-
-
-if __name__ == '__main__':
-    matrix = ColorMatrix(convertColorTemperature(8000, 1))
-    
-    print(matrix.getColor(3.5, 3.5))
-    print(matrix.getColor(0, 0))
-

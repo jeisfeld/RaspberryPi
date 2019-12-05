@@ -1,4 +1,4 @@
-from Color import Color
+from colormatrix.Color import Color
 from math import log
 
 kelvin_table = {

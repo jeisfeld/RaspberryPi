@@ -5,9 +5,10 @@ Created on 28.11.2019
 '''
 
 from copy import deepcopy
+from colormatrix.AbstractMatrix import AbstractMatrix
 
 
-class MotiveMatrix(object):
+class MotiveMatrix(AbstractMatrix):
     '''
     classdocs
     '''
@@ -22,9 +23,3 @@ class MotiveMatrix(object):
         
     def getColor(self, x, y):
         return self._motive[y][x]
-    
-    def getCombinedColor(self, other, quota, x, y):
-        colorself = self.getColor(x, y)
-        colorother = other.getColor(x, y)
-        return colorother * quota + colorself * (1 - quota)
-

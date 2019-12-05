@@ -30,3 +30,5 @@ class Color(object):
     def __mul__(self, factor):
         return Color(self._red * factor, self._green * factor, self._blue * factor)
     
+
+
