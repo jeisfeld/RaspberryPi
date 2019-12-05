@@ -157,17 +157,12 @@ public final class ButtonStatus {
 				}.start();
 			}
 			if (mButton1LongPressListener != null) {
-				new Thread() {
-					@Override
-					public void run() {
-						if (isButton1Pressed) {
-							mButton1LongPressListener.getNewWaitingThread(ButtonStatus.this).start();
-						}
-						else {
-							mButton1LongPressListener.reset();
-						}
-					}
-				}.start();
+				if (isButton1Pressed) {
+					mButton1LongPressListener.getNewWaitingThread(ButtonStatus.this).start();
+				}
+				else {
+					mButton1LongPressListener.reset();
+				}
 			}
 			mIsButton1Pressed = isButton1Pressed;
 		}
@@ -194,17 +189,12 @@ public final class ButtonStatus {
 				}.start();
 			}
 			if (mButton2LongPressListener != null) {
-				new Thread() {
-					@Override
-					public void run() {
-						if (isButton2Pressed) {
-							mButton2LongPressListener.getNewWaitingThread(ButtonStatus.this).start();
-						}
-						else {
-							mButton2LongPressListener.reset();
-						}
-					}
-				}.start();
+				if (isButton2Pressed) {
+					mButton2LongPressListener.getNewWaitingThread(ButtonStatus.this).start();
+				}
+				else {
+					mButton2LongPressListener.reset();
+				}
 			}
 			mIsButton2Pressed = isButton2Pressed;
 		}
