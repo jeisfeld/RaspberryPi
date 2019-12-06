@@ -62,8 +62,7 @@ if __name__ == '__main__':
     strip.begin()
     
     matrixAnimator = MatrixAnimator(strip)
-#    candleMatrix = CandleMatrix(randrange(4))
-    currentMatrixInfo = getNewMatrix()
+    currentMatrixInfo = CandleMatrix(randrange(4)), 10 + 180 * random()
     matrixAnimator.setMatrix(currentMatrixInfo[0])
 
     matrixAnimator.start()
