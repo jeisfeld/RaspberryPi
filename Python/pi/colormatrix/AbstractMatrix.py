@@ -55,7 +55,9 @@ class AbstractMatrix(object):
         '''
         Constructor
         '''
-        
+
+    def close(self):
+        pass
 
 def matrixFill(strip, matrix):
     for x in range(WIDTH):

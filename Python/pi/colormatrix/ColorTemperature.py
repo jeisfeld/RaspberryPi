@@ -130,20 +130,30 @@ def convertColorTemperature2(temperature, brightness):
     blue = convertToRange255(blue * brightness)
     return Color(red, green, blue)
 
+
 def convertColorTemperature(temperature, brightness):
     temperature1 = (temperature // 100) * 100
     factor = 1 - (temperature % 100) / 100
     color1 = kelvin_table[temperature1]
-    color2= kelvin_table[temperature1 + 100]
+    color2 = kelvin_table[temperature1 + 100]
     return Color(
         ensureInRange255((color1[0] * factor + color2[0] * (1 - factor)) * brightness),
         ensureInRange255((color1[1] * factor + color2[1] * (1 - factor)) * brightness),
         ensureInRange255((color1[2] * factor + color2[2] * (1 - factor)) * brightness)
         )
 
+
 def getRandomColor(minTemperature, maxTemperature, minBrightness, maxBrightness):
-    return convertColorTemperature(int(exp(log(minTemperature) + random()* (log(maxTemperature) - log(minTemperature)))), 
-                                   minBrightness + random() * (maxBrightness - minBrightness))
+    return convertColorTemperature(getRandomColorTemperature(minTemperature, maxTemperature),
+                                   getRandomBrightness(minBrightness, maxBrightness))
+
+
+def getRandomColorTemperature(minTemperature, maxTemperature):
+    return int(exp(log(minTemperature) + random() * (log(maxTemperature) - log(minTemperature))))
+
+
+def getRandomBrightness(minBrightness, maxBrightness):
+    return minBrightness + random() * (maxBrightness - minBrightness)
 
 
 def convertToRange255(value):
@@ -153,6 +163,7 @@ def convertToRange255(value):
         return 255
     else:
         return int(value * 255)
+
         
 def ensureInRange255(value):
     if value < 0:

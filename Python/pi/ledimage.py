@@ -8,8 +8,9 @@ from colormatrix.ImageMatrix import ImageMatrix
 from colormatrix.MatrixAnimator import MatrixAnimator
 from colormatrix.CandleMatrix import CandleMatrix
 from time import sleep
-from random import randrange
+from random import randrange, random
 from sys import argv
+from colormatrix.StarMatrix import StarMatrix
 
 global LED_BRIGHTNESS
 
@@ -37,6 +38,18 @@ TREE = ImageMatrix([
     ])
 
 
+def getNewMatrix():
+    rand = random()
+    
+    if rand < 0.2:
+        return (TREE, 2 + 10 * random())
+    elif rand < 0.6:
+        return (CandleMatrix(randrange(4)), 10 + 180 * random())
+    else:
+        return (StarMatrix(randrange(4,9)), 10 + 60 * random())
+
+
+
 # Main program logic follows:
 if __name__ == '__main__':
     if len(argv) >= 2:
@@ -49,23 +62,20 @@ if __name__ == '__main__':
     strip.begin()
     
     matrixAnimator = MatrixAnimator(strip)
-    candleMatrix = CandleMatrix(randrange(4))
-    matrixAnimator.setMatrix(candleMatrix)
-    matrixAnimator.start()
+#    candleMatrix = CandleMatrix(randrange(4))
+    currentMatrixInfo = getNewMatrix()
+    matrixAnimator.setMatrix(currentMatrixInfo[0])
 
-    matrix2 = TREE
+    matrixAnimator.start()
     
     try:
         while True:
-            sleep(20)
-            
-            matrixAnimator.moveToMatrix(matrix2, 2)
-            candleMatrix.close()
-            sleep(2)
-
-            candleMatrix = CandleMatrix(randrange(4))
-            matrixAnimator.moveToMatrix(candleMatrix, 2)
+            sleep(currentMatrixInfo[1])
+            newMatrixInfo = getNewMatrix()
+            matrixAnimator.moveToMatrix(newMatrixInfo[0], 2)
+            currentMatrixInfo[0].close()
+            currentMatrixInfo = newMatrixInfo
 
     except KeyboardInterrupt:
-        candleMatrix.close()
+        currentMatrixInfo[0].close()
         matrixAnimator.stop()

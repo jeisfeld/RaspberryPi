@@ -91,9 +91,9 @@ class CandleMatrix(ImageMatrix):
 
 class CandleAnimator(Thread):
     
-    def __init__(self, candle, index):
+    def __init__(self, candleMatrix, index):
         Thread.__init__(self)
-        self._candleMatrix = candle
+        self._candleMatrix = candleMatrix
         self._index = index
         self._stopped = False
     
