@@ -8,6 +8,7 @@ from colormatrix.ImageMatrix import ImageMatrix
 from colormatrix.MatrixAnimator import MatrixAnimator
 from colormatrix.CandleMatrix import CandleMatrix
 from time import sleep
+from random import randrange
 from sys import argv
 
 global LED_BRIGHTNESS
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     strip.begin()
     
     matrixAnimator = MatrixAnimator(strip)
-    candleMatrix = CandleMatrix()
+    candleMatrix = CandleMatrix(randrange(4))
     matrixAnimator.setMatrix(candleMatrix)
     matrixAnimator.start()
 
@@ -56,13 +57,13 @@ if __name__ == '__main__':
     
     try:
         while True:
-            sleep(10)
+            sleep(20)
             
             matrixAnimator.moveToMatrix(matrix2, 2)
             candleMatrix.close()
             sleep(2)
 
-            candleMatrix = CandleMatrix()
+            candleMatrix = CandleMatrix(randrange(4))
             matrixAnimator.moveToMatrix(candleMatrix, 2)
 
     except KeyboardInterrupt:
