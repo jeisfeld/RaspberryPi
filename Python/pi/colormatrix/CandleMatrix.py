@@ -5,7 +5,7 @@ Created on 28.11.2019
 '''
 
 from colormatrix.ImageMatrix import ImageMatrix
-from colormatrix.Color import Color, BLACK
+from colormatrix.Color import Color
 from colormatrix.ColorTemperature import getRandomColor
 from random import randrange
 from copy import deepcopy
@@ -13,22 +13,11 @@ from time import sleep, time
 from threading import Thread
 
 DARKRED = Color(20, 0, 0)
-DARKESTYELLOW = Color(10, 10, 0)
-DARKYELLOW = Color(50, 50, 0)
+DARKESTYELLOW = Color(5, 5, 0)
+DARKYELLOW = Color(25, 25, 0)
 MIN_TEMP = 1000
 MAX_TEMP = 3000
 FLAME_DURATION = 0.2
-
-CANDLES = [
-    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, DARKESTYELLOW, DARKESTYELLOW],
-    [DARKESTYELLOW, DARKESTYELLOW, BLACK, BLACK, BLACK, BLACK, DARKYELLOW, DARKYELLOW],
-    [DARKYELLOW, DARKYELLOW, BLACK, DARKESTYELLOW, DARKESTYELLOW, BLACK, DARKRED, DARKRED],
-    [DARKRED, DARKRED, BLACK, DARKYELLOW, DARKYELLOW, BLACK, DARKRED, DARKRED],
-    [DARKRED, DARKRED, BLACK, DARKRED, DARKRED, BLACK, DARKRED, DARKRED],
-    [DARKRED, DARKRED, BLACK, DARKRED, DARKRED, BLACK, DARKRED, DARKRED],
-    [DARKRED, DARKRED, BLACK, DARKRED, DARKRED, BLACK, BLACK, BLACK],
-    [BLACK, BLACK, BLACK, DARKRED, DARKRED, BLACK, BLACK, BLACK]
-    ]
 
 
 class CandleMatrix(ImageMatrix):
@@ -62,8 +51,8 @@ class CandleMatrix(ImageMatrix):
         self.setColorRect(6, third + 2, 7, third + 5, DARKRED)
 
     def setCandleColorsOneColumn(self, x, y):
-        color1 = getRandomColor(MIN_TEMP, MAX_TEMP, 0, 0.2)
-        color2 = color1 + getRandomColor(MIN_TEMP, MAX_TEMP, 0, 0.4)
+        color1 = getRandomColor(MIN_TEMP, MAX_TEMP, 0, 0.3)
+        color2 = color1 + getRandomColor(MIN_TEMP, MAX_TEMP, 0, 0.6)
         self.setColor(x, y, DARKESTYELLOW + color1)
         self.setColor(x, y + 1, DARKYELLOW + color2)
         

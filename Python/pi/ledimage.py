@@ -8,11 +8,14 @@ from colormatrix.ImageMatrix import ImageMatrix
 from colormatrix.MatrixAnimator import MatrixAnimator
 from colormatrix.CandleMatrix import CandleMatrix
 from time import sleep
+from sys import argv
+
+global LED_BRIGHTNESS
 
 # LED strip configuration:
 LED_PIN = 18  # GPIO pin connected to the pixels (18 uses PWM!).
 # LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
-LED_BRIGHTNESS = 150  # Set to 0 for darkest and 255 for brightest
+LED_BRIGHTNESS = 255  # Set to 0 for darkest and 255 for brightest
 LED_CHANNEL = 0  # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
 MIN_TEMP = 1000
@@ -35,6 +38,10 @@ TREE = ImageMatrix([
 
 # Main program logic follows:
 if __name__ == '__main__':
+    if len(argv) >= 2:
+        LED_BRIGHTNESS = int(argv[1])
+    
+
     # Create NeoPixel object with appropriate configuration.
     strip = getStrip(LED_PIN, LED_CHANNEL, LED_BRIGHTNESS)
     # Intialize the library (must be called once before other functions).
