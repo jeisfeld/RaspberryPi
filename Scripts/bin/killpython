@@ -1,0 +1,2 @@
+#!/bin/bash
+ps -ef | grep 'python /home/je' | grep -v grep | awk '{print "sudo kill " $2}' | sh

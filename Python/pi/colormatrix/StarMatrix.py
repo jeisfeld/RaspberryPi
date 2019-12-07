@@ -19,7 +19,7 @@ DARKYELLOW = Color(25, 25, 0)
 MIN_TEMP = 2000
 MAX_TEMP = 6000
 BRIGHTNESS_VARIATION = 0.3
-TEMPERATURE_VARIATION = 0.4
+TEMPERATURE_VARIATION = 0.5
 
 class StarMatrix(ImageMatrix):
     '''
@@ -87,7 +87,7 @@ class StarAnimator(Thread):
     def run(self):
         while not self._stopped:
             newBrightness = (1-BRIGHTNESS_VARIATION * random()) * self._starMatrix._starBrightness[self._position]
-            newTemperature = exp(log(self._starMatrix._starTemperature[self._position]) + (random() - 0.5))
+            newTemperature = exp(log(self._starMatrix._starTemperature[self._position]) + (random() - 0.5) * TEMPERATURE_VARIATION)
             newColor = convertColorTemperature(newTemperature, newBrightness)
             duration = 0.1 + 3 * random()
             (self._starMatrix._oldSpecialValues[self._position], self._starMatrix._changeTime[self._position],

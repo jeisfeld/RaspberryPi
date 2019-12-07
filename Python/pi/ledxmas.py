@@ -24,7 +24,7 @@ MIN_TEMP = 1000
 MAX_TEMP = 3000
 
 GREEN = Color(0, 20, 0)
-BROWN = Color(5, 3, 0)
+BROWN = Color(8, 5, 0)
 
 TREE = ImageMatrix([
     [BLACK, BLACK, BLACK, GREEN, GREEN, BLACK, BLACK, BLACK],
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     strip.begin()
     
     matrixAnimator = MatrixAnimator(strip)
-    currentMatrixInfo = CandleMatrix(randrange(4)), 10 + 180 * random()
+    currentMatrixInfo = (CandleMatrix(randrange(4)), 10 + 180 * random())
     matrixAnimator.setMatrix(currentMatrixInfo[0])
 
     matrixAnimator.start()
