@@ -1,7 +1,5 @@
 '''
-Created on 05.12.2019
-
-@author: Joerg
+A process animating an 8x8 LED panel.
 '''
 
 from threading import Thread

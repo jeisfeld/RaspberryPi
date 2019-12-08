@@ -17,7 +17,7 @@ public class XmasControl {
 	/**
 	 * Temperature when fan switches on.
 	 */
-	private static final float FAN_ON_TEMPERATURE = 60;
+	private static final float FAN_ON_TEMPERATURE = 75;
 	/**
 	 * Temperature when fan switches off.
 	 */
@@ -76,7 +76,7 @@ public class XmasControl {
 						Runtime.getRuntime().exec("/home/je/bin/killpython");
 					}
 					mProcess =
-							Runtime.getRuntime().exec("sudo python /home/je/python/ledxmas.py " + XmasControl.BRIGHTNESS[mControlCyclePosition]);
+							Runtime.getRuntime().exec("sudo python /home/je/python/ledxmas2.py " + XmasControl.BRIGHTNESS[mControlCyclePosition]);
 				}
 				catch (IOException e) {
 					// ignore

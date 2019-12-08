@@ -1,7 +1,5 @@
 '''
-Created on 28.11.2019
-
-@author: Joerg
+A 8x8 matrix with an image
 '''
 
 from copy import deepcopy
