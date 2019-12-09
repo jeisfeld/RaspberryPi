@@ -7,7 +7,8 @@ WIDTH = 8
 HEIGHT = 8
 LED_COUNT = WIDTH * HEIGHT  # Number of LED pixels.
 
-def getStrip(pin, channel, brightness):
+
+def getStrip(pin, channel, brightness=255):
     return Adafruit_NeoPixel(LED_COUNT, pin, channel, brightness)
 
 
@@ -16,7 +17,6 @@ def colorFill(strip, color):
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color.value())
     strip.show()
-
 
 
 def moveToColor(strip, temperature1, brightness1, temperature2, brightness2, duration):

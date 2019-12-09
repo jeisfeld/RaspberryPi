@@ -24,8 +24,9 @@ class StarMatrix(ImageMatrix):
     classdocs
     '''
 
-    def __init__(self, count=5, suppressThread=False):
+    def __init__(self, brightness=255, count=5, suppressThread=False):
         ImageMatrix.__init__(self)
+        self._brightness = brightness
         self.definePositions(count)
         
         if not suppressThread:
@@ -65,9 +66,9 @@ class StarMatrix(ImageMatrix):
             quota = (time() - self._changeTime[position]) / self._duration[position]
             if quota > 1:
                 quota = 1
-            return self._newSpecialValues[position] * quota + self._oldSpecialValues[position] * (1 - quota)
+            return (self._newSpecialValues[position] * quota + self._oldSpecialValues[position] * (1 - quota)) * self._brightness / 255
         else:
-            return self._matrix[y][x]
+            return self._matrix[y][x] * self._brightness / 255
     
     def close(self):
         for thread in self._thread:

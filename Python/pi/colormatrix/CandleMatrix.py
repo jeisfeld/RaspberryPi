@@ -21,8 +21,9 @@ class CandleMatrix(ImageMatrix):
     classdocs
     '''
 
-    def __init__(self, position=0, candleNumbers=[0, 1, 2], suppressThread=False):
+    def __init__(self, brightness=255, position=0, candleNumbers=[0, 1, 2], suppressThread=False):
         ImageMatrix.__init__(self)
+        self._brightness = brightness
         self._position = position
         self._candleNumbers = candleNumbers
         if position == 0:
@@ -80,7 +81,7 @@ class CandleMatrix(ImageMatrix):
             if quota > 1:
                 quota = 1
 
-            return self._newMatrix[index][y][x] * quota + self._oldMatrix[index][y][x] * (1 - quota)
+            return (self._newMatrix[index][y][x] * quota + self._oldMatrix[index][y][x] * (1 - quota)) * self._brightness / 255
     
     def close(self):
         for index in self._candleNumbers:
@@ -99,8 +100,8 @@ class CandleAnimator(Thread):
         while not self._stopped:
             newCandleMatrix = CandleMatrix(self._candleMatrix._position, candleNumbers=[self._index], suppressThread=True)
             newCandleMatrix.setCandleColorsOfCandle(self._index)
-            duration = 0.02 + random()
-            (self._candleMatrix._oldMatrix[self._index], self._candleMatrix._changeTime[self._index], 
+            duration = 0.02 + 2 * random()
+            (self._candleMatrix._oldMatrix[self._index], self._candleMatrix._changeTime[self._index],
                     self._candleMatrix._newMatrix[self._index], self._candleMatrix._duration[self._index]) = \
                 (self._candleMatrix._newMatrix[self._index], time(), newCandleMatrix._matrix, duration)
             sleep(duration)

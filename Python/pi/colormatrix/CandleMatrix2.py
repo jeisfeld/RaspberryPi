@@ -5,7 +5,7 @@ A 8x8 matrix with 2 candles.
 from colormatrix.ImageMatrix import ImageMatrix
 from colormatrix.Color import Color
 from colormatrix.ColorTemperature import getRandomColor
-from random import random, sample, randrange
+from random import random, sample
 from time import sleep, time
 from threading import Thread
 
@@ -21,8 +21,9 @@ class CandleMatrix2(ImageMatrix):
     classdocs
     '''
 
-    def __init__(self, candleNumbers=[0, 1], suppressThread=False, candlePositions = None):
+    def __init__(self, brightness=255, candleNumbers=[0, 1], suppressThread=False, candlePositions=None):
         ImageMatrix.__init__(self)
+        self._brightness = brightness
         self._candleNumbers = candleNumbers
         
         if candlePositions == None:
@@ -76,7 +77,7 @@ class CandleMatrix2(ImageMatrix):
             if quota > 1:
                 quota = 1
 
-            return self._newMatrix[index][y][x] * quota + self._oldMatrix[index][y][x] * (1 - quota)
+            return (self._newMatrix[index][y][x] * quota + self._oldMatrix[index][y][x] * (1 - quota)) * self._brightness / 255
     
     def close(self):
         for index in self._candleNumbers:
@@ -93,9 +94,9 @@ class CandleAnimator(Thread):
     
     def run(self):
         while not self._stopped:
-            newCandleMatrix = CandleMatrix2(candleNumbers=[self._index], suppressThread=True, candlePositions = self._candleMatrix._candlePositions)
+            newCandleMatrix = CandleMatrix2(candleNumbers=[self._index], suppressThread=True, candlePositions=self._candleMatrix._candlePositions)
             newCandleMatrix.setCandleColorsOfCandle(self._index)
-            duration = 0.02 + random()
+            duration = 0.02 + 2 * random()
             (self._candleMatrix._oldMatrix[self._index], self._candleMatrix._changeTime[self._index],
                     self._candleMatrix._newMatrix[self._index], self._candleMatrix._duration[self._index]) = \
                 (self._candleMatrix._newMatrix[self._index], time(), newCandleMatrix._matrix, duration)

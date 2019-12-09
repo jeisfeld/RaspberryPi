@@ -1,0 +1,4 @@
+#!/bin/bash
+/home/je/bin/xmas 0
+sleep 1
+/home/je/bin/killpython

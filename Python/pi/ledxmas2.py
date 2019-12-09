@@ -9,36 +9,33 @@ from time import sleep
 from random import random
 from sys import argv
 
-
 global LED_BRIGHTNESS
 
-# LED strip configuration:
 LED_PIN = 18  # GPIO pin connected to the pixels (18 uses PWM!).
-# LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
-LED_BRIGHTNESS = 255  # Set to 0 for darkest and 255 for brightest
 LED_CHANNEL = 0  # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
 MIN_TEMP = 1000
 MAX_TEMP = 3000
 
-def getNewMatrix():
-    return (CandleMatrix2(), 10 + 180 * random())
 
+def getNewMatrix(brightness):
+    return (CandleMatrix2(brightness=brightness), 10 + 180 * random())
 
 
 # Main program logic follows:
 if __name__ == '__main__':
-    if len(argv) >= 2:
-        LED_BRIGHTNESS = int(argv[1])
+    brightness = 63
     
+    if len(argv) >= 2:
+        brightness = int(argv[1])
 
     # Create NeoPixel object with appropriate configuration.
-    strip = getStrip(LED_PIN, LED_CHANNEL, LED_BRIGHTNESS)
+    strip = getStrip(LED_PIN, LED_CHANNEL)
     # Intialize the library (must be called once before other functions).
     strip.begin()
     
     matrixAnimator = MatrixAnimator(strip)
-    currentMatrixInfo = getNewMatrix()
+    currentMatrixInfo = getNewMatrix(brightness)
     matrixAnimator.setMatrix(currentMatrixInfo[0])
 
     matrixAnimator.start()
@@ -46,7 +43,7 @@ if __name__ == '__main__':
     try:
         while True:
             sleep(currentMatrixInfo[1])
-            newMatrixInfo = getNewMatrix()
+            newMatrixInfo = getNewMatrix(brightness)
             matrixAnimator.moveToMatrix(newMatrixInfo[0], 2)
             currentMatrixInfo[0].close()
             currentMatrixInfo = newMatrixInfo
