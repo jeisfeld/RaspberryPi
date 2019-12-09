@@ -4,7 +4,7 @@
 
 from colormatrix.LedDisplay import getStrip
 from colormatrix.MatrixAnimator import MatrixAnimator
-from colormatrix.CandleMatrix2 import CandleMatrix2
+from colormatrix.CandleMatrix import CandleMatrix
 from time import sleep
 from datetime import datetime
 from random import random
@@ -25,15 +25,17 @@ def getNewMatrix(brightness=None):
         candleSize = 1
     elif hour > 18:
         candleSize = 2
-    elif hour > 12:
+    elif hour > 14:
         candleSize = 3
-    else:
+    elif hour > 10:
         candleSize = 4
+    else:
+        candleSize = 5
     
     if brightness == None:
         brightness = getBrightnessByHour()
     
-    return (CandleMatrix2(brightness=brightness, candleSize=candleSize), 10 + 180 * random())
+    return (CandleMatrix(brightness=brightness, candleSize=candleSize, candleCount=2), 10 + 180 * random())
 
 def getBrightnessByHour():
     hour = datetime.now().hour + datetime.now().minute / 60
