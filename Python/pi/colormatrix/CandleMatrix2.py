@@ -21,23 +21,24 @@ class CandleMatrix2(ImageMatrix):
     classdocs
     '''
 
-    def __init__(self, brightness=255, candleNumbers=[0, 1], suppressThread=False, candlePositions=None):
+    def __init__(self, brightness=255, candleNumbers=[0, 1], suppressThread=False, candleSize=4, candlePositions=None):
         ImageMatrix.__init__(self)
         self._brightness = brightness
         self._candleNumbers = candleNumbers
-        
+        self._candleSize = candleSize
+
         if candlePositions == None:
             xpositionsample = sample(range(5), 2)
             xpositionsample.sort()
-            ypositionsample = sample(range(3), 2)
+            ypositionsample = sample(range(4, 7), 2)
             self._candlePositions = []
-            self._candlePositions.append((xpositionsample[0], ypositionsample[0]))
-            self._candlePositions.append((xpositionsample[1] + 2, ypositionsample[1]))
+            self._candlePositions.append((xpositionsample[0], ypositionsample[0] - self._candleSize))
+            self._candlePositions.append((xpositionsample[1] + 2, ypositionsample[1] - self._candleSize))
         else:
             self._candlePositions = candlePositions
         
         for (x, y) in self._candlePositions:
-            self.setColorRect(x, y + 2, x + 1, y + 5, DARKRED * self._brightness / 255)
+            self.setColorRect(x, y + 2, x + 1, y + 1 + self._candleSize, DARKRED * self._brightness / 255)
         
         if not suppressThread:
             self._oldMatrix = [None] * len(candleNumbers)
@@ -95,7 +96,8 @@ class CandleAnimator(Thread):
     
     def run(self):
         while not self._stopped:
-            newCandleMatrix = CandleMatrix2(brightness=self._candleMatrix._brightness, candleNumbers=[self._index], suppressThread=True, candlePositions=self._candleMatrix._candlePositions)
+            newCandleMatrix = CandleMatrix2(brightness=self._candleMatrix._brightness, candleNumbers=[self._index], suppressThread=True, 
+                                            candleSize=self._candleMatrix._candleSize, candlePositions=self._candleMatrix._candlePositions)
             newCandleMatrix.setCandleColorsOfCandle(self._index)
             duration = 0.02 + 2 * random()
             (self._candleMatrix._oldMatrix[self._index], self._candleMatrix._changeTime[self._index],

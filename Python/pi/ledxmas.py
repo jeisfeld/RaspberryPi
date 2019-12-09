@@ -8,6 +8,7 @@ from colormatrix.ImageMatrix import ImageMatrix
 from colormatrix.MatrixAnimator import MatrixAnimator
 from colormatrix.CandleMatrix import CandleMatrix
 from time import sleep
+from datetime import datetime
 from random import randrange, random
 from sys import argv
 from colormatrix.StarMatrix import StarMatrix
@@ -35,23 +36,45 @@ TREE = ImageMatrix([
     ])
 
 
-def getNewMatrix(brightness):
+def getNewMatrix():
+    hour = datetime.now().hour + datetime.now().minute / 60
+    if hour > 8.5 and hour < 16:
+        brightness = 63
+    elif hour > 16.5 or hour < 8:
+        brightness = 31
+    elif hour < 9:
+        brightness = 31 + 64 * (hour - 8) 
+    else:
+        brightness = 63 - 64 * (hour - 16) 
+
     rand = random()
     
     if rand < 0.2:
         return (TREE * brightness / 255, 2 + 10 * random())
     elif rand < 0.6:
-        return (CandleMatrix(brightness=brightness, position=randrange(4)), 10 + 180 * random())
+        return getNewCandleMatrix(hour, brightness)
     else:
         return (StarMatrix(brightness=brightness, count=randrange(4, 9)), 10 + 60 * random())
+
+
+def getNewCandleMatrix(hour, brightness):
+    if hour > 19.5:
+        candleSize = 1
+    elif hour > 18:
+        candleSize = 2
+    elif hour > 16.5:
+        candleSize = 3
+    else:
+        candleSize = 4
+    return (CandleMatrix(brightness=brightness, candleSize=candleSize), 10 + 180 * random())
 
 
 # Main program logic follows:
 if __name__ == '__main__':
     brightness = 63
     
-    if len(argv) >= 2:
-        brightness = int(argv[1])
+#    if len(argv) >= 2:
+#        brightness = int(argv[1])
 
     # Create NeoPixel object with appropriate configuration.
     strip = getStrip(LED_PIN, LED_CHANNEL)
@@ -59,7 +82,7 @@ if __name__ == '__main__':
     strip.begin()
     
     matrixAnimator = MatrixAnimator(strip)
-    currentMatrixInfo = (CandleMatrix(brightness=brightness, position=randrange(4)), 10 + 180 * random())
+    currentMatrixInfo = getNewCandleMatrix(0, brightness)
 #    currentMatrixInfo = (StarMatrix(brightness=brightness, count=randrange(4, 9)), 10 + 180 * random())
 #    currentMatrixInfo = (TREE * brightness / 255, 10 + 180 * random())
     matrixAnimator.setMatrix(currentMatrixInfo[0])
@@ -69,7 +92,7 @@ if __name__ == '__main__':
     try:
         while True:
             sleep(currentMatrixInfo[1])
-            newMatrixInfo = getNewMatrix(brightness)
+            newMatrixInfo = getNewMatrix()
             matrixAnimator.moveToMatrix(newMatrixInfo[0], 2)
             currentMatrixInfo[0].close()
             currentMatrixInfo = newMatrixInfo

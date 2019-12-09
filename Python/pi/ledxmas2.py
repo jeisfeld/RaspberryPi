@@ -6,6 +6,7 @@ from colormatrix.LedDisplay import getStrip
 from colormatrix.MatrixAnimator import MatrixAnimator
 from colormatrix.CandleMatrix2 import CandleMatrix2
 from time import sleep
+from datetime import datetime
 from random import random
 from sys import argv
 
@@ -18,8 +19,33 @@ MIN_TEMP = 1000
 MAX_TEMP = 3000
 
 
-def getNewMatrix(brightness):
-    return (CandleMatrix2(brightness=brightness), 10 + 180 * random())
+def getNewMatrix(brightness=None):
+    hour = datetime.now().hour + datetime.now().minute / 60
+    if hour > 22 or hour < 3:
+        candleSize = 1
+    elif hour > 18:
+        candleSize = 2
+    elif hour > 12:
+        candleSize = 3
+    else:
+        candleSize = 4
+    
+    if brightness == None:
+        brightness = getBrightnessByHour()
+    
+    return (CandleMatrix2(brightness=brightness, candleSize=candleSize), 10 + 180 * random())
+
+def getBrightnessByHour():
+    hour = datetime.now().hour + datetime.now().minute / 60
+
+    if hour > 8.5 and hour < 16:
+        return 63
+    elif hour > 16.5 or hour < 8:
+        return 31
+    elif hour < 9:
+        return 31 + 64 * (hour - 8) 
+    else:
+        return 63 - 64 * (hour - 16) 
 
 
 # Main program logic follows:
@@ -28,6 +54,8 @@ if __name__ == '__main__':
     
     if len(argv) >= 2:
         brightness = int(argv[1])
+    else:
+        brightness = None
 
     # Create NeoPixel object with appropriate configuration.
     strip = getStrip(LED_PIN, LED_CHANNEL)
