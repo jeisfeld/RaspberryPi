@@ -66,7 +66,7 @@ class StarMatrix(ImageMatrix):
             quota = (time() - self._changeTime[position]) / self._duration[position]
             if quota > 1:
                 quota = 1
-            return (self._newSpecialValues[position] * quota + self._oldSpecialValues[position] * (1 - quota)) * self._brightness / 255
+            return self._newSpecialValues[position] * quota + self._oldSpecialValues[position] * (1 - quota)
         else:
             return self._matrix[y][x] * self._brightness / 255
     
@@ -85,7 +85,7 @@ class StarAnimator(Thread):
     
     def run(self):
         while not self._stopped:
-            newBrightness = (1-BRIGHTNESS_VARIATION * random()) * self._starMatrix._starBrightness[self._position]
+            newBrightness = (1-BRIGHTNESS_VARIATION * random()) * self._starMatrix._starBrightness[self._position] * self._starMatrix._brightness / 255
             newTemperature = exp(log(self._starMatrix._starTemperature[self._position]) + (random() - 0.5) * TEMPERATURE_VARIATION)
             newColor = convertColorTemperature(newTemperature, newBrightness)
             duration = 0.1 + 3 * random()

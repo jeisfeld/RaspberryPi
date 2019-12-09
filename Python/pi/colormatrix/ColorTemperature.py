@@ -1,5 +1,5 @@
 from colormatrix.Color import Color
-from math import log, exp
+from math import log, exp, tan
 from random import random
 
 kelvin_table = {
@@ -143,17 +143,28 @@ def convertColorTemperature(temperature, brightness):
         )
 
 
-def getRandomColor(minTemperature, maxTemperature, minBrightness, maxBrightness):
+def getRandomColor(minTemperature, maxTemperature, minBrightness, maxBrightness, brightnessType=0):
     return convertColorTemperature(getRandomColorTemperature(minTemperature, maxTemperature),
-                                   getRandomBrightness(minBrightness, maxBrightness))
+                                   getRandomBrightness(minBrightness, maxBrightness, brightnessType))
 
 
 def getRandomColorTemperature(minTemperature, maxTemperature):
     return int(exp(log(minTemperature) + random() * (log(maxTemperature) - log(minTemperature))))
 
 
-def getRandomBrightness(minBrightness, maxBrightness):
-    return minBrightness + random() * (maxBrightness - minBrightness)
+def getRandomBrightness(minBrightness, maxBrightness, randomtype=0):
+    if randomtype == 1:  # centered
+        randomvalue = (random() - 0.5) ** 3 * 4 + 0.5
+    elif randomtype == 2:  # lowered
+        randomvalue = random() ** 2
+    elif randomtype == 3:  # slightly lowered
+        randomvalue = ((random() + 0.5) ** 2 - 0.25) / 2 
+    elif randomtype == 4:  # slightly centered
+        randomvalue = tan(2 * random() - 1) / (2 * tan(1)) + 0.5
+    else:  # equally distributed
+        randomvalue = random()
+    
+    return minBrightness + randomvalue * (maxBrightness - minBrightness)
 
 
 def convertToRange255(value):

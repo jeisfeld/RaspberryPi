@@ -60,6 +60,8 @@ if __name__ == '__main__':
     
     matrixAnimator = MatrixAnimator(strip)
     currentMatrixInfo = (CandleMatrix(brightness=brightness, position=randrange(4)), 10 + 180 * random())
+#    currentMatrixInfo = (StarMatrix(brightness=brightness, count=randrange(4, 9)), 10 + 180 * random())
+#    currentMatrixInfo = (TREE * brightness / 255, 10 + 180 * random())
     matrixAnimator.setMatrix(currentMatrixInfo[0])
 
     matrixAnimator.start()

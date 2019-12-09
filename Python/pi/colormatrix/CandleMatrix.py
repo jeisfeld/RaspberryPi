@@ -10,7 +10,7 @@ from time import sleep, time
 from threading import Thread
 
 DARKRED = Color(20, 0, 0)
-DARKESTYELLOW = Color(5, 5, 0)
+DARKESTYELLOW = Color(8, 8, 0)
 DARKYELLOW = Color(25, 25, 0)
 MIN_TEMP = 1000
 MAX_TEMP = 3000
@@ -52,15 +52,15 @@ class CandleMatrix(ImageMatrix):
  
     def setCandlePosition(self, first, second, third):
         self._candlePositions = (first, second, third)
-        self.setColorRect(0, first + 2, 1, first + 5, DARKRED)
-        self.setColorRect(3, second + 2, 4, second + 5, DARKRED)
-        self.setColorRect(6, third + 2, 7, third + 5, DARKRED)
+        self.setColorRect(0, first + 2, 1, first + 5, DARKRED * self._brightness / 255)
+        self.setColorRect(3, second + 2, 4, second + 5, DARKRED * self._brightness / 255)
+        self.setColorRect(6, third + 2, 7, third + 5, DARKRED * self._brightness / 255)
 
     def setCandleColorsOneColumn(self, x, y):
-        color1 = getRandomColor(MIN_TEMP, MAX_TEMP, 0, 0.3)
-        color2 = color1 + getRandomColor(MIN_TEMP, MAX_TEMP, 0, 0.6)
-        self.setColor(x, y, DARKESTYELLOW + color1)
-        self.setColor(x, y + 1, DARKYELLOW + color2)
+        color1 = getRandomColor(MIN_TEMP, MAX_TEMP, 0, 0.4 * self._brightness / 255)
+        color2 = color1 + getRandomColor(MIN_TEMP, MAX_TEMP, 0, 0.5 * self._brightness / 255)
+        self.setColor(x, y, DARKESTYELLOW * self._brightness / 255 + color1)
+        self.setColor(x, y + 1, DARKYELLOW * self._brightness / 255 + color2)
         
     def setCandleColorsOfCandle(self, i):
         self.setCandleColorsOneColumn(3 * i, self._candlePositions[i])
@@ -81,7 +81,7 @@ class CandleMatrix(ImageMatrix):
             if quota > 1:
                 quota = 1
 
-            return (self._newMatrix[index][y][x] * quota + self._oldMatrix[index][y][x] * (1 - quota)) * self._brightness / 255
+            return self._newMatrix[index][y][x] * quota + self._oldMatrix[index][y][x] * (1 - quota)
     
     def close(self):
         for index in self._candleNumbers:
@@ -98,7 +98,7 @@ class CandleAnimator(Thread):
     
     def run(self):
         while not self._stopped:
-            newCandleMatrix = CandleMatrix(self._candleMatrix._position, candleNumbers=[self._index], suppressThread=True)
+            newCandleMatrix = CandleMatrix(brightness=self._candleMatrix._brightness, position=self._candleMatrix._position, candleNumbers=[self._index], suppressThread=True)
             newCandleMatrix.setCandleColorsOfCandle(self._index)
             duration = 0.02 + 2 * random()
             (self._candleMatrix._oldMatrix[self._index], self._candleMatrix._changeTime[self._index],
