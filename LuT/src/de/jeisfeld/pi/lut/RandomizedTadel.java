@@ -56,11 +56,18 @@ public final class RandomizedTadel implements Runnable {
 	 * @param channel The channel where the signals should be sent.
 	 * @throws IOException Connection issues.
 	 */
-	private RandomizedTadel(final int channel) throws IOException {
+	public RandomizedTadel(final int channel) throws IOException {
 		Sender sender = Sender.getInstance();
 		sender.setButton2LongPressListener(new ShutdownListener());
 
-		sender.setButton1Listener(new ButtonListener() {
+		mChannelSender = sender.getChannelSender(channel);
+	}
+
+	/**
+	 * Set the special button listeners.
+	 */
+	public void setButtonListeners() {
+		mChannelSender.setButton1Listener(new ButtonListener() {
 			@Override
 			public void handleButtonDown() {
 				mIsRunning = !mIsRunning;
@@ -69,20 +76,22 @@ public final class RandomizedTadel implements Runnable {
 				}
 			}
 		});
-
-		mChannelSender = sender.getChannelSender(channel);
 	}
 
 	@Override
 	public void run() {
+		setButtonListeners();
+		mIsStopped = false;
+		mIsRunning = true;
+
 		Random random = new Random();
 		long nextSignalChangeTime = System.currentTimeMillis();
 		boolean isHighPower = false;
 		int lastRunningProbability = 0;
 		int extraPower = 0;
 		try {
-			while (true) {
-				if (!mIsStopped) {
+			while (!mIsStopped) {
+				if (!mIsRunning) {
 					Thread.sleep(Sender.QUERY_DURATION);
 					extraPower = 0;
 					continue;

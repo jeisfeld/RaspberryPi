@@ -1,5 +1,7 @@
 package de.jeisfeld.pi.lut.core;
 
+import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
+import de.jeisfeld.pi.lut.core.ButtonStatus.OnLongPressListener;
 import de.jeisfeld.pi.lut.core.command.Lob;
 import de.jeisfeld.pi.lut.core.command.Tadel;
 
@@ -155,5 +157,41 @@ public class ChannelSender {
 	 */
 	public ButtonStatus getButtonStatus() {
 		return mSender.getButtonStatus();
+	}
+
+	/**
+	 * Set listener for button 1.
+	 *
+	 * @param listener The listener.
+	 */
+	public void setButton1Listener(final ButtonListener listener) {
+		mSender.setButton1Listener(listener);
+	}
+
+	/**
+	 * Set listener for button 2.
+	 *
+	 * @param listener The listener.
+	 */
+	public void setButton2Listener(final ButtonListener listener) {
+		mSender.setButton2Listener(listener);
+	}
+
+	/**
+	 * Set long press listener for button 1.
+	 *
+	 * @param listener The listener.
+	 */
+	public void setButton1LongPressListener(final OnLongPressListener listener) {
+		mSender.setButton1LongPressListener(listener);
+	}
+
+	/**
+	 * Set long press listener for button 2.
+	 *
+	 * @param listener The listener.
+	 */
+	public void setButton2LongPressListener(final OnLongPressListener listener) {
+		mSender.setButton2LongPressListener(listener);
 	}
 }

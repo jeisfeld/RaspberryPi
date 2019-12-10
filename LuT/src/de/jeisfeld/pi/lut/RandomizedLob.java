@@ -32,7 +32,7 @@ public final class RandomizedLob implements Runnable {
 	/**
 	 * The waiting time after the last signal.
 	 */
-	private static final int SIGNAL_WAIT_DURATION = 2 * Sender.SEND_DURATION;
+	private static final int LONG_SIGNAL_WAIT_DURATION = 500;
 
 	/**
 	 * The number of modes.
@@ -79,33 +79,39 @@ public final class RandomizedLob implements Runnable {
 	 * @param channel The channel where the signals should be sent.
 	 * @throws IOException Connection issues.
 	 */
-	private RandomizedLob(final int channel) throws IOException {
+	public RandomizedLob(final int channel) throws IOException {
 		Sender sender = Sender.getInstance();
 		sender.setButton2LongPressListener(new ShutdownListener());
 
-		sender.setButton1Listener(new ButtonListener() {
+		mChannelSender = sender.getChannelSender(channel);
+	}
+
+	/**
+	 * Set the special button listeners.
+	 */
+	public void setButtonListeners() {
+		mChannelSender.setButton1Listener(new ButtonListener() {
 			@Override
 			public void handleButtonDown() {
 				mMode = (mMode + 1) % RandomizedLob.MODE_COUNT;
-				signal(mMode + 1);
+				signal(mMode + 1, false);
 			}
 		});
-
-		mChannelSender = sender.getChannelSender(channel);
 	}
 
 	/**
 	 * Give a signal via vibrating.
 	 *
 	 * @param count The count of vibrations in the signal.
+	 * @param isLong Indicator of long signal.
 	 */
-	private void signal(final int count) {
+	public void signal(final int count, final boolean isLong) {
 		mIsRunning = false;
 		try {
 			mChannelSender.lob(0, RandomizedLob.SIGNAL_DURATION);
 			for (int i = 0; i < count; i++) {
-				mChannelSender.lob(RandomizedLob.SIGNAL_POWER, RandomizedLob.SIGNAL_DURATION);
-				mChannelSender.lob(0, i == count - 1 ? RandomizedLob.SIGNAL_WAIT_DURATION : RandomizedLob.SIGNAL_DURATION);
+				mChannelSender.lob(RandomizedLob.SIGNAL_POWER, isLong ? RandomizedLob.LONG_SIGNAL_WAIT_DURATION : RandomizedLob.SIGNAL_DURATION);
+				mChannelSender.lob(0, i == count - 1 ? RandomizedLob.LONG_SIGNAL_WAIT_DURATION : RandomizedLob.SIGNAL_DURATION);
 			}
 		}
 		catch (InterruptedException e) {
@@ -116,12 +122,21 @@ public final class RandomizedLob implements Runnable {
 
 	@Override
 	public void run() {
+		setButtonListeners();
+		mIsStopped = false;
+		mIsRunning = true;
+		mMode = 0;
+
+		ButtonStatus status;
+
+		// variables for mode 1
+		double cyclePoint = 0;
+
+		// variables for mode 2
 		Random random = new Random();
 		long nextSignalChangeTime = System.currentTimeMillis();
 		boolean isHighPower = false;
 		int lastRunningProbability = 0;
-		double cyclePoint = 0;
-		ButtonStatus status;
 
 		try {
 			while (!mIsStopped) {
