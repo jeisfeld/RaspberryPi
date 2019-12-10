@@ -1,0 +1,3 @@
+#!/bin/bash
+/home/je/bin/stopbackground
+nohup sudo java -classpath .:/home/je/java:/opt/pi4j/lib/'*' de.jeisfeld.pi.lut.Startup > /dev/null &

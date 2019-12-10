@@ -5,7 +5,6 @@ import java.util.Random;
 
 import de.jeisfeld.pi.lut.core.ButtonStatus;
 import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
-import de.jeisfeld.pi.lut.core.ButtonStatus.OnLongPressListener;
 import de.jeisfeld.pi.lut.core.ChannelSender;
 import de.jeisfeld.pi.lut.core.Sender;
 import de.jeisfeld.pi.lut.core.ShutdownListener;
@@ -30,6 +29,10 @@ public final class RandomizedLob implements Runnable {
 	 * The duration of a signal.
 	 */
 	private static final int SIGNAL_DURATION = Sender.SEND_DURATION;
+	/**
+	 * The waiting time after the last signal.
+	 */
+	private static final int SIGNAL_WAIT_DURATION = 2 * Sender.SEND_DURATION;
 
 	/**
 	 * The number of modes.
@@ -44,6 +47,11 @@ public final class RandomizedLob implements Runnable {
 	 * Flag indicating if the Lob is running.
 	 */
 	private boolean mIsRunning = true;
+	/**
+	 * Flag indicating if this handler is stopped.
+	 */
+	private boolean mIsStopped = false;
+
 	/**
 	 * The current running mode.
 	 */
@@ -83,16 +91,6 @@ public final class RandomizedLob implements Runnable {
 			}
 		});
 
-		sender.setButton1LongPressListener(new OnLongPressListener() {
-
-			@Override
-			public void handleLongTrigger() {
-				mMode = -1;
-				mIsRunning = false;
-				mChannelSender.lob(0);
-			}
-		});
-
 		mChannelSender = sender.getChannelSender(channel);
 	}
 
@@ -104,11 +102,10 @@ public final class RandomizedLob implements Runnable {
 	private void signal(final int count) {
 		mIsRunning = false;
 		try {
-			// mChannelSender.cleanupCommandQueue();
 			mChannelSender.lob(0, RandomizedLob.SIGNAL_DURATION);
 			for (int i = 0; i < count; i++) {
 				mChannelSender.lob(RandomizedLob.SIGNAL_POWER, RandomizedLob.SIGNAL_DURATION);
-				mChannelSender.lob(0, RandomizedLob.SIGNAL_DURATION);
+				mChannelSender.lob(0, i == count - 1 ? RandomizedLob.SIGNAL_WAIT_DURATION : RandomizedLob.SIGNAL_DURATION);
 			}
 		}
 		catch (InterruptedException e) {
@@ -123,31 +120,67 @@ public final class RandomizedLob implements Runnable {
 		long nextSignalChangeTime = System.currentTimeMillis();
 		boolean isHighPower = false;
 		int lastRunningProbability = 0;
+		double cyclePoint = 0;
+		ButtonStatus status;
+
 		try {
-			while (true) {
+			while (!mIsStopped) {
 				if (!mIsRunning || mMode < 0) {
 					Thread.sleep(Sender.QUERY_DURATION);
 					continue;
 				}
 
-				ButtonStatus status = mChannelSender.getButtonStatus();
-				int maxPower = status.getControl1Value(); // 180
-				int runningProbability = status.getControl2Value(); // 75
-				int basePower = status.getControl3Value() * maxPower / ButtonStatus.MAX_CONTROL_VALUE; // 25
+				switch (mMode) {
+				case 1:
+					status = mChannelSender.getButtonStatus();
+					int power = status.getControl1Value();
+					int frequency = status.getControl2Value();
+					int minPower = (status.getControl3Value() * power) / ButtonStatus.MAX_CONTROL_VALUE;
 
-				if (System.currentTimeMillis() > nextSignalChangeTime || Math.abs(runningProbability - lastRunningProbability) > 10) { // MAGIC_NUMBER
-					lastRunningProbability = runningProbability;
-					long duration = (int) (-RandomizedLob.AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
-					nextSignalChangeTime = System.currentTimeMillis() + duration;
-					isHighPower = random.nextInt(ButtonStatus.MAX_CONTROL_VALUE) < runningProbability;
+					int value = (int) ((1 - Math.cos(2 * Math.PI * cyclePoint)) / 2 * (power - minPower) + minPower);
+					mChannelSender.lob(value);
+
+					if (frequency > 0) {
+						int factor = (frequency + 9) / 10; // MAGIC_NUMBER
+						cyclePoint = (Math.round(cyclePoint * 2 * factor) + 1.0) / 2 / factor;
+					}
+					else {
+						cyclePoint = 0.5; // MAGIC_NUMBER
+					}
+					break;
+				case 2:
+					status = mChannelSender.getButtonStatus();
+					int maxPower = status.getControl1Value(); // 180
+					int runningProbability = status.getControl2Value(); // 75
+					int basePower = status.getControl3Value() * maxPower / ButtonStatus.MAX_CONTROL_VALUE; // 25
+
+					if (System.currentTimeMillis() > nextSignalChangeTime
+							|| Math.abs(runningProbability - lastRunningProbability) > 10) { // MAGIC_NUMBER
+						lastRunningProbability = runningProbability;
+						long duration = (int) (-RandomizedLob.AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
+						nextSignalChangeTime = System.currentTimeMillis() + duration;
+						isHighPower = random.nextInt(ButtonStatus.MAX_CONTROL_VALUE) < runningProbability;
+					}
+					mChannelSender.lob(isHighPower ? maxPower : basePower);
+					break;
+				default:
+					mChannelSender.lob(0);
+					Thread.sleep(Sender.QUERY_DURATION);
+					break;
 				}
 
-				mChannelSender.lob(isHighPower ? maxPower : basePower);
 			}
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Stop this handler.
+	 */
+	public void stop() {
+		mIsStopped = true;
 	}
 
 }

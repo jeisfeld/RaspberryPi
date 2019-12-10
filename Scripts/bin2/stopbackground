@@ -1,0 +1,2 @@
+#!/bin/bash
+ps -ef | grep de.jeisfeld.pi.lut.Startup | grep classpath | grep -v sudo | awk '{ print "sudo kill " $2 }' | bash

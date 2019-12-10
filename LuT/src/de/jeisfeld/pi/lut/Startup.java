@@ -8,7 +8,7 @@ import de.jeisfeld.pi.lut.core.ShutdownListener;
 /**
  * Test class for LuT framework.
  */
-public class StartupTest { // SUPPRESS_CHECKSTYLE
+public class Startup { // SUPPRESS_CHECKSTYLE
 	/**
 	 * Main method.
 	 *
@@ -17,8 +17,7 @@ public class StartupTest { // SUPPRESS_CHECKSTYLE
 	 * @throws InterruptedException if interrupted
 	 */
 	public static void main(final String[] args) throws IOException, InterruptedException { // SUPPRESS_CHECKSTYLE
-		// SYSTEMOUT:OFF
-		StartupTest.test1();
+		Startup.run();
 	}
 
 	/**
@@ -27,7 +26,7 @@ public class StartupTest { // SUPPRESS_CHECKSTYLE
 	 * @throws IOException connection issues
 	 * @throws InterruptedException if interrupted
 	 */
-	private static void test1() throws IOException, InterruptedException {
+	private static void run() throws IOException, InterruptedException {
 		Sender sender = Sender.getInstance();
 
 		sender.setButton2LongPressListener(new ShutdownListener());

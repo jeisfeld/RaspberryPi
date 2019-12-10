@@ -29,6 +29,10 @@ public final class RandomizedTadel implements Runnable {
 	 * Flag indicating if the Lob is running.
 	 */
 	private boolean mIsRunning = false;
+	/**
+	 * Flag indicating if this handler is stopped.
+	 */
+	private boolean mIsStopped = false;
 
 	/**
 	 * Main method.
@@ -78,7 +82,7 @@ public final class RandomizedTadel implements Runnable {
 		int extraPower = 0;
 		try {
 			while (true) {
-				if (!mIsRunning) {
+				if (!mIsStopped) {
 					Thread.sleep(Sender.QUERY_DURATION);
 					extraPower = 0;
 					continue;
@@ -106,4 +110,10 @@ public final class RandomizedTadel implements Runnable {
 		}
 	}
 
+	/**
+	 * Stop this handler.
+	 */
+	public void stop() {
+		mIsStopped = true;
+	}
 }
