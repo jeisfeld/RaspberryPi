@@ -33,7 +33,6 @@ public final class RandomizedLob implements Runnable {
 	 * The waiting time after the last signal.
 	 */
 	private static final int LONG_SIGNAL_WAIT_DURATION = 500;
-
 	/**
 	 * The number of modes.
 	 */
@@ -51,7 +50,6 @@ public final class RandomizedLob implements Runnable {
 	 * Flag indicating if this handler is stopped.
 	 */
 	private boolean mIsStopped = false;
-
 	/**
 	 * The current running mode.
 	 */

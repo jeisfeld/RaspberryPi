@@ -22,17 +22,22 @@ public final class RandomizedTadel implements Runnable {
 	 */
 	private static final long AVERAGE_SIGNAL_DURATION = 2000;
 	/**
+	 * The number of modes.
+	 */
+	private static final int MODE_COUNT = 3;
+
+	/**
 	 * The sender used for sending signals.
 	 */
 	private final ChannelSender mChannelSender;
 	/**
-	 * Flag indicating if the Lob is running.
-	 */
-	private boolean mIsRunning = false;
-	/**
 	 * Flag indicating if this handler is stopped.
 	 */
 	private boolean mIsStopped = false;
+	/**
+	 * The current running mode.
+	 */
+	private int mMode = 0;
 
 	/**
 	 * Main method.
@@ -70,10 +75,7 @@ public final class RandomizedTadel implements Runnable {
 		mChannelSender.setButton1Listener(new ButtonListener() {
 			@Override
 			public void handleButtonDown() {
-				mIsRunning = !mIsRunning;
-				if (!mIsRunning) {
-					mChannelSender.tadel(0, 0, 0);
-				}
+				mMode = (mMode + 1) % RandomizedTadel.MODE_COUNT;
 			}
 		});
 	}
@@ -82,36 +84,55 @@ public final class RandomizedTadel implements Runnable {
 	public void run() {
 		setButtonListeners();
 		mIsStopped = false;
-		mIsRunning = true;
+		mMode = 0;
 
 		Random random = new Random();
 		long nextSignalChangeTime = System.currentTimeMillis();
-		boolean isHighPower = false;
+		long mode2BaseTime = System.currentTimeMillis();
+		boolean isPowered = false;
 		int lastRunningProbability = 0;
-		int extraPower = 0;
+		int power = 0;
+
 		try {
 			while (!mIsStopped) {
-				if (!mIsRunning) {
-					Thread.sleep(Sender.QUERY_DURATION);
-					extraPower = 0;
-					continue;
-				}
-
 				ButtonStatus status = mChannelSender.getButtonStatus();
-				int power = status.getControl1Value();
+				int buttonPower = status.getControl1Value();
 				int runningProbability = status.getControl2Value();
 				int frequency = status.getControl3Value();
 
-				if (System.currentTimeMillis() > nextSignalChangeTime || Math.abs(runningProbability - lastRunningProbability) > 10) { // MAGIC_NUMBER
-					lastRunningProbability = runningProbability;
-					long duration = (int) (-RandomizedTadel.AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
-					nextSignalChangeTime = System.currentTimeMillis() + duration;
-					isHighPower = random.nextInt(ButtonStatus.MAX_CONTROL_VALUE) < runningProbability;
-					if (isHighPower) {
-						extraPower++;
+				// Calculate if tadel should be on or off
+				if (mMode > 0) {
+					if (System.currentTimeMillis() > nextSignalChangeTime
+							|| Math.abs(runningProbability - lastRunningProbability) > 2) {
+						lastRunningProbability = runningProbability;
+						long duration = (int) (-RandomizedTadel.AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
+						nextSignalChangeTime = System.currentTimeMillis() + duration;
+						isPowered = random.nextInt(ButtonStatus.MAX_CONTROL_VALUE) < runningProbability;
 					}
 				}
-				mChannelSender.tadel(isHighPower ? power + extraPower : 0, frequency, 0);
+
+				switch (mMode) {
+				case 1:
+					power = buttonPower;
+					mChannelSender.tadel(isPowered ? power : 0, frequency, 0);
+					mode2BaseTime = System.currentTimeMillis();
+					break;
+				case 2:
+					int deltaSgn = (int) Math.signum((int) ((buttonPower - 127) / 16.0)); // MAGIC_NUMBER 0 in middle range, otherwise +-1
+					int millisUntilChange = (int) (150000 / Math.pow(1.04, Math.abs(buttonPower - 127))); // MAGIC_NUMBER ca. 1 minute to 1 second
+					if (System.currentTimeMillis() - mode2BaseTime > millisUntilChange) {
+						power += deltaSgn * ((System.currentTimeMillis() - mode2BaseTime) / millisUntilChange);
+						mode2BaseTime = System.currentTimeMillis();
+					}
+					mChannelSender.tadel(isPowered ? power : 0, frequency, 0);
+					break;
+				default:
+					mChannelSender.tadel(0, 0, 0);
+					Thread.sleep(Sender.QUERY_DURATION);
+					mode2BaseTime = System.currentTimeMillis();
+					break;
+				}
+
 			}
 		}
 		catch (InterruptedException e) {
