@@ -9,6 +9,22 @@ import de.jeisfeld.pi.lut.core.ButtonStatus.OnLongPressListener;
  */
 public class ShutdownListener extends OnLongPressListener {
 
+	/**
+	 * Constructor.
+	 *
+	 * @param duration The duration of the long press.
+	 */
+	public ShutdownListener(final long duration) {
+		super(duration);
+	}
+
+	/**
+	 * Constructor.
+	 */
+	public ShutdownListener() {
+		super();
+	}
+
 	@Override
 	public final void handleLongTrigger() {
 		try {

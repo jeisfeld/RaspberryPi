@@ -183,6 +183,7 @@ public final class RandomizedLob implements Runnable {
 				}
 
 			}
+			mChannelSender.lob(0);
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();

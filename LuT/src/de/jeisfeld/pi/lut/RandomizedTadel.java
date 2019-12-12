@@ -132,8 +132,8 @@ public final class RandomizedTadel implements Runnable {
 					mode2BaseTime = System.currentTimeMillis();
 					break;
 				}
-
 			}
+			mChannelSender.tadel(0, 0, 0);
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();

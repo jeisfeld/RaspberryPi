@@ -32,9 +32,33 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 		RandomizedTadel[] tadels = {new RandomizedTadel(0), new RandomizedTadel(1)};
 
 		Sender sender = Sender.getInstance();
+		sender.setButton2LongPressListener(new ShutdownListener(4000)); // MAGIC_NUMBER
+
 		sender.setButton2Listener(new ButtonListener() {
 			@Override
 			public void handleButtonDown() {
+				Startup.mChannel = (Startup.mChannel + 1) % 2;
+
+				if (Startup.mIsTadel) {
+					for (RandomizedTadel tadel : tadels) {
+						tadel.stop();
+					}
+					lobs[Startup.mChannel].signal(2, true);
+					new Thread(tadels[Startup.mChannel]).start();
+				}
+				else {
+					for (RandomizedLob lob : lobs) {
+						lob.stop();
+					}
+					lobs[Startup.mChannel].signal(1, true);
+					new Thread(lobs[Startup.mChannel]).start();
+				}
+			}
+		});
+
+		sender.setButton1LongPressListener(new OnLongPressListener() {
+			@Override
+			public void handleLongTrigger() {
 				if (Startup.mIsTadel) {
 					for (RandomizedTadel tadel : tadels) {
 						tadel.stop();
@@ -51,15 +75,6 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 					new Thread(tadels[Startup.mChannel]).start();
 					Startup.mIsTadel = true;
 				}
-			}
-		});
-
-		sender.setButton2LongPressListener(new ShutdownListener());
-
-		sender.setButton1LongPressListener(new OnLongPressListener() {
-			@Override
-			public void handleLongTrigger() {
-				Startup.mChannel = (Startup.mChannel + 1) % 2;
 			}
 		});
 
