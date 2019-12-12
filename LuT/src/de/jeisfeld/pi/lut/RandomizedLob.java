@@ -36,7 +36,7 @@ public final class RandomizedLob implements Runnable {
 	/**
 	 * The number of modes.
 	 */
-	private static final int MODE_COUNT = 3;
+	private static final int MODE_COUNT = 4;
 
 	/**
 	 * The sender used for sending signals.
@@ -135,6 +135,8 @@ public final class RandomizedLob implements Runnable {
 		long nextSignalChangeTime = System.currentTimeMillis();
 		boolean isHighPower = false;
 		int lastRunningProbability = 0;
+		int lastOnDurationInput = 0;
+		int lastOffDurationInput = 0;
 
 		try {
 			while (!mIsStopped) {
@@ -145,6 +147,7 @@ public final class RandomizedLob implements Runnable {
 
 				switch (mMode) {
 				case 1:
+					// Wave up and down
 					status = mChannelSender.getButtonStatus();
 					int power = status.getControl1Value();
 					int frequency = status.getControl2Value();
@@ -162,19 +165,41 @@ public final class RandomizedLob implements Runnable {
 					}
 					break;
 				case 2:
+					// Random change between high/low level. Avg signal duration 2s. Levels and Probability controllable.
 					status = mChannelSender.getButtonStatus();
-					int maxPower = status.getControl1Value(); // 180
-					int runningProbability = status.getControl2Value(); // 75
-					int basePower = status.getControl3Value() * maxPower / ButtonStatus.MAX_CONTROL_VALUE; // 25
+					int maxPower = status.getControl1Value();
+					int runningProbability = status.getControl2Value();
+					int basePower = status.getControl3Value() * maxPower / ButtonStatus.MAX_CONTROL_VALUE;
 
 					if (System.currentTimeMillis() > nextSignalChangeTime
-							|| Math.abs(runningProbability - lastRunningProbability) > 10) { // MAGIC_NUMBER
+							|| Math.abs(runningProbability - lastRunningProbability) > 2) {
 						lastRunningProbability = runningProbability;
 						long duration = (int) (-RandomizedLob.AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 						isHighPower = random.nextInt(ButtonStatus.MAX_CONTROL_VALUE) < runningProbability;
 					}
 					mChannelSender.lob(isHighPower ? maxPower : basePower);
+					break;
+				case 3: // MAGIC_NUMBER
+					// Random change between on/off. On level and avg off/on duration controllable.
+					status = mChannelSender.getButtonStatus();
+					int onPower = status.getControl1Value();
+					int onDurationInput = status.getControl2Value();
+					int offDurationInput = status.getControl3Value();
+
+					if (System.currentTimeMillis() > nextSignalChangeTime // BOOLEAN_EXPRESSION_COMPLEXITY
+							|| isHighPower && Math.abs(onDurationInput - lastOnDurationInput) > 2
+							|| !isHighPower && Math.abs(offDurationInput - lastOffDurationInput) > 2) {
+						lastOnDurationInput = onDurationInput;
+						lastOffDurationInput = offDurationInput;
+						if (System.currentTimeMillis() > nextSignalChangeTime) {
+							isHighPower = !isHighPower;
+						}
+						double avgDuration = 1000 * Math.exp(0.016 * (isHighPower ? onDurationInput : offDurationInput)); // MAGIC_NUMBER
+						int duration = (int) (-avgDuration * Math.log(random.nextFloat()));
+						nextSignalChangeTime = System.currentTimeMillis() + duration;
+					}
+					mChannelSender.lob(isHighPower ? onPower : 0);
 					break;
 				default:
 					mChannelSender.lob(0);

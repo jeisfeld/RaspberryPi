@@ -1,0 +1,4 @@
+#!/bin/bash
+/home/je/bin/stopbackground
+sleep 2
+/home/je/bin/startbackground
