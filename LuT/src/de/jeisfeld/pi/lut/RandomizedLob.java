@@ -174,7 +174,13 @@ public final class RandomizedLob implements Runnable {
 					if (System.currentTimeMillis() > nextSignalChangeTime
 							|| Math.abs(runningProbability - lastRunningProbability) > 2) {
 						lastRunningProbability = runningProbability;
-						long duration = (int) (-RandomizedLob.AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
+						long duration;
+						try {
+							duration = (int) (-RandomizedLob.AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
+						}
+						catch (Exception e) {
+							duration = Integer.MAX_VALUE;
+						}
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 						isHighPower = random.nextInt(ButtonStatus.MAX_CONTROL_VALUE) < runningProbability;
 					}
@@ -196,7 +202,13 @@ public final class RandomizedLob implements Runnable {
 							isHighPower = !isHighPower;
 						}
 						double avgDuration = 1000 * Math.exp(0.016 * (isHighPower ? onDurationInput : offDurationInput)); // MAGIC_NUMBER
-						int duration = (int) (-avgDuration * Math.log(random.nextFloat()));
+						int duration;
+						try {
+							duration = (int) (-avgDuration * Math.log(random.nextFloat()));
+						}
+						catch (Exception e) {
+							duration = Integer.MAX_VALUE;
+						}
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 					}
 					mChannelSender.lob(isHighPower ? onPower : 0);

@@ -125,7 +125,13 @@ public final class RandomizedTadel implements Runnable {
 					if (System.currentTimeMillis() > nextSignalChangeTime
 							|| Math.abs(runningProbability - lastRunningProbability) > 2) {
 						lastRunningProbability = runningProbability;
-						long duration = (int) (-RandomizedTadel.AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
+						long duration;
+						try {
+							duration = (int) (-RandomizedTadel.AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
+						}
+						catch (Exception e) {
+							duration = Integer.MAX_VALUE;
+						}
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 						isPowered = random.nextInt(ButtonStatus.MAX_CONTROL_VALUE) < runningProbability;
 					}
@@ -148,7 +154,13 @@ public final class RandomizedTadel implements Runnable {
 							isPowered = !isPowered;
 						}
 						double avgDuration = 1000 * Math.exp(0.016 * (isPowered ? onDurationInput : offDurationInput)); // MAGIC_NUMBER
-						int duration = (int) (-avgDuration * Math.log(random.nextFloat()));
+						int duration;
+						try {
+							duration = (int) (-avgDuration * Math.log(random.nextFloat()));
+						}
+						catch (Exception e) {
+							duration = Integer.MAX_VALUE;
+						}
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 					}
 					power = getUpdatedPower(power, controlPower);
