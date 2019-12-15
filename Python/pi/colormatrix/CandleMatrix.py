@@ -35,7 +35,7 @@ class CandleMatrix(ImageMatrix):
                 self._candlePositions = []
                 self._candlePositions.append((xpositionsample[0], ypositionsample[0] - self._candleSize))
                 self._candlePositions.append((xpositionsample[1] + 2, ypositionsample[1] - self._candleSize))                
-            else:
+            elif candleCount == 3:
                 position = randrange(4)
                 if position == 0:
                     ypositionsample = [5, 6, 4]
@@ -49,11 +49,25 @@ class CandleMatrix(ImageMatrix):
                 self._candlePositions.append((0, ypositionsample[0] - self._candleSize))
                 self._candlePositions.append((3, ypositionsample[1] - self._candleSize))
                 self._candlePositions.append((6, ypositionsample[2] - self._candleSize))
+            else:
+                xpositiongap = randrange(5)
+                yindicator1 = randrange(2)
+                yindicator2 = randrange(2)
+                self._candlePositions = []
+                self._candlePositions.append((0 if xpositiongap > 0 else 1, 4 + yindicator1 - self._candleSize))
+                self._candlePositions.append((2 if xpositiongap > 1 else 3, 3 + 3 * yindicator2 - self._candleSize))
+                self._candlePositions.append((4 if xpositiongap > 2 else 5, 6 - 3 * yindicator2 - self._candleSize))
+                self._candlePositions.append((6 if xpositiongap > 3 else 7, 5 - yindicator1 - self._candleSize))
+                
         else:
             self._candlePositions = candlePositions
         
-        for (x, y) in self._candlePositions:
-            self.setColorRect(x, y + 2, x + 1, 7, DARKRED * self._brightness / 255)
+        if len(self._candlePositions) == 4:
+            for (x, y) in self._candlePositions:
+                self.setColorRect(x, y + 2, x, 7, DARKRED * self._brightness / 255)
+        else:
+            for (x, y) in self._candlePositions:
+                self.setColorRect(x, y + 2, x + 1, 7, DARKRED * self._brightness / 255)
                     
         if not suppressThread:
             self._oldMatrix = [None] * candleCount
@@ -79,15 +93,18 @@ class CandleMatrix(ImageMatrix):
         
     def setCandleColorsOfCandle(self, i):
         self.setCandleColorsOneColumn(self._candlePositions[i][0], self._candlePositions[i][1])
-        self.setCandleColorsOneColumn(self._candlePositions[i][0] + 1, self._candlePositions[i][1])
+        if len(self._candlePositions) < 4:
+            self.setCandleColorsOneColumn(self._candlePositions[i][0] + 1, self._candlePositions[i][1])
 
     def getColor(self, x, y):
         if self._candleCount == 1 or x < self._candlePositions[1][0]:
             index = 0
         elif self._candleCount == 2 or x < self._candlePositions[2][0]:
             index = 1
-        else:
+        elif self._candleCount == 3 or x < self._candlePositions[3][0]:
             index = 2
+        else:
+            index = 3
             
         quota = (time() - self._changeTime[index]) / self._duration[index]
         if quota > 1:
@@ -101,7 +118,6 @@ class CandleMatrix(ImageMatrix):
 
 
 class CandleAnimator(Thread):
-    
     def __init__(self, candleMatrix, index):
         Thread.__init__(self)
         self._candleMatrix = candleMatrix
@@ -110,7 +126,7 @@ class CandleAnimator(Thread):
     
     def run(self):
         while not self._stopped:
-            newCandleMatrix = CandleMatrix(brightness=self._candleMatrix._brightness, candleCount=[self._candleMatrix._candleCount], suppressThread=True, 
+            newCandleMatrix = CandleMatrix(brightness=self._candleMatrix._brightness, candleCount=[self._candleMatrix._candleCount], suppressThread=True,
                                             candleSize=self._candleMatrix._candleSize, candlePositions=self._candleMatrix._candlePositions)
             newCandleMatrix.setCandleColorsOfCandle(self._index)
             duration = 0.02 + 2 * random()

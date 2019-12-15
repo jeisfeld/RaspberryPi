@@ -44,24 +44,27 @@ def getNewMatrix(brightness=None):
     
     if rand < 0.2:
         return (TREE * brightness / 255, 2 + 10 * random())
-    elif rand < 0.6:
-        return getNewCandleMatrix(brightness)
+#    elif rand < 0.6:
+#        return (StarMatrix(brightness=brightness, count=randrange(4, 9)), 10 + 60 * random())
     else:
-        return (StarMatrix(brightness=brightness, count=randrange(4, 9)), 10 + 60 * random())
+        return getNewCandleMatrix(brightness)
 
 
 def getNewCandleMatrix(brightness):
     hour = datetime.now().hour + datetime.now().minute / 60
+    date = datetime.now().day
+    candleCount = 4 if date >= 22 else 3
 
-    if hour > 19 or hour < 3:
+    if hour > 22 or hour < 4:
         candleSize = 1
-    elif hour > 18:
+    elif hour > 16:
         candleSize = 2
-    elif hour > 17:
+    elif hour > 10:
         candleSize = 3
     else:
         candleSize = 4
-    return (CandleMatrix(brightness=brightness, candleSize=candleSize, candleCount=3), 10 + 180 * random())
+    return (CandleMatrix(brightness=brightness, candleSize=candleSize, candleCount=candleCount), 10 + 180 * random())
+
 
 def getBrightnessByHour():
     hour = datetime.now().hour + datetime.now().minute / 60
