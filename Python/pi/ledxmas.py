@@ -9,9 +9,8 @@ from colormatrix.MatrixAnimator import MatrixAnimator
 from colormatrix.CandleMatrix import CandleMatrix
 from time import sleep
 from datetime import datetime
-from random import randrange, random
+from random import random
 from sys import argv
-from colormatrix.StarMatrix import StarMatrix
 
 global LED_BRIGHTNESS
 
@@ -53,16 +52,47 @@ def getNewMatrix(brightness=None):
 def getNewCandleMatrix(brightness):
     hour = datetime.now().hour + datetime.now().minute / 60
     date = datetime.now().day
-    candleCount = 4 if date >= 22 else 3
+    candleCount = 4 if date >= 20 else 3 if date >= 13 else 2 if date >= 6 else 1
 
-    if hour > 22 or hour < 4:
-        candleSize = 1
-    elif hour > 16:
-        candleSize = 2
-    elif hour > 10:
-        candleSize = 3
+    if candleCount == 1:
+        if hour > 22 or hour < 4:
+            candleSize = 2
+        elif hour > 18:
+            candleSize = 3
+        elif hour > 14:
+            candleSize = 4
+        elif hour > 10:
+            candleSize = 5
+        else:
+            candleSize = 6        
+    elif candleCount == 2:
+        if hour > 22 or hour < 4:
+            candleSize = 1
+        elif hour > 18:
+            candleSize = 2
+        elif hour > 14:
+            candleSize = 3
+        elif hour > 10:
+            candleSize = 4
+        else:
+            candleSize = 5        
+    elif candleCount == 3:
+        if hour > 22 or hour < 4:
+            candleSize = 1
+        elif hour > 16:
+            candleSize = 2
+        elif hour > 10:
+            candleSize = 3
+        else:
+            candleSize = 4
     else:
-        candleSize = 4
+        if hour > 22 or hour < 4:
+            candleSize = 1
+        elif hour > 14:
+            candleSize = 2
+        else:
+            candleSize = 3
+
     return (CandleMatrix(brightness=brightness, candleSize=candleSize, candleCount=candleCount), 10 + 180 * random())
 
 

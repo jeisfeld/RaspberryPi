@@ -28,7 +28,11 @@ class CandleMatrix(ImageMatrix):
         self._candleSize = candleSize
         
         if candlePositions == None:
-            if candleCount == 2:
+            if candleCount == 1:
+                xposition = randrange(7)
+                self._candlePositions = []
+                self._candlePositions.append((xposition, 6 - self._candleSize))
+            elif candleCount == 2:
                 xpositionsample = sample(range(5), 2)
                 xpositionsample.sort()
                 ypositionsample = sample(range(5, 7), 2)
