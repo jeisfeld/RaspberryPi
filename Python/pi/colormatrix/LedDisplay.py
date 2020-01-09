@@ -20,7 +20,7 @@ def colorFill(strip, color):
 
 
 def moveToColor(strip, temperature1, brightness1, temperature2, brightness2, duration):
-    steps = max(min(duration * 400, 100), 1)
+    steps = max(min(duration * 400, 255), 1)
     sleepDuration = duration / steps
     logTemperatureStart = log(temperature1)
     logTemperatureDiff = (log(temperature2) - log(temperature1)) / steps;
