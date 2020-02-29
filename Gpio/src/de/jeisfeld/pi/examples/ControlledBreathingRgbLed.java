@@ -132,7 +132,7 @@ public class ControlledBreathingRgbLed {
 		}
 		else {
 			red = 1.269 * Math.pow(temperature / 100 - 60, -0.1332); // MAGIC_NUMBER
-			green = 0.873 * Math.pow(temperature / 100 - 60, 0.0755); // MAGIC_NUMBER
+			green = 1.144 * Math.pow(temperature / 100 - 60, -0.0755); // MAGIC_NUMBER
 			blue = 1;
 		}
 		red = ControlledBreathingRgbLed.ensureInRange01(red) * brightness;
