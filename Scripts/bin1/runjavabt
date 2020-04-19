@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo java -classpath .:/home/je/java:/opt/pi4j/lib/'*':/home/je/java/lib/'*' de.jeisfeld.pi.bluetooth.$1
