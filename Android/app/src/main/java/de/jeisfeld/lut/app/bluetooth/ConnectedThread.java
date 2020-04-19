@@ -10,6 +10,9 @@ import android.content.Context;
 import android.util.Log;
 import de.jeisfeld.lut.app.bluetooth.BluetoothMessageHandler.MessageType;
 
+/**
+ * Thread for sending and receiving data via bluetooth connection.
+ */
 public class ConnectedThread extends Thread {
 	/**
 	 * The logging tag.

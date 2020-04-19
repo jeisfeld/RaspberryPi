@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 
 import javax.microedition.io.StreamConnection;
 
+/**
+ * Thread for sending and receiving data via bluetooth connection.
+ */
 public class ConnectedThread extends Thread {
 	/**
 	 * The connection.

@@ -46,27 +46,27 @@
 		<link>
 			<name>AndroidManifest.xml</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Android/test/src/main/AndroidManifest.xml</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Android/app/src/main/AndroidManifest.xml</locationURI>
 		</link>
 		<link>
 			<name>libs</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Android/test/libs</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Android/app/libs</locationURI>
 		</link>
 		<link>
 			<name>res</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Android/test/src/main/res</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Android/app/src/main/res</locationURI>
 		</link>
 		<link>
 			<name>src</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Android/test/src/main/java</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Android/app/src/main/java</locationURI>
 		</link>
 		<link>
 			<name>libs-local/R.jar</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Android/test/build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/debug/R.jar</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Android/app/build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/debug/R.jar</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

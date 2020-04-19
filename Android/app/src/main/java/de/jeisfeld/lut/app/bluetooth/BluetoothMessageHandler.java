@@ -10,6 +10,9 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import de.jeisfeld.lut.app.MainActivity;
 
+/**
+ * Message handler for the bluetooth connection.
+ */
 public class BluetoothMessageHandler extends Handler {
 	/**
 	 * The logging tag.

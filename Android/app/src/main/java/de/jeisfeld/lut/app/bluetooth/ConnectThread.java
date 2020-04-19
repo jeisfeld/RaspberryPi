@@ -11,6 +11,9 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+/**
+ * Thread for creating a bluetooth connection.
+ */
 public class ConnectThread extends Thread {
 	/**
 	 * The logging tag.
@@ -61,7 +64,7 @@ public class ConnectThread extends Thread {
 	 *
 	 * @param context the context.
 	 * @param handler a message handler.
-	 * @param mac     The MAC of the bluetooth device.
+	 * @param mac The MAC of the bluetooth device.
 	 */
 	public ConnectThread(final Context context, final BluetoothMessageHandler handler, final String mac) {
 		mContext = context;
@@ -156,7 +159,9 @@ public class ConnectThread extends Thread {
 	 */
 	public void cancel() {
 		try {
-			mSocket.close();
+			if (mSocket != null) {
+				mSocket.close();
+			}
 		}
 		catch (IOException e) {
 			Log.e(ConnectThread.TAG, "Could not close the client socket");
