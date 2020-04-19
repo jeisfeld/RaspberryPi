@@ -44,7 +44,7 @@ public class BluetoothMessageHandler extends Handler {
 
 		if (messageType == MessageType.ERROR) {
 			AppCompatActivity activity = mActivity.get();
-			if (activity != null && activity instanceof MainActivity && !activity.isDestroyed() && !activity.isFinishing()) {
+			if (activity instanceof MainActivity && !activity.isDestroyed() && !activity.isFinishing()) {
 				((MainActivity) activity).connect();
 			}
 		}
@@ -56,7 +56,7 @@ public class BluetoothMessageHandler extends Handler {
 	 * @param messageType The message type.
 	 * @param message The message content.
 	 */
-	public void sendMessage(final MessageType messageType, final Object message) {
+	protected void sendMessage(final MessageType messageType, final Object message) {
 		obtainMessage(messageType.ordinal(), message).sendToTarget();
 	}
 
@@ -67,7 +67,7 @@ public class BluetoothMessageHandler extends Handler {
 	 * @param size The size of message content.
 	 * @param buffer The message content as byte buffer.
 	 */
-	public void sendMessage(final MessageType messageType, final int size, final byte[] buffer) {
+	protected void sendMessage(final MessageType messageType, final int size, final byte[] buffer) {
 		if (size <= 0) {
 			sendMessage(messageType, null);
 		}
@@ -79,7 +79,7 @@ public class BluetoothMessageHandler extends Handler {
 	/**
 	 * Send a reconnect message.
 	 */
-	public void sendReconnect() {
+	protected void sendReconnect() {
 		Message message = new Message();
 		message.what = MessageType.ERROR.ordinal();
 		sendMessageDelayed(message, BluetoothMessageHandler.RECONNECT_DELAY);

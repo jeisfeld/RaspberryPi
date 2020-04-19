@@ -39,7 +39,7 @@ public class ConnectedThread extends Thread {
 	 * @param handler The bluetooth message handler.
 	 * @param socket The socket.
 	 */
-	public ConnectedThread(final Context context, final BluetoothMessageHandler handler, final BluetoothSocket socket) {
+	protected ConnectedThread(final Context context, final BluetoothMessageHandler handler, final BluetoothSocket socket) {
 		mContext = context;
 		mHandler = handler;
 		InputStream tmpIn = null;
@@ -90,7 +90,7 @@ public class ConnectedThread extends Thread {
 	 *
 	 * @param data The data to be written.
 	 */
-	public void write(final String data) {
+	protected void write(final String data) {
 		try {
 			mOutStream.write(data.getBytes(StandardCharsets.UTF_8));
 			mHandler.sendMessage(MessageType.WRITE, data);

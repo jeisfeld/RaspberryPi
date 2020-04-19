@@ -1,2 +1,2 @@
 rootProject.name='LuT Tools'
-include ':test'
+include ':app'

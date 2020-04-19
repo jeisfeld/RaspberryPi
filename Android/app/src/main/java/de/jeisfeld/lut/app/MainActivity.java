@@ -37,9 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
 		connect();
 
-		buttonTest.setOnClickListener(v -> {
-			testBluetooth();
-		});
+		buttonTest.setOnClickListener(v -> testBluetooth());
 	}
 
 	@Override

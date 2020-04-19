@@ -61,13 +61,17 @@ public class ConnectThread extends Thread {
 	 *
 	 * @param context the context.
 	 * @param handler a message handler.
-	 * @param mac The MAC of the bluetooth device.
+	 * @param mac     The MAC of the bluetooth device.
 	 */
 	public ConnectThread(final Context context, final BluetoothMessageHandler handler, final String mac) {
 		mContext = context;
 		mHandler = handler;
 		BluetoothDevice device = getBluetoothDevice(mac);
-
+		if (device == null) {
+			Log.e(ConnectThread.TAG, "Failed to get Bluetooth device.");
+			mSocket = null;
+			return;
+		}
 		// Use a temporary object that is later assigned to mmSocket because mmSocket is final.
 		BluetoothSocket tmpSocket = null;
 		try {
@@ -111,6 +115,10 @@ public class ConnectThread extends Thread {
 
 	@Override
 	public final void run() {
+		if (mSocket == null) {
+			return;
+		}
+
 		// Cancel discovery because it otherwise slows down the connection.
 		// BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
 
