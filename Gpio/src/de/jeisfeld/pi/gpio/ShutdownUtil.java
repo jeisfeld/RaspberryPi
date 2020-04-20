@@ -31,23 +31,28 @@ public final class ShutdownUtil {
 	 * @param pins The PINs.
 	 */
 	public static synchronized void prepareShutdown(final GpioPin... pins) {
-		if (!mIsShutdownHandlerPrepared) {
+		if (!ShutdownUtil.mIsShutdownHandlerPrepared) {
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				@Override
 				public void run() {
-					mIsShutdown = true;
+					ShutdownUtil.mIsShutdown = true;
 					GpioFactory.getInstance().shutdown();
 				}
 			});
-			mIsShutdownHandlerPrepared = true;
+			ShutdownUtil.mIsShutdownHandlerPrepared = true;
 		}
 		for (GpioPin pin : pins) {
 			pin.setShutdownOptions(true, PinState.LOW, PinPullResistance.PULL_DOWN, PinMode.DIGITAL_INPUT);
 		}
 	}
 
+	/**
+	 * Get flag indicating if shutdown is triggered.
+	 *
+	 * @return The flag indicating if shutdown is triggered.
+	 */
 	public static boolean isShutdown() {
-		return mIsShutdown;
+		return ShutdownUtil.mIsShutdown;
 	}
 
 }

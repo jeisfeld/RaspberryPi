@@ -2,10 +2,15 @@ package de.jeisfeld.pi.lut;
 
 import java.io.IOException;
 
+import de.jeisfeld.pi.bluetooth.BluetoothMessageHandler;
+import de.jeisfeld.pi.bluetooth.ConnectThread;
+import de.jeisfeld.pi.lut.core.ButtonStatus;
 import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
 import de.jeisfeld.pi.lut.core.ButtonStatus.OnLongPressListener;
+import de.jeisfeld.pi.lut.core.ButtonStatusUpdateListener;
 import de.jeisfeld.pi.lut.core.Sender;
 import de.jeisfeld.pi.lut.core.ShutdownListener;
+import de.jeisfeld.pi.util.Logger;
 
 /**
  * Test class for LuT framework.
@@ -79,6 +84,23 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 		});
 
 		new Thread(lobs[Startup.mChannel]).start();
+
+		ConnectThread connectThread = new ConnectThread(new BluetoothMessageHandler() {
+			@Override
+			public void onMessageReceived(final String data) {
+				Logger.log("Received bluetooth: " + data);
+			}
+		});
+		connectThread.start();
+
+		sender.setButtonStatusUpdateListener(new ButtonStatusUpdateListener() {
+			@Override
+			public void onButtonStatusUpdated(final ButtonStatus status) {
+				Logger.log("Button status: " + status);
+				connectThread.write("Button status: " + status);
+			}
+		});
+
 	}
 
 }

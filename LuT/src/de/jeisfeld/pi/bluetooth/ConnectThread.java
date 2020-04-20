@@ -1,56 +1,99 @@
 package de.jeisfeld.pi.bluetooth;
 
-import javax.bluetooth.DiscoveryAgent;
-import javax.bluetooth.LocalDevice;
 import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
+import de.jeisfeld.pi.util.Logger;
+
 /**
  * Thread for creating a bluetooth connection.
  */
 public class ConnectThread extends Thread {
+	/**
+	 * The connected thread.
+	 */
+	private ConnectedThread mConnectedThread;
+	/**
+	 * The message handler.
+	 */
+	private final BluetoothMessageHandler mHandler;
 
 	/**
 	 * Constructor.
+	 *
+	 * @param handler the bluetooth message handler.
 	 */
-	public ConnectThread() {
+	public ConnectThread(final BluetoothMessageHandler handler) {
+		mHandler = handler;
 	}
 
 	@Override
 	public final void run() {
-		LocalDevice local = null;
-		StreamConnectionNotifier notifier;
+		StreamConnectionNotifier notifier = null;
 		StreamConnection connection = null;
+		boolean isInterrupted = false;
 
 		// setup the server to listen for connection
-		try {
-			local = LocalDevice.getLocalDevice();
-			local.setDiscoverable(DiscoveryAgent.GIAC);
-
-			UUID uuid = new UUID("e91868ef27844d1899b0408878da815a", false);
-			String url = "btspp://localhost:" + uuid.toString() + ";name=RemoteBluetooth";
-			notifier = (StreamConnectionNotifier) Connector.open(url);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
-		// waiting for connection
-		while (true) {
+		while (notifier == null && !isInterrupted) {
 			try {
-				System.out.println("waiting for connection...");
-				connection = notifier.acceptAndOpen();
-				System.out.println("got connection.");
-
-				Thread processThread = new ConnectedThread(connection);
-				processThread.start();
+				UUID uuid = new UUID("e91868ef27844d1899b0408878da815a", false);
+				String url = "btspp://localhost:" + uuid.toString() + ";name=RemoteBluetooth";
+				notifier = (StreamConnectionNotifier) Connector.open(url);
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				Logger.error(e);
 				return;
 			}
+
+			if (notifier == null) {
+				try {
+					Thread.sleep(1000); // MAGIC_NUMBER
+				}
+				catch (InterruptedException e) {
+					isInterrupted = true;
+				}
+			}
+		}
+
+		if (isInterrupted) {
+			return;
+		}
+
+		// waiting for connection
+		while (true) {
+			// Retry, so that after closing a connection, the next one will immediately reopen.
+			try {
+				Logger.info("waiting for connection...");
+				connection = notifier.acceptAndOpen();
+				Logger.info("got connection.");
+
+				ConnectedThread newConnectedThread = new ConnectedThread(mHandler, connection);
+				if (mConnectedThread != null) {
+					mConnectedThread.interrupt();
+				}
+				mConnectedThread = newConnectedThread;
+				mConnectedThread.start();
+			}
+			catch (Exception e) {
+				Logger.error(e);
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Write a message.
+	 *
+	 * @param message The message.
+	 */
+	public void write(final String message) {
+		if (mConnectedThread == null) {
+			Logger.error(new RuntimeException("Failed to send message - no connection available"));
+		}
+		else {
+			mConnectedThread.write(message);
 		}
 	}
 

@@ -33,7 +33,7 @@ public class HomeFragment extends Fragment {
 		buttonTest.setOnClickListener(v -> {
 			ConnectThread connectThread = ((MainActivity) requireActivity()).getConnectThread();
 			if (connectThread != null) {
-				connectThread.write("Hello world " + mCounter++ + "\n");
+				connectThread.write("Hello world " + mCounter++);
 			}
 			else {
 				Log.e(HomeFragment.TAG, "ConnectedThread not existing");

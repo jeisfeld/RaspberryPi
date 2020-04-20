@@ -1,8 +1,10 @@
 package de.jeisfeld.lut.app.bluetooth;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
 import android.bluetooth.BluetoothSocket;
@@ -29,11 +31,11 @@ public class ConnectedThread extends Thread {
 	/**
 	 * The input stream.
 	 */
-	private final InputStream mInStream;
+	private final BufferedReader mReader;
 	/**
 	 * The output stream.
 	 */
-	private final OutputStream mOutStream;
+	private final BufferedWriter mWriter;
 
 	/**
 	 * Create a message thread.
@@ -45,40 +47,37 @@ public class ConnectedThread extends Thread {
 	protected ConnectedThread(final Context context, final BluetoothMessageHandler handler, final BluetoothSocket socket) {
 		mContext = context;
 		mHandler = handler;
-		InputStream tmpIn = null;
-		OutputStream tmpOut = null;
+		BufferedReader tmpIn = null;
+		BufferedWriter tmpOut = null;
 
 		// Get the input and output streams; using temp objects because
 		// member streams are final.
 		try {
-			tmpIn = socket.getInputStream();
+			tmpIn = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 		}
 		catch (IOException e) {
 			Log.e(ConnectedThread.TAG, "Error occurred when creating input stream", e);
 		}
 		try {
-			tmpOut = socket.getOutputStream();
+			tmpOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 		}
 		catch (IOException e) {
 			Log.e(ConnectedThread.TAG, "Error occurred when creating output stream", e);
 		}
 
-		mInStream = tmpIn;
-		mOutStream = tmpOut;
+		mReader = tmpIn;
+		mWriter = tmpOut;
 	}
 
 	@Override
 	public final void run() {
-		byte[] buffer = new byte[1024]; // MAGIC_NUMBER
-		int numBytes; // bytes returned from read()
-
 		// Keep listening to the InputStream until an exception occurs.
 		while (true) {
 			try {
 				// Read from the InputStream.
-				numBytes = mInStream.read(buffer);
+				String data = mReader.readLine();
 				// Send the obtained bytes to the UI activity.
-				mHandler.sendMessage(MessageType.READ, numBytes, buffer);
+				mHandler.sendMessage(MessageType.READ, data);
 			}
 			catch (IOException e) {
 				Log.w(ConnectedThread.TAG, "Input stream was disconnected");
@@ -95,7 +94,9 @@ public class ConnectedThread extends Thread {
 	 */
 	protected void write(final String data) {
 		try {
-			mOutStream.write(data.getBytes(StandardCharsets.UTF_8));
+			mWriter.write(data);
+			mWriter.newLine();
+			mWriter.flush();
 			mHandler.sendMessage(MessageType.WRITE, data);
 		}
 		catch (IOException e) {

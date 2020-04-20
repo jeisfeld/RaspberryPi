@@ -1,5 +1,7 @@
 package de.jeisfeld.pi.bluetooth;
 
+import de.jeisfeld.pi.util.Logger;
+
 /**
  * Standalone bluetooth server.
  */
@@ -10,6 +12,14 @@ public class RemoteBluetoothServer {
 	 * @param args Command line arguments.
 	 */
 	public static void main(final String[] args) {
-		new ConnectThread().start();
+		Logger.setLogDetails(true);
+
+		ConnectThread connectThread = new ConnectThread(new BluetoothMessageHandler() {
+			@Override
+			public void onMessageReceived(final String data) {
+				Logger.log(data);
+			}
+		});
+		connectThread.start();
 	}
 }

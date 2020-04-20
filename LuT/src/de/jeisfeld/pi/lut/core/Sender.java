@@ -29,6 +29,7 @@ import de.jeisfeld.pi.lut.core.command.ReadCommand;
 import de.jeisfeld.pi.lut.core.command.Tadel;
 import de.jeisfeld.pi.lut.core.command.Wait;
 import de.jeisfeld.pi.lut.core.command.WriteCommand;
+import de.jeisfeld.pi.util.Logger;
 
 /**
  * The generic sender for LuT devices.
@@ -96,6 +97,10 @@ public final class Sender {
 	 * The list of commands waiting to be processed.
 	 */
 	private final List<WriteCommand> mQueuedCommands = new ArrayList<>();
+	/**
+	 * The button status update listener.
+	 */
+	private ButtonStatusUpdateListener mButtonStatusUpdateListener = null;
 
 	/**
 	 * Constructor for default port.
@@ -250,6 +255,9 @@ public final class Sender {
 			}
 			while (missingResponses > 0);
 			mButtonStatus.updateWith(buttonStatus);
+			if (mButtonStatusUpdateListener != null) {
+				mButtonStatusUpdateListener.onButtonStatusUpdated(mButtonStatus);
+			}
 			mProcessingCommands.clear();
 		}
 	}
@@ -324,6 +332,15 @@ public final class Sender {
 	 */
 	public void setButton2LongPressListener(final OnLongPressListener listener) {
 		mButtonStatus.setButton2LongPressListener(listener);
+	}
+
+	/**
+	 * Set the button status update listener.
+	 *
+	 * @param buttonStatusUpdateListener the mButtonStatusUpdateListener to set
+	 */
+	public void setButtonStatusUpdateListener(final ButtonStatusUpdateListener buttonStatusUpdateListener) {
+		mButtonStatusUpdateListener = buttonStatusUpdateListener;
 	}
 
 	/**
@@ -460,7 +477,7 @@ public final class Sender {
 					}
 				}
 				catch (IOException ioe) {
-					ioe.printStackTrace();
+					Logger.error(ioe);
 				}
 			}
 			synchronized (Sender.this) {

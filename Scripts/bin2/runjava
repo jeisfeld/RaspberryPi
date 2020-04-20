@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo java -classpath .:/home/je/java:/opt/pi4j/lib/'*' de.jeisfeld.pi.lut.$1 $2 $3 $4
+sudo java -classpath .:/home/je/java:/opt/pi4j/lib/'*':/home/je/java/lib/'*' de.jeisfeld.pi.lut.$1 $2 $3 $4

@@ -40,6 +40,12 @@ public interface WriteCommand extends Command {
 	 */
 	boolean isOverride();
 
+	/**
+	 * Limit integer to range 0 to 255.
+	 *
+	 * @param value the input integer
+	 * @return the integer limited to 0 ... 255
+	 */
 	static int makeByte(final int value) {
 		return Math.min(ButtonStatus.MAX_CONTROL_VALUE, Math.max(0, value));
 	}

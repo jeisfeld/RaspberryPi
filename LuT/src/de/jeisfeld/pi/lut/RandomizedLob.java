@@ -8,6 +8,7 @@ import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
 import de.jeisfeld.pi.lut.core.ChannelSender;
 import de.jeisfeld.pi.lut.core.Sender;
 import de.jeisfeld.pi.lut.core.ShutdownListener;
+import de.jeisfeld.pi.util.Logger;
 
 /**
  * Class used for sending randomized Lob signals via LuT.
@@ -223,7 +224,7 @@ public final class RandomizedLob implements Runnable {
 			mChannelSender.lob(0);
 		}
 		catch (InterruptedException e) {
-			e.printStackTrace();
+			Logger.error(e);
 		}
 	}
 
