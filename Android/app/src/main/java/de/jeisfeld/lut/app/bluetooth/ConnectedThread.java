@@ -67,6 +67,7 @@ public class ConnectedThread extends Thread {
 
 		mReader = tmpIn;
 		mWriter = tmpOut;
+		mHandler.sendMessage(MessageType.CONNECTED, null);
 	}
 
 	@Override

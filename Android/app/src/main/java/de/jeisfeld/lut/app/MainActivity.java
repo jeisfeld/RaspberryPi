@@ -7,15 +7,21 @@ import com.google.android.material.snackbar.Snackbar;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import de.jeisfeld.lut.app.bluetooth.BluetoothMessageHandler;
 import de.jeisfeld.lut.app.bluetooth.ConnectThread;
+import de.jeisfeld.lut.app.ui.status.StatusViewModel;
+import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
+import de.jeisfeld.lut.bluetooth.message.Message;
+import de.jeisfeld.lut.bluetooth.message.ProcessingModeMessage;
 
 /**
  * Main activity of the app.
@@ -54,9 +60,9 @@ public class MainActivity extends AppCompatActivity {
 		// Passing each menu ID as a set of Ids because each
 		// menu should be considered as top level destinations.
 		mAppBarConfiguration = new AppBarConfiguration.Builder(
-				R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
-						.setDrawerLayout(drawer)
-						.build();
+				R.id.nav_home, R.id.nav_gallery, R.id.nav_status)
+				.setDrawerLayout(drawer)
+				.build();
 		NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 		NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
 		NavigationUI.setupWithNavController(navigationView, navController);
@@ -106,5 +112,37 @@ public class MainActivity extends AppCompatActivity {
 		NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 		return NavigationUI.navigateUp(navController, mAppBarConfiguration)
 				|| super.onSupportNavigateUp();
+	}
+
+	/**
+	 * Update the button status based on message received from Pi.
+	 *
+	 * @param message The button status message.
+	 */
+	public void updateButtonStatus(final Message message) {
+		StatusViewModel statusViewModel = new ViewModelProvider(this).get(StatusViewModel.class);
+		switch (message.getType()) {
+		case BUTTON_STATUS:
+			Log.d(MainActivity.TAG, "Received button status message: " + message.getDataString());
+			statusViewModel.setStatus((ButtonStatusMessage) message);
+			break;
+		case PROCESSING_MODE:
+			Log.i(MainActivity.TAG, "Received processing mode message: " + message.getDataString());
+			statusViewModel.setProcessingMode((ProcessingModeMessage) message);
+			break;
+		default:
+			Log.i(MainActivity.TAG, "Received unexpected message: " + message.getDataString());
+		}
+	}
+
+	/**
+	 * Update the status information if bluetooth is connected.
+	 *
+	 * @param connected true if connected.
+	 */
+	public void updateConnectedStatus(final boolean connected) {
+		Log.i(MainActivity.TAG, "Bluetooth connection status: " + connected);
+		StatusViewModel statusViewModel = new ViewModelProvider(this).get(StatusViewModel.class);
+		statusViewModel.setBluetoothStatus(connected);
 	}
 }

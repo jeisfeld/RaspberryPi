@@ -1,2 +1,2 @@
 #!/bin/bash
-nohup sudo java -classpath .:/home/je/java:/opt/pi4j/lib/'*':/home/je/java/lib/'*' de.jeisfeld.pi.lut.Startup > /dev/null &
+nohup sudo java -classpath .:/home/je/java:/opt/pi4j/lib/'*':/home/je/java/lib/'*' de.jeisfeld.pi.lut.Startup > /dev/null 2>&1 &

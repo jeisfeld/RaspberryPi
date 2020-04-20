@@ -1,13 +1,10 @@
 package de.jeisfeld.lut.app.bluetooth;
 
 import java.lang.ref.WeakReference;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import androidx.appcompat.app.AppCompatActivity;
 import de.jeisfeld.lut.app.MainActivity;
 
 /**
@@ -25,14 +22,14 @@ public class BluetoothMessageHandler extends Handler {
 	/**
 	 * The context.
 	 */
-	private final WeakReference<AppCompatActivity> mActivity;
+	private final WeakReference<MainActivity> mActivity;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param activity The triggering activity
 	 */
-	public BluetoothMessageHandler(final AppCompatActivity activity) {
+	public BluetoothMessageHandler(final MainActivity activity) {
 		mActivity = new WeakReference<>(activity);
 	}
 
@@ -42,14 +39,33 @@ public class BluetoothMessageHandler extends Handler {
 
 		String data = msg.obj instanceof String ? (String) msg.obj : null;
 		MessageType messageType = MessageType.fromOrdinal(msg.what);
+		MainActivity activity = mActivity.get();
 
-		Log.i(BluetoothMessageHandler.TAG, "Received message: " + messageType.name() + (data == null ? "" : " - " + data));
-
-		if (messageType == MessageType.ERROR) {
-			AppCompatActivity activity = mActivity.get();
-			if (activity instanceof MainActivity && !activity.isDestroyed() && !activity.isFinishing()) {
-				((MainActivity) activity).connect();
+		switch (messageType) {
+		case RECONNECT:
+			if (activity != null && !activity.isDestroyed() && !activity.isFinishing()) {
+				activity.updateConnectedStatus(false);
+				activity.connect();
 			}
+			break;
+		case READ:
+			de.jeisfeld.lut.bluetooth.message.Message message = de.jeisfeld.lut.bluetooth.message.Message.fromString(data);
+			if (message != null) {
+				if (activity != null) {
+					activity.updateButtonStatus(message);
+				}
+			}
+			else {
+				Log.i(BluetoothMessageHandler.TAG, "Received unknown read message: " + data);
+			}
+			break;
+		case CONNECTED:
+			if (activity != null && !activity.isDestroyed() && !activity.isFinishing()) {
+				activity.updateConnectedStatus(true);
+			}
+			break;
+		default:
+			Log.i(BluetoothMessageHandler.TAG, "Received message: " + messageType.name() + (data == null ? "" : " - " + data));
 		}
 	}
 
@@ -64,27 +80,11 @@ public class BluetoothMessageHandler extends Handler {
 	}
 
 	/**
-	 * Send a message.
-	 *
-	 * @param messageType The message type.
-	 * @param size The size of message content.
-	 * @param buffer The message content as byte buffer.
-	 */
-	protected void sendMessage(final MessageType messageType, final int size, final byte[] buffer) {
-		if (size <= 0) {
-			sendMessage(messageType, null);
-		}
-		else {
-			sendMessage(messageType, new String(Arrays.copyOf(buffer, size), StandardCharsets.UTF_8));
-		}
-	}
-
-	/**
 	 * Send a reconnect message.
 	 */
 	protected void sendReconnect() {
 		Message message = new Message();
-		message.what = MessageType.ERROR.ordinal();
+		message.what = MessageType.RECONNECT.ordinal();
 		sendMessageDelayed(message, BluetoothMessageHandler.RECONNECT_DELAY);
 	}
 
@@ -107,7 +107,11 @@ public class BluetoothMessageHandler extends Handler {
 		/**
 		 * Connection error.
 		 */
-		ERROR;
+		RECONNECT,
+		/**
+		 * Connected message.
+		 */
+		CONNECTED;
 
 		/**
 		 * Get the message type from its ordinal value.

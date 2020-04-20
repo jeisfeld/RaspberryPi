@@ -3,11 +3,11 @@ package de.jeisfeld.pi.lut;
 import java.io.IOException;
 import java.util.Random;
 
+import de.jeisfeld.pi.lut.Startup.OnModeChangeListener;
 import de.jeisfeld.pi.lut.core.ButtonStatus;
 import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
 import de.jeisfeld.pi.lut.core.ChannelSender;
 import de.jeisfeld.pi.lut.core.Sender;
-import de.jeisfeld.pi.lut.core.ShutdownListener;
 import de.jeisfeld.pi.util.Logger;
 
 /**
@@ -48,6 +48,10 @@ public final class RandomizedTadel implements Runnable {
 	 */
 	private int mMode = 0;
 	/**
+	 * Callback for mode change.
+	 */
+	private final OnModeChangeListener mListener;
+	/**
 	 * The base time for automatic power change.
 	 */
 	private long mPowerBaseTime = System.currentTimeMillis();
@@ -75,10 +79,20 @@ public final class RandomizedTadel implements Runnable {
 	 * @throws IOException Connection issues.
 	 */
 	public RandomizedTadel(final int channel) throws IOException {
-		Sender sender = Sender.getInstance();
-		sender.setButton2LongPressListener(new ShutdownListener());
+		this(channel, null);
+	}
 
+	/**
+	 * Constructor.
+	 *
+	 * @param channel The channel where the signals should be sent.
+	 * @param listener Callback for mode change.
+	 * @throws IOException Connection issues.
+	 */
+	public RandomizedTadel(final int channel, final OnModeChangeListener listener) throws IOException {
+		Sender sender = Sender.getInstance();
 		mChannelSender = sender.getChannelSender(channel);
+		mListener = listener;
 	}
 
 	/**
@@ -89,6 +103,9 @@ public final class RandomizedTadel implements Runnable {
 			@Override
 			public void handleButtonDown() {
 				mMode = (mMode + 1) % RandomizedTadel.MODE_COUNT;
+				if (mListener != null) {
+					mListener.onModeChange(mMode);
+				}
 			}
 		});
 	}

@@ -3,11 +3,11 @@ package de.jeisfeld.pi.lut;
 import java.io.IOException;
 import java.util.Random;
 
+import de.jeisfeld.pi.lut.Startup.OnModeChangeListener;
 import de.jeisfeld.pi.lut.core.ButtonStatus;
 import de.jeisfeld.pi.lut.core.ButtonStatus.ButtonListener;
 import de.jeisfeld.pi.lut.core.ChannelSender;
 import de.jeisfeld.pi.lut.core.Sender;
-import de.jeisfeld.pi.lut.core.ShutdownListener;
 import de.jeisfeld.pi.util.Logger;
 
 /**
@@ -55,6 +55,10 @@ public final class RandomizedLob implements Runnable {
 	 * The current running mode.
 	 */
 	private int mMode = 0;
+	/**
+	 * Callback for mode change.
+	 */
+	private final OnModeChangeListener mListener;
 
 	/**
 	 * Main method.
@@ -79,10 +83,20 @@ public final class RandomizedLob implements Runnable {
 	 * @throws IOException Connection issues.
 	 */
 	public RandomizedLob(final int channel) throws IOException {
-		Sender sender = Sender.getInstance();
-		sender.setButton2LongPressListener(new ShutdownListener());
+		this(channel, null);
+	}
 
+	/**
+	 * Constructor.
+	 *
+	 * @param channel The channel where the signals should be sent.
+	 * @param listener Callback for mode change.
+	 * @throws IOException Connection issues.
+	 */
+	public RandomizedLob(final int channel, final OnModeChangeListener listener) throws IOException {
+		Sender sender = Sender.getInstance();
 		mChannelSender = sender.getChannelSender(channel);
+		mListener = listener;
 	}
 
 	/**
@@ -94,6 +108,9 @@ public final class RandomizedLob implements Runnable {
 			public void handleButtonDown() {
 				mMode = (mMode + 1) % RandomizedLob.MODE_COUNT;
 				signal(mMode + 1, false);
+				if (mListener != null) {
+					mListener.onModeChange(mMode);
+				}
 			}
 		});
 	}

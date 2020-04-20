@@ -2,6 +2,8 @@ package de.jeisfeld.pi.lut;
 
 import java.io.IOException;
 
+import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
+import de.jeisfeld.lut.bluetooth.message.ProcessingModeMessage;
 import de.jeisfeld.pi.bluetooth.BluetoothMessageHandler;
 import de.jeisfeld.pi.bluetooth.ConnectThread;
 import de.jeisfeld.pi.lut.core.ButtonStatus;
@@ -33,8 +35,23 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 	 * @throws InterruptedException if interrupted
 	 */
 	public static void main(final String[] args) throws IOException, InterruptedException { // SUPPRESS_CHECKSTYLE
-		RandomizedLob[] lobs = {new RandomizedLob(0), new RandomizedLob(1)};
-		RandomizedTadel[] tadels = {new RandomizedTadel(0), new RandomizedTadel(1)};
+		ConnectThread connectThread = new ConnectThread(new BluetoothMessageHandler() {
+			@Override
+			public void onMessageReceived(final String data) {
+				Logger.log("Received bluetooth: " + data);
+			}
+		});
+		connectThread.start();
+
+		OnModeChangeListener listener = new OnModeChangeListener() {
+			@Override
+			public void onModeChange(final int mode) {
+				connectThread.write(new ProcessingModeMessage(Startup.mChannel, Startup.mIsTadel, mode));
+			}
+		};
+
+		RandomizedLob[] lobs = {new RandomizedLob(0, listener), new RandomizedLob(1, listener)};
+		RandomizedTadel[] tadels = {new RandomizedTadel(0, listener), new RandomizedTadel(1, listener)};
 
 		Sender sender = Sender.getInstance();
 		sender.setButton2LongPressListener(new ShutdownListener(4000)); // MAGIC_NUMBER
@@ -58,6 +75,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 					lobs[Startup.mChannel].signal(1, true);
 					new Thread(lobs[Startup.mChannel]).start();
 				}
+				listener.onModeChange(0);
 			}
 		});
 
@@ -80,27 +98,31 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 					new Thread(tadels[Startup.mChannel]).start();
 					Startup.mIsTadel = true;
 				}
+				listener.onModeChange(0);
 			}
 		});
 
 		new Thread(lobs[Startup.mChannel]).start();
 
-		ConnectThread connectThread = new ConnectThread(new BluetoothMessageHandler() {
-			@Override
-			public void onMessageReceived(final String data) {
-				Logger.log("Received bluetooth: " + data);
-			}
-		});
-		connectThread.start();
-
 		sender.setButtonStatusUpdateListener(new ButtonStatusUpdateListener() {
 			@Override
 			public void onButtonStatusUpdated(final ButtonStatus status) {
-				Logger.log("Button status: " + status);
-				connectThread.write("Button status: " + status);
+				connectThread.write(new ButtonStatusMessage(status.toString()));
 			}
 		});
 
+	}
+
+	/**
+	 * Listener for mode change.
+	 */
+	public interface OnModeChangeListener {
+		/**
+		 * Callback called in case of mode change.
+		 *
+		 * @param mode The new mode.
+		 */
+		void onModeChange(int mode);
 	}
 
 }
