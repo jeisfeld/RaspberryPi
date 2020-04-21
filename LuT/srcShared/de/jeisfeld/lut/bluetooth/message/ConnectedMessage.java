@@ -16,7 +16,7 @@ public class ConnectedMessage extends Message {
 	}
 
 	@Override
-	public final String getDataString() {
+	protected final String getDataString() {
 		return "";
 	}
 }

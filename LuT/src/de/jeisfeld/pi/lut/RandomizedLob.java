@@ -169,13 +169,14 @@ public final class RandomizedLob implements Runnable {
 					status = mChannelSender.getButtonStatus();
 					int power = status.getControl1Value();
 					int frequency = status.getControl2Value();
+					int factor = (frequency + 9) / 10; // MAGIC_NUMBER
 					int minPower = (status.getControl3Value() * power) / ButtonStatus.MAX_CONTROL_VALUE;
+					mListener.onModeDetails("Wave", "Length: " + factor + "\nPower range: [" + minPower + "," + power + "]");
 
 					int value = (int) ((1 - Math.cos(2 * Math.PI * cyclePoint)) / 2 * (power - minPower) + minPower);
 					mChannelSender.lob(value);
 
 					if (frequency > 0) {
-						int factor = (frequency + 9) / 10; // MAGIC_NUMBER
 						cyclePoint = (Math.round(cyclePoint * 2 * factor) + 1.0) / 2 / factor;
 					}
 					else {
@@ -188,6 +189,8 @@ public final class RandomizedLob implements Runnable {
 					int maxPower = status.getControl1Value();
 					int runningProbability = status.getControl2Value();
 					int basePower = status.getControl3Value() * maxPower / ButtonStatus.MAX_CONTROL_VALUE;
+					mListener.onModeDetails("Avg Duration 2 sec", "High Power: " + maxPower + "\nLow Power: " + basePower
+							+ "\nHigh Probability: " + String.format("%.3f", (double) runningProbability / ButtonStatus.MAX_CONTROL_VALUE));
 
 					if (System.currentTimeMillis() > nextSignalChangeTime
 							|| Math.abs(runningProbability - lastRunningProbability) > 2) {
@@ -210,6 +213,12 @@ public final class RandomizedLob implements Runnable {
 					int onPower = status.getControl1Value();
 					int onDurationInput = status.getControl2Value();
 					int offDurationInput = status.getControl3Value();
+					double avgOnDuration = Math.exp(0.016 * onDurationInput); // MAGIC_NUMBER seconds
+					double avgOffDuration = Math.exp(0.016 * offDurationInput); // MAGIC_NUMBER seconds
+
+					mListener.onModeDetails("Random On/Off", "Power: " + onPower
+							+ "\nAvg On duration: " + String.format("%.1fs", avgOnDuration)
+							+ "\nAvg Off duration: " + String.format("%.1fs", avgOffDuration));
 
 					if (System.currentTimeMillis() > nextSignalChangeTime // BOOLEAN_EXPRESSION_COMPLEXITY
 							|| isHighPower && Math.abs(onDurationInput - lastOnDurationInput) > 2
@@ -219,7 +228,7 @@ public final class RandomizedLob implements Runnable {
 						if (System.currentTimeMillis() > nextSignalChangeTime) {
 							isHighPower = !isHighPower;
 						}
-						double avgDuration = 1000 * Math.exp(0.016 * (isHighPower ? onDurationInput : offDurationInput)); // MAGIC_NUMBER
+						double avgDuration = 1000 * (isHighPower ? avgOnDuration : avgOffDuration); // MAGIC_NUMBER milliseconds
 						int duration;
 						try {
 							duration = (int) (-avgDuration * Math.log(random.nextFloat()));
@@ -233,6 +242,7 @@ public final class RandomizedLob implements Runnable {
 					break;
 				default:
 					mChannelSender.lob(0);
+					mListener.onModeDetails("Off", "");
 					Thread.sleep(Sender.QUERY_DURATION);
 					break;
 				}

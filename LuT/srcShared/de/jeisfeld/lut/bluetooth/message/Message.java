@@ -1,5 +1,8 @@
 package de.jeisfeld.lut.bluetooth.message;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 /**
  * Messages transferred via Bluetooth between app and pi.
  */
@@ -16,7 +19,7 @@ public abstract class Message {
 	 *
 	 * @return The message data.
 	 */
-	public abstract String getDataString();
+	protected abstract String getDataString();
 
 	@Override
 	public final String toString() {
@@ -43,7 +46,7 @@ public abstract class Message {
 		case PING:
 			return new PingMessage();
 		case FREE_TEXT:
-			return new FreeTextMessage(messageData);
+			return new FreeTextMessage(Message.decode(messageData));
 		case BUTTON_STATUS:
 			return new ButtonStatusMessage(messageData);
 		case PROCESSING_MODE:
@@ -51,6 +54,26 @@ public abstract class Message {
 		default:
 			return null;
 		}
+	}
+
+	/**
+	 * Encode a String for passing within message.
+	 *
+	 * @param s The String.
+	 * @return The decoded String.
+	 */
+	protected static final String encode(final String s) {
+		return Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8));
+	}
+
+	/**
+	 * Decode a String from message.
+	 *
+	 * @param s The String from message.
+	 * @return The decoded String.
+	 */
+	protected static final String decode(final String s) {
+		return new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8);
 	}
 
 	/**

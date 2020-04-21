@@ -16,6 +16,14 @@ public class ProcessingModeMessage extends Message {
 	 * The processing mode.
 	 */
 	private final int mMode;
+	/**
+	 * The mode name.
+	 */
+	private final String mModeName;
+	/**
+	 * Details on processing mode.
+	 */
+	private final String mDetails;
 
 	/**
 	 * Constructor to reconstruct from String representation.
@@ -23,10 +31,29 @@ public class ProcessingModeMessage extends Message {
 	 * @param dataString The data string.
 	 */
 	public ProcessingModeMessage(final String dataString) {
-		String[] splitData = dataString.split(",");
+		String[] splitData = dataString.split(",", -1);
 		mChannel = Integer.parseInt(splitData[0]);
 		mIsTadel = Boolean.parseBoolean(splitData[1]);
 		mMode = Integer.parseInt(splitData[2]);
+		mModeName = Message.decode(splitData[3]); // MAGIC_NUMBER
+		mDetails = Message.decode(splitData[4]); // MAGIC_NUMBER
+	}
+
+	/**
+	 * Constructor.
+	 *
+	 * @param channel The current channel.
+	 * @param isTadel Flag indicating if it is Lob or Tadel
+	 * @param mode The processing mode.
+	 * @param modeName The mode name.
+	 * @param details The details.
+	 */
+	public ProcessingModeMessage(final int channel, final boolean isTadel, final int mode, final String modeName, final String details) {
+		mChannel = channel;
+		mIsTadel = isTadel;
+		mMode = mode;
+		mModeName = modeName;
+		mDetails = details;
 	}
 
 	/**
@@ -37,9 +64,7 @@ public class ProcessingModeMessage extends Message {
 	 * @param mode The processing mode.
 	 */
 	public ProcessingModeMessage(final int channel, final boolean isTadel, final int mode) {
-		mChannel = channel;
-		mIsTadel = isTadel;
-		mMode = mode;
+		this(channel, isTadel, mode, "", "");
 	}
 
 	@Override
@@ -48,8 +73,8 @@ public class ProcessingModeMessage extends Message {
 	}
 
 	@Override
-	public final String getDataString() {
-		return mChannel + "," + mIsTadel + "," + mMode;
+	protected final String getDataString() {
+		return mChannel + "," + mIsTadel + "," + mMode + "," + Message.encode(mModeName) + "," + Message.encode(mDetails);
 	}
 
 	/**
@@ -77,6 +102,24 @@ public class ProcessingModeMessage extends Message {
 	 */
 	public int getMode() {
 		return mMode;
+	}
+
+	/**
+	 * Get the mode name.
+	 *
+	 * @return The mode name
+	 */
+	public String getModeName() {
+		return mModeName;
+	}
+
+	/**
+	 * Get the details.
+	 *
+	 * @return The details
+	 */
+	public String getDetails() {
+		return mDetails;
 	}
 
 }

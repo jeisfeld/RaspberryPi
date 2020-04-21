@@ -16,7 +16,7 @@ public class PingMessage extends Message {
 	}
 
 	@Override
-	public final String getDataString() {
+	protected final String getDataString() {
 		return "";
 	}
 }

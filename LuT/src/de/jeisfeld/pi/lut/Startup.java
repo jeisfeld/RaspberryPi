@@ -3,6 +3,7 @@ package de.jeisfeld.pi.lut;
 import java.io.IOException;
 
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
+import de.jeisfeld.lut.bluetooth.message.FreeTextMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
 import de.jeisfeld.lut.bluetooth.message.ProcessingModeMessage;
 import de.jeisfeld.pi.bluetooth.BluetoothMessageHandler;
@@ -57,7 +58,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 						Logger.info("Ping");
 						break;
 					case FREE_TEXT:
-						Logger.log("Received free text message: " + message.getDataString());
+						Logger.log("Received free text message: " + ((FreeTextMessage) message).getText());
 						break;
 					case PROCESSING_MODE:
 					case BUTTON_STATUS:
@@ -76,6 +77,11 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 			public void onModeChange(final int mode) {
 				Startup.mMode = mode;
 				connectThread.write(new ProcessingModeMessage(Startup.mChannel, Startup.mIsTadel, mode));
+			}
+
+			@Override
+			public void onModeDetails(final String modeName, final String details) {
+				connectThread.write(new ProcessingModeMessage(Startup.mChannel, Startup.mIsTadel, Startup.mMode, modeName, details));
 			}
 		};
 
@@ -152,6 +158,14 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 		 * @param mode The new mode.
 		 */
 		void onModeChange(int mode);
+
+		/**
+		 * Callback called to report mode details.
+		 *
+		 * @param modeName The mode name.
+		 * @param details mode details.
+		 */
+		void onModeDetails(String modeName, String details);
 	}
 
 }

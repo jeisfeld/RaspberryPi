@@ -46,7 +46,7 @@ public class ButtonStatusMessage extends Message {
 	}
 
 	@Override
-	public final String getDataString() {
+	protected final String getDataString() {
 		return mIsButton1Pressed + "," + mIsButton2Pressed + "," + mControl1Value + "," + mControl2Value + "," + mControl3Value;
 	}
 

@@ -123,15 +123,13 @@ public class MainActivity extends AppCompatActivity {
 		StatusViewModel statusViewModel = new ViewModelProvider(this).get(StatusViewModel.class);
 		switch (message.getType()) {
 		case BUTTON_STATUS:
-			Log.d(MainActivity.TAG, "Received button status message: " + message.getDataString());
 			statusViewModel.setStatus((ButtonStatusMessage) message);
 			break;
 		case PROCESSING_MODE:
-			Log.i(MainActivity.TAG, "Received processing mode message: " + message.getDataString());
 			statusViewModel.setProcessingMode((ProcessingModeMessage) message);
 			break;
 		default:
-			Log.i(MainActivity.TAG, "Received unexpected message: " + message.getDataString());
+			Log.i(MainActivity.TAG, "Received unexpected message: " + message);
 		}
 	}
 

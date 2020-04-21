@@ -72,7 +72,8 @@ public class StatusViewModel extends ViewModel {
 	public void setProcessingMode(final ProcessingModeMessage processingModeMessage) {
 		String processingMode = "Channel: " + processingModeMessage.getChannel() + "\n"
 				+ "Type: " + (processingModeMessage.isTadel() ? "Tadel" : "Lob") + "\n"
-				+ "Mode: " + processingModeMessage.getMode();
+				+ "Mode: " + processingModeMessage.getMode() + " (" + processingModeMessage.getModeName() + ")\n"
+				+ processingModeMessage.getDetails();
 		mProcessingMode.postValue(processingMode);
 	}
 

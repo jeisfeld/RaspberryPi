@@ -24,8 +24,8 @@ public class FreeTextMessage extends Message {
 	}
 
 	@Override
-	public final String getDataString() {
-		return mText;
+	protected final String getDataString() {
+		return Message.encode(mText);
 	}
 
 	/**

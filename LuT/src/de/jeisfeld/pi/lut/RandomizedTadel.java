@@ -135,6 +135,8 @@ public final class RandomizedTadel implements Runnable {
 				case 1:
 					// constant power and frequency, both controllable. Serves to prepare base power for modes 2 and 3.
 					power = controlPower;
+					mListener.onModeDetails("Fixed", "Power: " + power + "\nFrequency: " + frequency);
+
 					mChannelSender.tadel(power, frequency, RandomizedTadel.DEFAULT_WAVE);
 					mPowerBaseTime = System.currentTimeMillis();
 					break;
@@ -155,6 +157,13 @@ public final class RandomizedTadel implements Runnable {
 					}
 
 					power = getUpdatedPower(power, controlPower);
+
+					mListener.onModeDetails("Avg Duration 2 sec", "Powered: " + isPowered + "\nCurrent Power: " + power
+							+ "\nPower time: " + String.format("%.1fs", (double) getMillisUntilChange(controlPower) / 1000) // MAGIC_NUMBER
+							+ "\nPower direction: " + getChangeDirection(controlPower)
+							+ "\nFrequency: " + frequency + "\nOn Probability: "
+							+ String.format("%.3f", (double) runningProbability / ButtonStatus.MAX_CONTROL_VALUE));
+
 					mChannelSender.tadel(isPowered ? power : 0, frequency, RandomizedTadel.DEFAULT_WAVE);
 					break;
 				case 3: // MAGIC_NUMBER
@@ -162,6 +171,8 @@ public final class RandomizedTadel implements Runnable {
 					status = mChannelSender.getButtonStatus();
 					int onDurationInput = runningProbability;
 					int offDurationInput = frequency;
+					double avgOnDuration = Math.exp(0.016 * onDurationInput); // MAGIC_NUMBER seconds
+					double avgOffDuration = Math.exp(0.016 * offDurationInput); // MAGIC_NUMBER seconds
 
 					if (System.currentTimeMillis() > nextSignalChangeTime // BOOLEAN_EXPRESSION_COMPLEXITY
 							|| isPowered && Math.abs(onDurationInput - lastOnDurationInput) > 2
@@ -171,7 +182,7 @@ public final class RandomizedTadel implements Runnable {
 						if (System.currentTimeMillis() > nextSignalChangeTime) {
 							isPowered = !isPowered;
 						}
-						double avgDuration = 1000 * Math.exp(0.016 * (isPowered ? onDurationInput : offDurationInput)); // MAGIC_NUMBER
+						double avgDuration = 1000 * (isPowered ? avgOnDuration : avgOffDuration); // MAGIC_NUMBER
 						int duration;
 						try {
 							duration = (int) (-avgDuration * Math.log(random.nextFloat()));
@@ -182,10 +193,18 @@ public final class RandomizedTadel implements Runnable {
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 					}
 					power = getUpdatedPower(power, controlPower);
+
+					mListener.onModeDetails("Random On/Off", "Powered: " + isPowered + "\nCurrent Power: " + power
+							+ "\nPower time: " + String.format("%.1fs", (double) getMillisUntilChange(controlPower) / 1000) // MAGIC_NUMBER
+							+ "\nPower direction: " + getChangeDirection(controlPower)
+							+ "\nAvg On duration: " + String.format("%.1fs", avgOnDuration)
+							+ "\nAvg Off duration: " + String.format("%.1fs", avgOffDuration));
+
 					mChannelSender.tadel(isPowered ? power : 0, RandomizedTadel.DEFAULT_FREQUENCY, RandomizedTadel.DEFAULT_WAVE);
 					break;
 				default:
 					mChannelSender.tadel(0, 0, 0);
+					mListener.onModeDetails("Off", "");
 					Thread.sleep(Sender.QUERY_DURATION);
 					mPowerBaseTime = System.currentTimeMillis();
 					break;
@@ -207,10 +226,9 @@ public final class RandomizedTadel implements Runnable {
 	 */
 	private int getUpdatedPower(final int oldPower, final int controlPower) {
 		int newPower = oldPower;
-		int deltaSgn = (int) Math.signum((int) ((controlPower - 127) / 16.0)); // MAGIC_NUMBER 0 in middle range, otherwise +-1
-		int millisUntilChange = (int) (150000 / Math.pow(1.04, Math.abs(controlPower - 127))); // MAGIC_NUMBER ca. 1 minute to 1 second
+		int millisUntilChange = getMillisUntilChange(controlPower);
 		if (System.currentTimeMillis() - mPowerBaseTime > millisUntilChange) {
-			newPower += deltaSgn * ((System.currentTimeMillis() - mPowerBaseTime) / millisUntilChange);
+			newPower += getChangeDirection(controlPower) * ((System.currentTimeMillis() - mPowerBaseTime) / millisUntilChange);
 			mPowerBaseTime = System.currentTimeMillis();
 		}
 		if (newPower > ButtonStatus.MAX_CONTROL_VALUE) {
@@ -220,6 +238,26 @@ public final class RandomizedTadel implements Runnable {
 			newPower = 0;
 		}
 		return newPower;
+	}
+
+	/**
+	 * Get the change direction.
+	 *
+	 * @param controlPower The value of power control.
+	 * @return The milliseconds until change.
+	 */
+	private int getChangeDirection(final int controlPower) {
+		return (int) Math.signum((int) ((controlPower - 127) / 16.0)); // MAGIC_NUMBER 0 in middle range, otherwise +-1
+	}
+
+	/**
+	 * Get milliseconds until change.
+	 *
+	 * @param controlPower The value of power control.
+	 * @return The milliseconds until change.
+	 */
+	private int getMillisUntilChange(final int controlPower) {
+		return (int) (150000 / Math.pow(1.04, Math.abs(controlPower - 127))); // MAGIC_NUMBER ca. 1 minute to 1 second
 	}
 
 	/**
