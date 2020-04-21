@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
+import de.jeisfeld.lut.bluetooth.message.Message;
 
 /**
  * Thread for creating a bluetooth connection.
@@ -144,7 +145,7 @@ public class ConnectThread extends Thread {
 	 *
 	 * @param message The message.
 	 */
-	public void write(final String message) {
+	private void write(final String message) {
 		if (mConnectedThread == null) {
 			Toast.makeText(mContext, "Failed to send message - no connection available", Toast.LENGTH_SHORT).show();
 			Log.e(ConnectThread.TAG, "Failed to send message - no connection available");
@@ -152,6 +153,15 @@ public class ConnectThread extends Thread {
 		else {
 			mConnectedThread.write(message);
 		}
+	}
+
+	/**
+	 * Write a message.
+	 *
+	 * @param message The message.
+	 */
+	public void write(final Message message) {
+		write(message.toString());
 	}
 
 	/**

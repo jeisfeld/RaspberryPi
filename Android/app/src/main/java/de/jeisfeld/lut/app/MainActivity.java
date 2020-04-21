@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 	 *
 	 * @param message The button status message.
 	 */
-	public void updateButtonStatus(final Message message) {
+	public void updateOnMessageReceived(final Message message) {
 		StatusViewModel statusViewModel = new ViewModelProvider(this).get(StatusViewModel.class);
 		switch (message.getType()) {
 		case BUTTON_STATUS:

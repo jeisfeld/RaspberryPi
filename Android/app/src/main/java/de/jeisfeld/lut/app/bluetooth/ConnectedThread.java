@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.util.Log;
 import de.jeisfeld.lut.app.bluetooth.BluetoothMessageHandler.MessageType;
+import de.jeisfeld.lut.bluetooth.message.ConnectedMessage;
 
 /**
  * Thread for sending and receiving data via bluetooth connection.
@@ -67,7 +68,9 @@ public class ConnectedThread extends Thread {
 
 		mReader = tmpIn;
 		mWriter = tmpOut;
+		// update local GUI with connection
 		mHandler.sendMessage(MessageType.CONNECTED, null);
+		write(new ConnectedMessage().toString());
 	}
 
 	@Override

@@ -10,9 +10,10 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
         android:text="@string/text_bluetooth_status"
+        android:textAlignment="center"
         android:textSize="20sp" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -20,80 +21,92 @@
         <Switch
             android:id="@+id/switchBluetoothStatus"
             android:layout_width="wrap_content"
-            android:switchMinWidth="64dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:switchMinWidth="64dp" />
     </FrameLayout>
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/seekbar_height"/>
-
-    <TextView
-        android:id="@+id/textStatusMessage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:textSize="20sp" />
-
     <LinearLayout
+        android:id="@+id/layoutControlInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:baselineAligned="false">
+        android:orientation="vertical"
+        android:visibility="gone">
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/seekbar_height" />
 
-        <FrameLayout
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/textStatusMessage"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:textAlignment="center"
+            android:textSize="20sp" />
 
-            <Switch
-                android:id="@+id/switchButton1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:baselineAligned="false"
+            android:orientation="horizontal">
 
-            <Switch
-                android:id="@+id/switchButton2"
-                android:layout_width="wrap_content"
+
+            <FrameLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal" />
-        </FrameLayout>
+                android:layout_weight="1">
+
+                <Switch
+                    android:id="@+id/switchButton1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <Switch
+                    android:id="@+id/switchButton2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/seekBarControl1"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/seekbar_height"
+            android:max="255" />
+
+        <SeekBar
+            android:id="@+id/seekBarControl2"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/seekbar_height"
+            android:max="255" />
+
+        <SeekBar
+            android:id="@+id/seekBarControl3"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/seekbar_height"
+            android:max="255" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/seekbar_height" />
+
+        <TextView
+            android:id="@+id/textProcessingMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="20sp" />
+
+
     </LinearLayout>
 
-    <SeekBar
-        android:id="@+id/seekBarControl1"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/seekbar_height"
-        android:max="255" />
 
-    <SeekBar
-        android:id="@+id/seekBarControl2"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/seekbar_height"
-        android:max="255" />
-
-    <SeekBar
-        android:id="@+id/seekBarControl3"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/seekbar_height"
-        android:max="255" />
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/seekbar_height"/>
-
-    <TextView
-        android:id="@+id/textProcessingMode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:textSize="20sp" />
 </LinearLayout>

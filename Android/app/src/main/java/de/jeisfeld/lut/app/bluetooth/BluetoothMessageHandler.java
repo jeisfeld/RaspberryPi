@@ -52,7 +52,7 @@ public class BluetoothMessageHandler extends Handler {
 			de.jeisfeld.lut.bluetooth.message.Message message = de.jeisfeld.lut.bluetooth.message.Message.fromString(data);
 			if (message != null) {
 				if (activity != null) {
-					activity.updateButtonStatus(message);
+					activity.updateOnMessageReceived(message);
 				}
 			}
 			else {

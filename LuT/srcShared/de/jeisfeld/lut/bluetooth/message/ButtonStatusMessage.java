@@ -1,5 +1,8 @@
 package de.jeisfeld.lut.bluetooth.message;
 
+/**
+ * A button status message.
+ */
 public class ButtonStatusMessage extends Message {
 	/**
 	 * Flag indicating if button 1 is pressed.

@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.app.R;
 import de.jeisfeld.lut.app.bluetooth.ConnectThread;
+import de.jeisfeld.lut.bluetooth.message.FreeTextMessage;
 
 /**
  * The home fragment of the app.
@@ -33,7 +34,7 @@ public class HomeFragment extends Fragment {
 		buttonTest.setOnClickListener(v -> {
 			ConnectThread connectThread = ((MainActivity) requireActivity()).getConnectThread();
 			if (connectThread != null) {
-				connectThread.write("Hello world " + mCounter++);
+				connectThread.write(new FreeTextMessage("Hello world " + mCounter++));
 			}
 			else {
 				Log.e(HomeFragment.TAG, "ConnectedThread not existing");

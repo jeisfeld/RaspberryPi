@@ -3,6 +3,7 @@ package de.jeisfeld.pi.lut;
 import java.io.IOException;
 
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
+import de.jeisfeld.lut.bluetooth.message.Message;
 import de.jeisfeld.lut.bluetooth.message.ProcessingModeMessage;
 import de.jeisfeld.pi.bluetooth.BluetoothMessageHandler;
 import de.jeisfeld.pi.bluetooth.ConnectThread;
@@ -26,6 +27,10 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 	 * The used channel.
 	 */
 	private static int mChannel = 0;
+	/**
+	 * The used mode.
+	 */
+	private static int mMode = 0;
 
 	/**
 	 * Main method.
@@ -35,17 +40,41 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 	 * @throws InterruptedException if interrupted
 	 */
 	public static void main(final String[] args) throws IOException, InterruptedException { // SUPPRESS_CHECKSTYLE
-		ConnectThread connectThread = new ConnectThread(new BluetoothMessageHandler() {
+		ConnectThread connectThread = new ConnectThread();
+		connectThread.setMessageHandler(new BluetoothMessageHandler() {
 			@Override
 			public void onMessageReceived(final String data) {
-				Logger.log("Received bluetooth: " + data);
+				Message message = Message.fromString(data);
+				if (message == null) {
+					Logger.error(new RuntimeException("Received unspecified bluetooth message: " + data));
+				}
+				else {
+					switch (message.getType()) {
+					case CONNECTED:
+						connectThread.write(new ProcessingModeMessage(Startup.mChannel, Startup.mIsTadel, Startup.mMode));
+						break;
+					case PING:
+						Logger.info("Ping");
+						break;
+					case FREE_TEXT:
+						Logger.log("Received free text message: " + message.getDataString());
+						break;
+					case PROCESSING_MODE:
+					case BUTTON_STATUS:
+					default:
+						Logger.error(new RuntimeException("Received unexpected message: " + data));
+					}
+				}
+
 			}
 		});
+
 		connectThread.start();
 
 		OnModeChangeListener listener = new OnModeChangeListener() {
 			@Override
 			public void onModeChange(final int mode) {
+				Startup.mMode = mode;
 				connectThread.write(new ProcessingModeMessage(Startup.mChannel, Startup.mIsTadel, mode));
 			}
 		};

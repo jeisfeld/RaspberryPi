@@ -1,5 +1,8 @@
 package de.jeisfeld.lut.bluetooth.message;
 
+/**
+ * A processing mode message.
+ */
 public class ProcessingModeMessage extends Message {
 	/**
 	 * The current channel.

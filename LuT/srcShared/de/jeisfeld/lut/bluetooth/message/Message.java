@@ -38,6 +38,12 @@ public abstract class Message {
 		String messageData = splitData.length > 1 ? splitData[1] : "";
 
 		switch (type) {
+		case CONNECTED:
+			return new ConnectedMessage();
+		case PING:
+			return new PingMessage();
+		case FREE_TEXT:
+			return new FreeTextMessage(messageData);
 		case BUTTON_STATUS:
 			return new ButtonStatusMessage(messageData);
 		case PROCESSING_MODE:
@@ -52,13 +58,25 @@ public abstract class Message {
 	 */
 	public enum MessageType {
 		/**
+		 * Message passed when connected.
+		 */
+		CONNECTED,
+		/**
+		 * Ping message.
+		 */
+		PING,
+		/**
+		 * Free text message.
+		 */
+		FREE_TEXT,
+		/**
 		 * Button status message sent from Pi to Android.
 		 */
 		BUTTON_STATUS,
 		/**
 		 * The processing mode of the Pi LuT application.
 		 */
-		PROCESSING_MODE;
+		PROCESSING_MODE
 	}
 
 }

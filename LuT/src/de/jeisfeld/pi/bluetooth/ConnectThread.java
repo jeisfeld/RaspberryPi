@@ -5,6 +5,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
+import de.jeisfeld.lut.bluetooth.message.ConnectedMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
 import de.jeisfeld.pi.util.Logger;
 
@@ -19,14 +20,20 @@ public class ConnectThread extends Thread {
 	/**
 	 * The message handler.
 	 */
-	private final BluetoothMessageHandler mHandler;
+	private BluetoothMessageHandler mHandler;
 
 	/**
 	 * Constructor.
-	 *
-	 * @param handler the bluetooth message handler.
 	 */
-	public ConnectThread(final BluetoothMessageHandler handler) {
+	public ConnectThread() {
+	}
+
+	/**
+	 * Set the message handler.
+	 *
+	 * @param handler The message handler.
+	 */
+	public void setMessageHandler(final BluetoothMessageHandler handler) {
 		mHandler = handler;
 	}
 
@@ -63,6 +70,7 @@ public class ConnectThread extends Thread {
 				Logger.info("waiting for connection...");
 				connection = notifier.acceptAndOpen();
 				Logger.info("got connection.");
+				mHandler.onMessageReceived(new ConnectedMessage().toString());
 
 				ConnectedThread newConnectedThread = new ConnectedThread(mHandler, connection);
 				if (mConnectedThread != null) {
