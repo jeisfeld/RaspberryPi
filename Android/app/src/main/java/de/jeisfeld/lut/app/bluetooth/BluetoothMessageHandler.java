@@ -49,7 +49,13 @@ public class BluetoothMessageHandler extends Handler {
 			}
 			break;
 		case READ:
-			de.jeisfeld.lut.bluetooth.message.Message message = de.jeisfeld.lut.bluetooth.message.Message.fromString(data);
+			de.jeisfeld.lut.bluetooth.message.Message message = null;
+			try {
+				message = de.jeisfeld.lut.bluetooth.message.Message.fromString(data);
+			}
+			catch (Exception e) {
+				Log.e(BluetoothMessageHandler.TAG, "Exception while decoding message: " + data, e);
+			}
 			if (message != null) {
 				if (activity != null) {
 					activity.updateOnMessageReceived(message);

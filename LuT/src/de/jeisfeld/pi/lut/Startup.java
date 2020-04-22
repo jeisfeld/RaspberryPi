@@ -45,14 +45,20 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 		connectThread.setMessageHandler(new BluetoothMessageHandler() {
 			@Override
 			public void onMessageReceived(final String data) {
-				Message message = Message.fromString(data);
+				Message message = null;
+				try {
+					message = Message.fromString(data);
+				}
+				catch (Exception e) {
+					Logger.error(e);
+				}
 				if (message == null) {
 					Logger.error(new RuntimeException("Received unspecified bluetooth message: " + data));
 				}
 				else {
 					switch (message.getType()) {
 					case CONNECTED:
-						connectThread.write(new ProcessingModeMessage(Startup.mChannel, Startup.mIsTadel, Startup.mMode));
+						connectThread.write(new ProcessingModeMessage(mChannel, mIsTadel, false, null, null, null, mMode, "", ""));
 						break;
 					case PING:
 						Logger.info("Ping");
@@ -74,14 +80,9 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 
 		OnModeChangeListener listener = new OnModeChangeListener() {
 			@Override
-			public void onModeChange(final int mode) {
-				Startup.mMode = mode;
-				connectThread.write(new ProcessingModeMessage(Startup.mChannel, Startup.mIsTadel, mode));
-			}
-
-			@Override
-			public void onModeDetails(final String modeName, final String details) {
-				connectThread.write(new ProcessingModeMessage(Startup.mChannel, Startup.mIsTadel, Startup.mMode, modeName, details));
+			public void onModeDetails(final boolean isActive, final Integer power, final Integer frequency, final Integer wave,
+					final Integer mode, final String modeName, final String details) {
+				connectThread.write(new ProcessingModeMessage(mChannel, mIsTadel, isActive, power, frequency, wave, mode, modeName, details));
 			}
 		};
 
@@ -94,50 +95,50 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 		sender.setButton2Listener(new ButtonListener() {
 			@Override
 			public void handleButtonDown() {
-				Startup.mChannel = (Startup.mChannel + 1) % 2;
+				mChannel = (mChannel + 1) % 2;
 
-				if (Startup.mIsTadel) {
+				if (mIsTadel) {
 					for (RandomizedTadel tadel : tadels) {
 						tadel.stop();
 					}
-					lobs[Startup.mChannel].signal(2, true);
-					new Thread(tadels[Startup.mChannel]).start();
+					lobs[mChannel].signal(2, true);
+					new Thread(tadels[mChannel]).start();
 				}
 				else {
 					for (RandomizedLob lob : lobs) {
 						lob.stop();
 					}
-					lobs[Startup.mChannel].signal(1, true);
-					new Thread(lobs[Startup.mChannel]).start();
+					lobs[mChannel].signal(1, true);
+					new Thread(lobs[mChannel]).start();
 				}
-				listener.onModeChange(0);
+				listener.onModeDetails(false, null, null, null, 0, "", "");
 			}
 		});
 
 		sender.setButton1LongPressListener(new OnLongPressListener() {
 			@Override
 			public void handleLongTrigger() {
-				if (Startup.mIsTadel) {
+				if (mIsTadel) {
 					for (RandomizedTadel tadel : tadels) {
 						tadel.stop();
 					}
-					lobs[Startup.mChannel].signal(1, true);
-					new Thread(lobs[Startup.mChannel]).start();
-					Startup.mIsTadel = false;
+					lobs[mChannel].signal(1, true);
+					new Thread(lobs[mChannel]).start();
+					mIsTadel = false;
 				}
 				else {
 					for (RandomizedLob lob : lobs) {
 						lob.stop();
 					}
-					lobs[Startup.mChannel].signal(2, true);
-					new Thread(tadels[Startup.mChannel]).start();
-					Startup.mIsTadel = true;
+					lobs[mChannel].signal(2, true);
+					new Thread(tadels[mChannel]).start();
+					mIsTadel = true;
 				}
-				listener.onModeChange(0);
+				listener.onModeDetails(false, null, null, null, 0, "", "");
 			}
 		});
 
-		new Thread(lobs[Startup.mChannel]).start();
+		new Thread(lobs[mChannel]).start();
 
 		sender.setButtonStatusUpdateListener(new ButtonStatusUpdateListener() {
 			@Override
@@ -153,19 +154,17 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 	 */
 	public interface OnModeChangeListener {
 		/**
-		 * Callback called in case of mode change.
-		 *
-		 * @param mode The new mode.
-		 */
-		void onModeChange(int mode);
-
-		/**
 		 * Callback called to report mode details.
 		 *
+		 * @param isActive Flag if power is active.
+		 * @param power The power.
+		 * @param frequency The frequency.
+		 * @param wave The wave.
+		 * @param mode The mode.
 		 * @param modeName The mode name.
 		 * @param details mode details.
 		 */
-		void onModeDetails(String modeName, String details);
+		void onModeDetails(boolean isActive, Integer power, Integer frequency, Integer wave, Integer mode, String modeName, String details);
 	}
 
 }

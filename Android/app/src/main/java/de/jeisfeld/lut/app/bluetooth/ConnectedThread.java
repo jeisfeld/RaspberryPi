@@ -96,7 +96,7 @@ public class ConnectedThread extends Thread {
 	 *
 	 * @param data The data to be written.
 	 */
-	protected void write(final String data) {
+	protected synchronized void write(final String data) {
 		try {
 			mWriter.write(data);
 			mWriter.newLine();

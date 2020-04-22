@@ -25,7 +25,7 @@ public final class RandomizedTadel implements Runnable {
 	/**
 	 * The default frequency.
 	 */
-	private static final int DEFAULT_FREQUENCY = 255;
+	private static final int DEFAULT_FREQUENCY = 20;
 	/**
 	 * The default wave.
 	 */
@@ -104,7 +104,7 @@ public final class RandomizedTadel implements Runnable {
 			public void handleButtonDown() {
 				mMode = (mMode + 1) % RandomizedTadel.MODE_COUNT;
 				if (mListener != null) {
-					mListener.onModeChange(mMode);
+					mListener.onModeDetails(false, null, null, null, mMode, "", "");
 				}
 			}
 		});
@@ -135,8 +135,7 @@ public final class RandomizedTadel implements Runnable {
 				case 1:
 					// constant power and frequency, both controllable. Serves to prepare base power for modes 2 and 3.
 					power = controlPower;
-					mListener.onModeDetails("Fixed", "Power: " + power + "\nFrequency: " + frequency);
-
+					mListener.onModeDetails(true, power, frequency, RandomizedTadel.DEFAULT_WAVE, mMode, "Fixed", "");
 					mChannelSender.tadel(power, frequency, RandomizedTadel.DEFAULT_WAVE);
 					mPowerBaseTime = System.currentTimeMillis();
 					break;
@@ -158,11 +157,12 @@ public final class RandomizedTadel implements Runnable {
 
 					power = getUpdatedPower(power, controlPower);
 
-					mListener.onModeDetails("Avg Duration 2 sec", "Powered: " + isPowered + "\nCurrent Power: " + power
-							+ "\nPower time: " + String.format("%.1fs", (double) getMillisUntilChange(controlPower) / 1000) // MAGIC_NUMBER
-							+ "\nPower direction: " + getChangeDirection(controlPower)
-							+ "\nFrequency: " + frequency + "\nOn Probability: "
-							+ String.format("%.3f", (double) runningProbability / ButtonStatus.MAX_CONTROL_VALUE));
+					mListener.onModeDetails(isPowered, power, frequency, RandomizedTadel.DEFAULT_WAVE, mMode,
+							"Avg Duration 2 sec",
+							"Power time: " + String.format("%.1fs", (double) getMillisUntilChange(controlPower) / 1000) // MAGIC_NUMBER
+									+ "\nPower direction: " + getChangeDirection(controlPower)
+									+ "\nOn Probability: "
+									+ String.format("%.3f", (double) runningProbability / ButtonStatus.MAX_CONTROL_VALUE));
 
 					mChannelSender.tadel(isPowered ? power : 0, frequency, RandomizedTadel.DEFAULT_WAVE);
 					break;
@@ -194,17 +194,18 @@ public final class RandomizedTadel implements Runnable {
 					}
 					power = getUpdatedPower(power, controlPower);
 
-					mListener.onModeDetails("Random On/Off", "Powered: " + isPowered + "\nCurrent Power: " + power
-							+ "\nPower time: " + String.format("%.1fs", (double) getMillisUntilChange(controlPower) / 1000) // MAGIC_NUMBER
-							+ "\nPower direction: " + getChangeDirection(controlPower)
-							+ "\nAvg On duration: " + String.format("%.1fs", avgOnDuration)
-							+ "\nAvg Off duration: " + String.format("%.1fs", avgOffDuration));
+					mListener.onModeDetails(isPowered, power, RandomizedTadel.DEFAULT_FREQUENCY, RandomizedTadel.DEFAULT_WAVE, mMode,
+							"Random On/Off",
+							"Power time: " + String.format("%.1fs", (double) getMillisUntilChange(controlPower) / 1000) // MAGIC_NUMBER
+									+ "\nPower direction: " + getChangeDirection(controlPower)
+									+ "\nAvg On duration: " + String.format("%.1fs", avgOnDuration)
+									+ "\nAvg Off duration: " + String.format("%.1fs", avgOffDuration));
 
 					mChannelSender.tadel(isPowered ? power : 0, RandomizedTadel.DEFAULT_FREQUENCY, RandomizedTadel.DEFAULT_WAVE);
 					break;
 				default:
 					mChannelSender.tadel(0, 0, 0);
-					mListener.onModeDetails("Off", "");
+					mListener.onModeDetails(false, 0, null, null, mMode, "Off", "");
 					Thread.sleep(Sender.QUERY_DURATION);
 					mPowerBaseTime = System.currentTimeMillis();
 					break;

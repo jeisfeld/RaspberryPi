@@ -13,9 +13,25 @@ public class ProcessingModeMessage extends Message {
 	 */
 	private final boolean mIsTadel;
 	/**
+	 * Flag if the power is active.
+	 */
+	private final boolean mIsActive;
+	/**
+	 * The power.
+	 */
+	private final Integer mPower;
+	/**
+	 * The frequency.
+	 */
+	private final Integer mFrequency;
+	/**
+	 * The wave.
+	 */
+	private final Integer mWave;
+	/**
 	 * The processing mode.
 	 */
-	private final int mMode;
+	private final Integer mMode;
 	/**
 	 * The mode name.
 	 */
@@ -32,11 +48,15 @@ public class ProcessingModeMessage extends Message {
 	 */
 	public ProcessingModeMessage(final String dataString) {
 		String[] splitData = dataString.split(",", -1);
-		mChannel = Integer.parseInt(splitData[0]);
+		mChannel = stringToInt(splitData[0]);
 		mIsTadel = Boolean.parseBoolean(splitData[1]);
-		mMode = Integer.parseInt(splitData[2]);
-		mModeName = Message.decode(splitData[3]); // MAGIC_NUMBER
-		mDetails = Message.decode(splitData[4]); // MAGIC_NUMBER
+		mIsActive = Boolean.parseBoolean(splitData[2]);
+		mPower = stringToInt(splitData[3]); // MAGIC_NUMBER
+		mFrequency = stringToInt(splitData[4]); // MAGIC_NUMBER
+		mWave = stringToInt(splitData[5]); // MAGIC_NUMBER
+		mMode = stringToInt(splitData[6]); // MAGIC_NUMBER
+		mModeName = Message.decode(splitData[7]); // MAGIC_NUMBER
+		mDetails = Message.decode(splitData[8]); // MAGIC_NUMBER
 	}
 
 	/**
@@ -44,27 +64,25 @@ public class ProcessingModeMessage extends Message {
 	 *
 	 * @param channel The current channel.
 	 * @param isTadel Flag indicating if it is Lob or Tadel
+	 * @param isActive Flag indicating if power is active
+	 * @param power The power.
+	 * @param frequency The frequency.
+	 * @param wave The wave.
 	 * @param mode The processing mode.
 	 * @param modeName The mode name.
 	 * @param details The details.
 	 */
-	public ProcessingModeMessage(final int channel, final boolean isTadel, final int mode, final String modeName, final String details) {
+	public ProcessingModeMessage(final int channel, final boolean isTadel, final boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
+			final Integer frequency, final Integer wave, final Integer mode, final String modeName, final String details) {
 		mChannel = channel;
 		mIsTadel = isTadel;
+		mIsActive = isActive;
+		mPower = power;
+		mFrequency = frequency;
+		mWave = wave;
 		mMode = mode;
 		mModeName = modeName;
 		mDetails = details;
-	}
-
-	/**
-	 * Constructor.
-	 *
-	 * @param channel The current channel.
-	 * @param isTadel Flag indicating if it is Lob or Tadel
-	 * @param mode The processing mode.
-	 */
-	public ProcessingModeMessage(final int channel, final boolean isTadel, final int mode) {
-		this(channel, isTadel, mode, "", "");
 	}
 
 	@Override
@@ -74,7 +92,9 @@ public class ProcessingModeMessage extends Message {
 
 	@Override
 	protected final String getDataString() {
-		return mChannel + "," + mIsTadel + "," + mMode + "," + Message.encode(mModeName) + "," + Message.encode(mDetails);
+		return mChannel + "," + mIsTadel + "," + mIsActive + ","
+				+ intToString(mPower) + "," + intToString(mFrequency) + "," + intToString(mWave) + ","
+				+ intToString(mMode) + "," + Message.encode(mModeName) + "," + Message.encode(mDetails);
 	}
 
 	/**
@@ -96,11 +116,47 @@ public class ProcessingModeMessage extends Message {
 	}
 
 	/**
+	 * Get information if power is active.
+	 *
+	 * @return True if active
+	 */
+	public boolean isActive() {
+		return mIsActive;
+	}
+
+	/**
+	 * Get the power.
+	 *
+	 * @return The power
+	 */
+	public Integer getPower() {
+		return mPower;
+	}
+
+	/**
+	 * Get the frequency.
+	 *
+	 * @return The frequency
+	 */
+	public Integer getFrequency() {
+		return mFrequency;
+	}
+
+	/**
+	 * Get the wave.
+	 *
+	 * @return The wave
+	 */
+	public Integer getWave() {
+		return mWave;
+	}
+
+	/**
 	 * Get the mode.
 	 *
 	 * @return The mode
 	 */
-	public int getMode() {
+	public Integer getMode() {
 		return mMode;
 	}
 
@@ -120,6 +176,26 @@ public class ProcessingModeMessage extends Message {
 	 */
 	public String getDetails() {
 		return mDetails;
+	}
+
+	/**
+	 * Convert integer to String.
+	 *
+	 * @param i the integer
+	 * @return the String
+	 */
+	private static String intToString(final Integer i) {
+		return i == null ? "" : i.toString();
+	}
+
+	/**
+	 * Convert String back to integer.
+	 *
+	 * @param s The string.
+	 * @return the integer.
+	 */
+	private static Integer stringToInt(final String s) {
+		return (s == null || s.isEmpty()) ? null : Integer.parseInt(s);
 	}
 
 }
