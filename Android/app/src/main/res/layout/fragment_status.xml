@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:text="@string/text_bluetooth_status"
         android:textAlignment="center"
-        android:textSize="20sp" />
+        android:textSize="@dimen/text_header_size" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -38,11 +38,11 @@
             android:layout_height="@dimen/seekbar_height" />
 
         <TextView
-            android:id="@+id/textStatusMessage"
+            android:id="@+id/textControlStatusMessage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="center"
-            android:textSize="20sp" />
+            android:textSize="@dimen/text_header_size" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -99,12 +99,31 @@
             android:layout_height="@dimen/seekbar_height" />
 
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/text_standalone_status"
+            android:textAlignment="center"
+            android:textSize="@dimen/text_header_size" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Switch
+                android:id="@+id/switchStandaloneStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:switchMinWidth="64dp" />
+        </FrameLayout>
+
+        <TextView
             android:id="@+id/textProcessingMode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="center"
-            android:textSize="20sp" />
-
+            android:textSize="@dimen/text_header_size"
+            android:visibility="gone" />
 
     </LinearLayout>
 

@@ -54,7 +54,7 @@ public class BluetoothMessageHandler extends Handler {
 				message = de.jeisfeld.lut.bluetooth.message.Message.fromString(data);
 			}
 			catch (Exception e) {
-				Log.e(BluetoothMessageHandler.TAG, "Exception while decoding message: " + data, e);
+				Log.e(TAG, "Exception while decoding message: " + data, e);
 			}
 			if (message != null) {
 				if (activity != null) {
@@ -62,7 +62,7 @@ public class BluetoothMessageHandler extends Handler {
 				}
 			}
 			else {
-				Log.i(BluetoothMessageHandler.TAG, "Received unknown read message: " + data);
+				Log.i(TAG, "Received unknown read message: " + data);
 			}
 			break;
 		case CONNECTED:
@@ -71,7 +71,7 @@ public class BluetoothMessageHandler extends Handler {
 			}
 			break;
 		default:
-			Log.i(BluetoothMessageHandler.TAG, "Received message: " + messageType.name() + (data == null ? "" : " - " + data));
+			Log.i(TAG, "Received message: " + messageType.name() + (data == null ? "" : " - " + data));
 		}
 	}
 

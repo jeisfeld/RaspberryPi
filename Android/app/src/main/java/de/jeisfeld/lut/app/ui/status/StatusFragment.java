@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.app.R;
 
 public class StatusFragment extends Fragment {
@@ -24,10 +25,11 @@ public class StatusFragment extends Fragment {
 	@Override
 	public final View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
 		mStatusViewModel = new ViewModelProvider(requireActivity()).get(StatusViewModel.class);
+		mStatusViewModel.setActivity((MainActivity) requireActivity());
 		View root = inflater.inflate(R.layout.fragment_status, container, false);
 
-		final TextView textStatusMessage = root.findViewById(R.id.textStatusMessage);
-		mStatusViewModel.getStatusMessage().observe(getViewLifecycleOwner(), textStatusMessage::setText);
+		final TextView textStatusMessage = root.findViewById(R.id.textControlStatusMessage);
+		mStatusViewModel.getControlStatusMessage().observe(getViewLifecycleOwner(), textStatusMessage::setText);
 		final TextView textProcessingMode = root.findViewById(R.id.textProcessingMode);
 		mStatusViewModel.getProcessingMode().observe(getViewLifecycleOwner(), textProcessingMode::setText);
 
@@ -36,6 +38,13 @@ public class StatusFragment extends Fragment {
 		mStatusViewModel.getStatusBluetooth().observe(getViewLifecycleOwner(), checked -> {
 			switchBluetoothStatus.setChecked(checked);
 			layoutControlInfo.setVisibility(checked ? View.VISIBLE : View.GONE);
+		});
+
+		final Switch switchStandaloneStatus = root.findViewById(R.id.switchStandaloneStatus);
+		mStatusViewModel.getStatusStandalone().observe(getViewLifecycleOwner(), checked -> switchStandaloneStatus.setChecked(checked));
+		switchStandaloneStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			mStatusViewModel.updateStandaloneStatus(isChecked);
+			textProcessingMode.setVisibility(isChecked ? View.VISIBLE : View.GONE);
 		});
 
 		final Switch switchButton1 = root.findViewById(R.id.switchButton1);

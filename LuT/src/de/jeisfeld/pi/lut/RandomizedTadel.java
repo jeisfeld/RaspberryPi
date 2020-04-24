@@ -25,7 +25,7 @@ public final class RandomizedTadel implements Runnable {
 	/**
 	 * The default frequency.
 	 */
-	private static final int DEFAULT_FREQUENCY = 20;
+	private static final int DEFAULT_FREQUENCY = 100;
 	/**
 	 * The default wave.
 	 */

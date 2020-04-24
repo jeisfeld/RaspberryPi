@@ -51,6 +51,8 @@ public abstract class Message {
 			return new ButtonStatusMessage(messageData);
 		case PROCESSING_MODE:
 			return new ProcessingModeMessage(messageData);
+		case STANDALONE_STATUS:
+			return new StandaloneStatusMessage(messageData);
 		default:
 			return null;
 		}
@@ -99,7 +101,11 @@ public abstract class Message {
 		/**
 		 * The processing mode of the Pi LuT application.
 		 */
-		PROCESSING_MODE
+		PROCESSING_MODE,
+		/**
+		 * The status of standalone processing.
+		 */
+		STANDALONE_STATUS
 	}
 
 }

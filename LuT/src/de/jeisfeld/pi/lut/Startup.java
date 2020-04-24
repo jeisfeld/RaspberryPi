@@ -6,6 +6,7 @@ import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.FreeTextMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
 import de.jeisfeld.lut.bluetooth.message.ProcessingModeMessage;
+import de.jeisfeld.lut.bluetooth.message.StandaloneStatusMessage;
 import de.jeisfeld.pi.bluetooth.BluetoothMessageHandler;
 import de.jeisfeld.pi.bluetooth.ConnectThread;
 import de.jeisfeld.pi.lut.core.ButtonStatus;
@@ -32,6 +33,18 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 	 * The used mode.
 	 */
 	private static int mMode = 0;
+	/**
+	 * The RandomizedLob instances.
+	 */
+	private static RandomizedLob[] mLobs;
+	/**
+	 * The RandomizedTadel instances.
+	 */
+	private static RandomizedTadel[] mTadels;
+	/**
+	 * Flag indicating if the standalone processing is active.
+	 */
+	private static boolean mIsStandaloneActive;
 
 	/**
 	 * Main method.
@@ -59,12 +72,33 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 					switch (message.getType()) {
 					case CONNECTED:
 						connectThread.write(new ProcessingModeMessage(mChannel, mIsTadel, false, null, null, null, mMode, "", ""));
+						connectThread.write(new StandaloneStatusMessage(mIsStandaloneActive));
 						break;
 					case PING:
 						Logger.info("Ping");
 						break;
 					case FREE_TEXT:
 						Logger.log("Received free text message: " + ((FreeTextMessage) message).getText());
+						break;
+					case STANDALONE_STATUS:
+						if (((StandaloneStatusMessage) message).isActive()) {
+							if (!mIsStandaloneActive) {
+								mChannel = 0;
+								mIsTadel = false;
+								mMode = 0;
+								new Thread(mLobs[mChannel]).start();
+								mIsStandaloneActive = true;
+							}
+						}
+						else {
+							for (RandomizedLob lob : mLobs) {
+								lob.stop();
+							}
+							for (RandomizedTadel tadel : mTadels) {
+								tadel.stop();
+							}
+							mIsStandaloneActive = false;
+						}
 						break;
 					case PROCESSING_MODE:
 					case BUTTON_STATUS:
@@ -86,8 +120,8 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 			}
 		};
 
-		RandomizedLob[] lobs = {new RandomizedLob(0, listener), new RandomizedLob(1, listener)};
-		RandomizedTadel[] tadels = {new RandomizedTadel(0, listener), new RandomizedTadel(1, listener)};
+		mLobs = new RandomizedLob[] {new RandomizedLob(0, listener), new RandomizedLob(1, listener)};
+		mTadels = new RandomizedTadel[] {new RandomizedTadel(0, listener), new RandomizedTadel(1, listener)};
 
 		Sender sender = Sender.getInstance();
 		sender.setButton2LongPressListener(new ShutdownListener(4000)); // MAGIC_NUMBER
@@ -98,18 +132,18 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 				mChannel = (mChannel + 1) % 2;
 
 				if (mIsTadel) {
-					for (RandomizedTadel tadel : tadels) {
+					for (RandomizedTadel tadel : mTadels) {
 						tadel.stop();
 					}
-					lobs[mChannel].signal(2, true);
-					new Thread(tadels[mChannel]).start();
+					mLobs[mChannel].signal(2, true);
+					new Thread(mTadels[mChannel]).start();
 				}
 				else {
-					for (RandomizedLob lob : lobs) {
+					for (RandomizedLob lob : mLobs) {
 						lob.stop();
 					}
-					lobs[mChannel].signal(1, true);
-					new Thread(lobs[mChannel]).start();
+					mLobs[mChannel].signal(1, true);
+					new Thread(mLobs[mChannel]).start();
 				}
 				listener.onModeDetails(false, null, null, null, 0, "", "");
 			}
@@ -119,26 +153,27 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 			@Override
 			public void handleLongTrigger() {
 				if (mIsTadel) {
-					for (RandomizedTadel tadel : tadels) {
+					for (RandomizedTadel tadel : mTadels) {
 						tadel.stop();
 					}
-					lobs[mChannel].signal(1, true);
-					new Thread(lobs[mChannel]).start();
+					mLobs[mChannel].signal(1, true);
+					new Thread(mLobs[mChannel]).start();
 					mIsTadel = false;
 				}
 				else {
-					for (RandomizedLob lob : lobs) {
+					for (RandomizedLob lob : mLobs) {
 						lob.stop();
 					}
-					lobs[mChannel].signal(2, true);
-					new Thread(tadels[mChannel]).start();
+					mLobs[mChannel].signal(2, true);
+					new Thread(mTadels[mChannel]).start();
 					mIsTadel = true;
 				}
 				listener.onModeDetails(false, null, null, null, 0, "", "");
 			}
 		});
 
-		new Thread(lobs[mChannel]).start();
+		new Thread(mLobs[mChannel]).start();
+		mIsStandaloneActive = true;
 
 		sender.setButtonStatusUpdateListener(new ButtonStatusUpdateListener() {
 			@Override

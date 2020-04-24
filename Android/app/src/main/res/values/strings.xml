@@ -8,6 +8,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="text_bluetooth_status">Bluetooth Status:</string>
+    <string name="text_standalone_status">Standalone Processing Status:</string>
 
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>

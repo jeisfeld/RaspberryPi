@@ -57,13 +57,13 @@ public class ConnectedThread extends Thread {
 			tmpIn = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 		}
 		catch (IOException e) {
-			Log.e(ConnectedThread.TAG, "Error occurred when creating input stream", e);
+			Log.e(TAG, "Error occurred when creating input stream", e);
 		}
 		try {
 			tmpOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 		}
 		catch (IOException e) {
-			Log.e(ConnectedThread.TAG, "Error occurred when creating output stream", e);
+			Log.e(TAG, "Error occurred when creating output stream", e);
 		}
 
 		mReader = tmpIn;
@@ -84,7 +84,7 @@ public class ConnectedThread extends Thread {
 				mHandler.sendMessage(MessageType.READ, data);
 			}
 			catch (IOException e) {
-				Log.w(ConnectedThread.TAG, "Input stream was disconnected");
+				Log.w(TAG, "Input stream was disconnected");
 				mHandler.sendReconnect();
 				break;
 			}
@@ -104,7 +104,7 @@ public class ConnectedThread extends Thread {
 			mHandler.sendMessage(MessageType.WRITE, data);
 		}
 		catch (IOException e) {
-			Log.e(ConnectedThread.TAG, "Error occurred when sending data", e);
+			Log.e(TAG, "Error occurred when sending data", e);
 		}
 	}
 

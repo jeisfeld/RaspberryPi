@@ -7,7 +7,6 @@ import com.google.android.material.snackbar.Snackbar;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -22,6 +21,7 @@ import de.jeisfeld.lut.app.ui.status.StatusViewModel;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
 import de.jeisfeld.lut.bluetooth.message.ProcessingModeMessage;
+import de.jeisfeld.lut.bluetooth.message.StandaloneStatusMessage;
 
 /**
  * Main activity of the app.
@@ -61,8 +61,8 @@ public class MainActivity extends AppCompatActivity {
 		// menu should be considered as top level destinations.
 		mAppBarConfiguration = new AppBarConfiguration.Builder(
 				R.id.nav_home, R.id.nav_gallery, R.id.nav_status)
-				.setDrawerLayout(drawer)
-				.build();
+						.setDrawerLayout(drawer)
+						.build();
 		NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 		NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
 		NavigationUI.setupWithNavController(navigationView, navController);
@@ -86,18 +86,24 @@ public class MainActivity extends AppCompatActivity {
 		if (mConnectThread != null) {
 			mConnectThread.cancel();
 		}
-		Log.i(MainActivity.TAG, "Starting bluetooth connection...");
+		Log.i(TAG, "Starting bluetooth connection...");
 		mConnectThread = new ConnectThread(this, mHandler);
 		mConnectThread.start();
 	}
 
 	/**
-	 * Get the connect thread.
+	 * Write a message via bluetooth to Pi.
 	 *
-	 * @return The connect thread.
+	 * @param message The message.
 	 */
-	public ConnectThread getConnectThread() {
-		return mConnectThread;
+	public void writeBluetoothMessage(final Message message) {
+		ConnectThread connectThread = mConnectThread;
+		if (connectThread != null) {
+			connectThread.write(message);
+		}
+		else {
+			Log.e(TAG, "ConnectedThread not existing");
+		}
 	}
 
 	@Override
@@ -128,8 +134,11 @@ public class MainActivity extends AppCompatActivity {
 		case PROCESSING_MODE:
 			statusViewModel.setProcessingMode((ProcessingModeMessage) message);
 			break;
+		case STANDALONE_STATUS:
+			statusViewModel.setStandaloneStatus(((StandaloneStatusMessage) message).isActive());
+			break;
 		default:
-			Log.i(MainActivity.TAG, "Received unexpected message: " + message);
+			Log.i(TAG, "Received unexpected message: " + message);
 		}
 	}
 
@@ -139,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
 	 * @param connected true if connected.
 	 */
 	public void updateConnectedStatus(final boolean connected) {
-		Log.i(MainActivity.TAG, "Bluetooth connection status: " + connected);
+		Log.i(TAG, "Bluetooth connection status: " + connected);
 		StatusViewModel statusViewModel = new ViewModelProvider(this).get(StatusViewModel.class);
 		statusViewModel.setBluetoothStatus(connected);
 	}

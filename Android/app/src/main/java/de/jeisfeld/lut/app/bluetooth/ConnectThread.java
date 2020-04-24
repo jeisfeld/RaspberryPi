@@ -72,7 +72,7 @@ public class ConnectThread extends Thread {
 		mHandler = handler;
 		BluetoothDevice device = getBluetoothDevice(mac);
 		if (device == null) {
-			Log.e(ConnectThread.TAG, "Failed to get Bluetooth device.");
+			Log.e(TAG, "Failed to get Bluetooth device.");
 			mSocket = null;
 			return;
 		}
@@ -82,7 +82,7 @@ public class ConnectThread extends Thread {
 			tmpSocket = device.createRfcommSocketToServiceRecord(ConnectThread.APP_UUID);
 		}
 		catch (IOException e) {
-			Log.e(ConnectThread.TAG, "Socket's create() method failed", e);
+			Log.e(TAG, "Socket's create() method failed", e);
 		}
 		mSocket = tmpSocket;
 	}
@@ -96,11 +96,11 @@ public class ConnectThread extends Thread {
 	private BluetoothDevice getBluetoothDevice(final String mac) {
 		BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (bluetoothAdapter == null) {
-			Log.e(ConnectThread.TAG, "Bluetooth not available");
+			Log.e(TAG, "Bluetooth not available");
 			return null;
 		}
 		if (!bluetoothAdapter.isEnabled()) {
-			Log.e(ConnectThread.TAG, "Bluetooth not enabled");
+			Log.e(TAG, "Bluetooth not enabled");
 			return null;
 		}
 
@@ -130,7 +130,7 @@ public class ConnectThread extends Thread {
 			mSocket.connect();
 		}
 		catch (IOException connectException) {
-			Log.e(ConnectThread.TAG, "Unable to connect: " + connectException.getMessage());
+			Log.e(TAG, "Unable to connect: " + connectException.getMessage());
 			cancel();
 			mHandler.sendReconnect();
 			return;
@@ -148,7 +148,7 @@ public class ConnectThread extends Thread {
 	private void write(final String message) {
 		if (mConnectedThread == null) {
 			Toast.makeText(mContext, "Failed to send message - no connection available", Toast.LENGTH_SHORT).show();
-			Log.e(ConnectThread.TAG, "Failed to send message - no connection available");
+			Log.e(TAG, "Failed to send message - no connection available");
 		}
 		else {
 			mConnectedThread.write(message);
@@ -174,7 +174,7 @@ public class ConnectThread extends Thread {
 			}
 		}
 		catch (IOException e) {
-			Log.e(ConnectThread.TAG, "Could not close the client socket");
+			Log.e(TAG, "Could not close the client socket");
 		}
 	}
 }

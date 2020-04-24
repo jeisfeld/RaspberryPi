@@ -1,23 +1,36 @@
 package de.jeisfeld.lut.app.ui.status;
 
+import java.lang.ref.WeakReference;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
+import de.jeisfeld.lut.bluetooth.message.Message;
 import de.jeisfeld.lut.bluetooth.message.ProcessingModeMessage;
+import de.jeisfeld.lut.bluetooth.message.StandaloneStatusMessage;
 
 /**
  * The view model for the fragment.
  */
 public class StatusViewModel extends ViewModel {
 	/**
+	 * A reference to the starting activity.
+	 */
+	private WeakReference<MainActivity> mMainActivity;
+	/**
 	 * The status of bluetooth connection.
 	 */
 	private final MutableLiveData<Boolean> mStatusBluetooth = new MutableLiveData<>();
 	/**
-	 * The status message.
+	 * The status of standalone processing.
 	 */
-	private final MutableLiveData<String> mStatusMessage = new MutableLiveData<>();
+	private final MutableLiveData<Boolean> mStatusStandalone = new MutableLiveData<>();
+	/**
+	 * The control status message.
+	 */
+	private final MutableLiveData<String> mControlStatusMessage = new MutableLiveData<>();
 	/**
 	 * The status of button 1.
 	 */
@@ -50,6 +63,27 @@ public class StatusViewModel extends ViewModel {
 	}
 
 	/**
+	 * Set the activity.
+	 *
+	 * @param activity The activity.
+	 */
+	protected void setActivity(final MainActivity activity) {
+		mMainActivity = new WeakReference<>(activity);
+	}
+
+	/**
+	 * Write a bluetooth message.
+	 *
+	 * @param message The message to be written.
+	 */
+	private void writeBluetoothMessage(final Message message) {
+		MainActivity activity = mMainActivity.get();
+		if (activity != null) {
+			activity.writeBluetoothMessage(message);
+		}
+	}
+
+	/**
 	 * Set the status from status message.
 	 *
 	 * @param statusMessage The status message.
@@ -60,7 +94,7 @@ public class StatusViewModel extends ViewModel {
 		mStatusControl1.postValue(statusMessage.getControl1Value());
 		mStatusControl2.postValue(statusMessage.getControl2Value());
 		mStatusControl3.postValue(statusMessage.getControl3Value());
-		mStatusMessage.postValue("Control Status: "
+		mControlStatusMessage.postValue("Control Status: "
 				+ statusMessage.getControl1Value() + "," + statusMessage.getControl2Value() + "," + statusMessage.getControl3Value());
 	}
 
@@ -84,6 +118,15 @@ public class StatusViewModel extends ViewModel {
 	}
 
 	/**
+	 * Update the standalone status of the device.
+	 *
+	 * @param isStandaloneActive Flag indicating if standalone status should be set active or inactive.
+	 */
+	protected void updateStandaloneStatus(final boolean isStandaloneActive) {
+		writeBluetoothMessage(new StandaloneStatusMessage(isStandaloneActive));
+	}
+
+	/**
 	 * Set the bluetooth status.
 	 *
 	 * @param status The bluetooth status.
@@ -102,12 +145,30 @@ public class StatusViewModel extends ViewModel {
 	}
 
 	/**
-	 * Get the status message.
+	 * Set the standalone status.
 	 *
-	 * @return The status message.
+	 * @param status The standalone status.
 	 */
-	public final LiveData<String> getStatusMessage() {
-		return mStatusMessage;
+	public void setStandaloneStatus(final boolean status) {
+		mStatusStandalone.postValue(status);
+	}
+
+	/**
+	 * Get the standalone processing status.
+	 *
+	 * @return The standalone processing status.
+	 */
+	public final LiveData<Boolean> getStatusStandalone() {
+		return mStatusStandalone;
+	}
+
+	/**
+	 * Get the control status message.
+	 *
+	 * @return The control status message.
+	 */
+	public final LiveData<String> getControlStatusMessage() {
+		return mControlStatusMessage;
 	}
 
 	/**
