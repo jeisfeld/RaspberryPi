@@ -31,7 +31,7 @@ public class ButtonStatusMessage extends Message {
 	 * @param dataString The data string.
 	 */
 	public ButtonStatusMessage(final String dataString) {
-		String[] splitData = dataString.split(",");
+		String[] splitData = dataString.split(SEP);
 
 		mIsButton1Pressed = Boolean.parseBoolean(splitData[0]);
 		mIsButton2Pressed = Boolean.parseBoolean(splitData[1]);
@@ -47,7 +47,7 @@ public class ButtonStatusMessage extends Message {
 
 	@Override
 	protected final String getDataString() {
-		return mIsButton1Pressed + "," + mIsButton2Pressed + "," + mControl1Value + "," + mControl2Value + "," + mControl3Value;
+		return mIsButton1Pressed + SEP + mIsButton2Pressed + SEP + mControl1Value + SEP + mControl2Value + SEP + mControl3Value;
 	}
 
 	/**

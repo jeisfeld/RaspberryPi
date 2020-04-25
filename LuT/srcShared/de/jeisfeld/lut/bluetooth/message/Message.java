@@ -8,6 +8,11 @@ import java.util.Base64;
  */
 public abstract class Message {
 	/**
+	 * The separator in serialization.
+	 */
+	protected static final String SEP = ",";
+
+	/**
 	 * Get the type of message.
 	 *
 	 * @return The message type.
@@ -49,8 +54,10 @@ public abstract class Message {
 			return new FreeTextMessage(Message.decode(messageData));
 		case BUTTON_STATUS:
 			return new ButtonStatusMessage(messageData);
-		case PROCESSING_MODE:
-			return new ProcessingModeMessage(messageData);
+		case PROCESSING_STATUS:
+			return new ProcessingStatusMessage(messageData);
+		case PROCESSING_TRIGGER:
+			return new ProcessingTriggerMessage(messageData);
 		case STANDALONE_STATUS:
 			return new StandaloneStatusMessage(messageData);
 		default:
@@ -64,7 +71,7 @@ public abstract class Message {
 	 * @param s The String.
 	 * @return The decoded String.
 	 */
-	protected static final String encode(final String s) {
+	protected static String encode(final String s) {
 		return Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8));
 	}
 
@@ -74,7 +81,7 @@ public abstract class Message {
 	 * @param s The String from message.
 	 * @return The decoded String.
 	 */
-	protected static final String decode(final String s) {
+	protected static String decode(final String s) {
 		return new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8);
 	}
 
@@ -99,9 +106,13 @@ public abstract class Message {
 		 */
 		BUTTON_STATUS,
 		/**
-		 * The processing mode of the Pi LuT application.
+		 * The processing status of the Pi LuT application.
 		 */
-		PROCESSING_MODE,
+		PROCESSING_STATUS,
+		/**
+		 * A processing trigger of the Pi LuT application.
+		 */
+		PROCESSING_TRIGGER,
 		/**
 		 * The status of standalone processing.
 		 */

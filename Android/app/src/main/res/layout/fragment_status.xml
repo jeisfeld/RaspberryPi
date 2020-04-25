@@ -118,7 +118,7 @@
         </FrameLayout>
 
         <TextView
-            android:id="@+id/textProcessingMode"
+            android:id="@+id/textProcessingStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="center"

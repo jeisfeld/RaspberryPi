@@ -5,7 +5,7 @@ import java.io.IOException;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.FreeTextMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
-import de.jeisfeld.lut.bluetooth.message.ProcessingModeMessage;
+import de.jeisfeld.lut.bluetooth.message.ProcessingStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.StandaloneStatusMessage;
 import de.jeisfeld.pi.bluetooth.BluetoothMessageHandler;
 import de.jeisfeld.pi.bluetooth.ConnectThread;
@@ -71,7 +71,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 				else {
 					switch (message.getType()) {
 					case CONNECTED:
-						connectThread.write(new ProcessingModeMessage(mChannel, mIsTadel, false, null, null, null, mMode, "", ""));
+						connectThread.write(new ProcessingStatusMessage(mChannel, mIsTadel, false, null, null, null, mMode, "", ""));
 						connectThread.write(new StandaloneStatusMessage(mIsStandaloneActive));
 						break;
 					case PING:
@@ -100,7 +100,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 							mIsStandaloneActive = false;
 						}
 						break;
-					case PROCESSING_MODE:
+					case PROCESSING_STATUS:
 					case BUTTON_STATUS:
 					default:
 						Logger.error(new RuntimeException("Received unexpected message: " + data));
@@ -116,7 +116,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 			@Override
 			public void onModeDetails(final boolean isActive, final Integer power, final Integer frequency, final Integer wave,
 					final Integer mode, final String modeName, final String details) {
-				connectThread.write(new ProcessingModeMessage(mChannel, mIsTadel, isActive, power, frequency, wave, mode, modeName, details));
+				connectThread.write(new ProcessingStatusMessage(mChannel, mIsTadel, isActive, power, frequency, wave, mode, modeName, details));
 			}
 		};
 

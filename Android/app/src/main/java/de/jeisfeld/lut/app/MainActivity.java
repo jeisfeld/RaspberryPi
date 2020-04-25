@@ -20,7 +20,7 @@ import de.jeisfeld.lut.app.bluetooth.ConnectThread;
 import de.jeisfeld.lut.app.ui.status.StatusViewModel;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
-import de.jeisfeld.lut.bluetooth.message.ProcessingModeMessage;
+import de.jeisfeld.lut.bluetooth.message.ProcessingStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.StandaloneStatusMessage;
 
 /**
@@ -131,8 +131,8 @@ public class MainActivity extends AppCompatActivity {
 		case BUTTON_STATUS:
 			statusViewModel.setStatus((ButtonStatusMessage) message);
 			break;
-		case PROCESSING_MODE:
-			statusViewModel.setProcessingMode((ProcessingModeMessage) message);
+		case PROCESSING_STATUS:
+			statusViewModel.setProcessingStatus((ProcessingStatusMessage) message);
 			break;
 		case STANDALONE_STATUS:
 			statusViewModel.setStandaloneStatus(((StandaloneStatusMessage) message).isActive());

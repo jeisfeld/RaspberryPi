@@ -30,7 +30,7 @@ public class StatusFragment extends Fragment {
 
 		final TextView textStatusMessage = root.findViewById(R.id.textControlStatusMessage);
 		mStatusViewModel.getControlStatusMessage().observe(getViewLifecycleOwner(), textStatusMessage::setText);
-		final TextView textProcessingMode = root.findViewById(R.id.textProcessingMode);
+		final TextView textProcessingMode = root.findViewById(R.id.textProcessingStatus);
 		mStatusViewModel.getProcessingMode().observe(getViewLifecycleOwner(), textProcessingMode::setText);
 
 		final Switch switchBluetoothStatus = root.findViewById(R.id.switchBluetoothStatus);
@@ -41,7 +41,7 @@ public class StatusFragment extends Fragment {
 		});
 
 		final Switch switchStandaloneStatus = root.findViewById(R.id.switchStandaloneStatus);
-		mStatusViewModel.getStatusStandalone().observe(getViewLifecycleOwner(), checked -> switchStandaloneStatus.setChecked(checked));
+		mStatusViewModel.getStatusStandalone().observe(getViewLifecycleOwner(), switchStandaloneStatus::setChecked);
 		switchStandaloneStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
 			mStatusViewModel.updateStandaloneStatus(isChecked);
 			textProcessingMode.setVisibility(isChecked ? View.VISIBLE : View.GONE);

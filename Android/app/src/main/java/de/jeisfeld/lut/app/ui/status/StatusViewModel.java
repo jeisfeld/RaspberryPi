@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
-import de.jeisfeld.lut.bluetooth.message.ProcessingModeMessage;
+import de.jeisfeld.lut.bluetooth.message.ProcessingStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.StandaloneStatusMessage;
 
 /**
@@ -52,9 +52,9 @@ public class StatusViewModel extends ViewModel {
 	 */
 	private final MutableLiveData<Integer> mStatusControl3 = new MutableLiveData<>();
 	/**
-	 * The status message.
+	 * The processing status message.
 	 */
-	private final MutableLiveData<String> mProcessingMode = new MutableLiveData<>();
+	private final MutableLiveData<String> mProcessingStatus = new MutableLiveData<>();
 
 	/**
 	 * Constructor.
@@ -101,20 +101,20 @@ public class StatusViewModel extends ViewModel {
 	/**
 	 * Set the status from processing mode message.
 	 *
-	 * @param processingModeMessage The processing mode message.
+	 * @param processingStatusMessage The processing mode message.
 	 */
-	public void setProcessingMode(final ProcessingModeMessage processingModeMessage) {
-		String processingMode = "Channel: " + processingModeMessage.getChannel() + "\n"
-				+ "Type: " + (processingModeMessage.isTadel() ? "Tadel" : "Lob") + "\n"
-				+ (processingModeMessage.getPower() == null ? ""
-						: ("Active: " + processingModeMessage.isActive() + "\n"
-								+ "Power: " + processingModeMessage.getPower() + "\n"))
-				+ (processingModeMessage.getFrequency() == null ? "" : "Frequency: " + processingModeMessage.getFrequency() + "\n")
-				+ (processingModeMessage.getWave() == null ? "" : "Wave: " + processingModeMessage.getWave() + "\n")
-				+ (processingModeMessage.getMode() == null ? ""
-						: "Mode: " + processingModeMessage.getMode() + " (" + processingModeMessage.getModeName() + ")\n")
-				+ processingModeMessage.getDetails();
-		mProcessingMode.postValue(processingMode);
+	public void setProcessingStatus(final ProcessingStatusMessage processingStatusMessage) {
+		String processingStatus = "Channel: " + processingStatusMessage.getChannel() + "\n"
+				+ "Type: " + (processingStatusMessage.isTadel() ? "Tadel" : "Lob") + "\n"
+				+ (processingStatusMessage.getPower() == null ? ""
+						: ("Active: " + processingStatusMessage.isActive() + "\n"
+								+ "Power: " + processingStatusMessage.getPower() + "\n"))
+				+ (processingStatusMessage.getFrequency() == null ? "" : "Frequency: " + processingStatusMessage.getFrequency() + "\n")
+				+ (processingStatusMessage.getWave() == null ? "" : "Wave: " + processingStatusMessage.getWave() + "\n")
+				+ (processingStatusMessage.getMode() == null ? ""
+						: "Mode: " + processingStatusMessage.getMode() + " (" + processingStatusMessage.getModeName() + ")\n")
+				+ processingStatusMessage.getDetails();
+		mProcessingStatus.postValue(processingStatus);
 	}
 
 	/**
@@ -222,6 +222,6 @@ public class StatusViewModel extends ViewModel {
 	 * @return The processing mode.
 	 */
 	public final LiveData<String> getProcessingMode() {
-		return mProcessingMode;
+		return mProcessingStatus;
 	}
 }

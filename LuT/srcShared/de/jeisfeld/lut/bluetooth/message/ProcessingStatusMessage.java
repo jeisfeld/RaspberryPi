@@ -1,9 +1,9 @@
 package de.jeisfeld.lut.bluetooth.message;
 
 /**
- * A processing mode message.
+ * A processing status message.
  */
-public class ProcessingModeMessage extends Message {
+public class ProcessingStatusMessage extends Message {
 	/**
 	 * The current channel.
 	 */
@@ -46,8 +46,8 @@ public class ProcessingModeMessage extends Message {
 	 *
 	 * @param dataString The data string.
 	 */
-	public ProcessingModeMessage(final String dataString) {
-		String[] splitData = dataString.split(",", -1);
+	public ProcessingStatusMessage(final String dataString) {
+		String[] splitData = dataString.split(SEP, -1);
 		mChannel = stringToInt(splitData[0]);
 		mIsTadel = Boolean.parseBoolean(splitData[1]);
 		mIsActive = Boolean.parseBoolean(splitData[2]);
@@ -72,7 +72,7 @@ public class ProcessingModeMessage extends Message {
 	 * @param modeName The mode name.
 	 * @param details The details.
 	 */
-	public ProcessingModeMessage(final int channel, final boolean isTadel, final boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
+	public ProcessingStatusMessage(final int channel, final boolean isTadel, final boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
 			final Integer frequency, final Integer wave, final Integer mode, final String modeName, final String details) {
 		mChannel = channel;
 		mIsTadel = isTadel;
@@ -87,14 +87,14 @@ public class ProcessingModeMessage extends Message {
 
 	@Override
 	public final MessageType getType() {
-		return MessageType.PROCESSING_MODE;
+		return MessageType.PROCESSING_STATUS;
 	}
 
 	@Override
 	protected final String getDataString() {
-		return mChannel + "," + mIsTadel + "," + mIsActive + ","
-				+ intToString(mPower) + "," + intToString(mFrequency) + "," + intToString(mWave) + ","
-				+ intToString(mMode) + "," + Message.encode(mModeName) + "," + Message.encode(mDetails);
+		return mChannel + SEP + mIsTadel + SEP + mIsActive + SEP
+				+ intToString(mPower) + SEP + intToString(mFrequency) + SEP + intToString(mWave) + SEP
+				+ intToString(mMode) + SEP + Message.encode(mModeName) + SEP + Message.encode(mDetails);
 	}
 
 	/**
