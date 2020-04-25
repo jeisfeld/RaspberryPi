@@ -13,7 +13,7 @@ import de.jeisfeld.pi.util.Logger;
 /**
  * Class used for sending randomized Lob signals via LuT.
  */
-public final class RandomizedLob implements Runnable {
+public final class RandomizedLobStandalone implements Runnable {
 	/**
 	 * The default channel.
 	 */
@@ -67,13 +67,13 @@ public final class RandomizedLob implements Runnable {
 	 * @throws IOException connection issues
 	 */
 	public static void main(final String[] args) throws IOException { // SUPPRESS_CHECKSTYLE
-		int channel = RandomizedLob.DEFAULT_CHANNEL;
+		int channel = DEFAULT_CHANNEL;
 
 		if (args.length > 0) {
 			channel = Integer.parseInt(args[0]);
 		}
 
-		new RandomizedLob(channel).run();
+		new RandomizedLobStandalone(channel).run();
 	}
 
 	/**
@@ -82,7 +82,7 @@ public final class RandomizedLob implements Runnable {
 	 * @param channel The channel where the signals should be sent.
 	 * @throws IOException Connection issues.
 	 */
-	public RandomizedLob(final int channel) throws IOException {
+	public RandomizedLobStandalone(final int channel) throws IOException {
 		this(channel, null);
 	}
 
@@ -93,7 +93,7 @@ public final class RandomizedLob implements Runnable {
 	 * @param listener Callback for mode change.
 	 * @throws IOException Connection issues.
 	 */
-	public RandomizedLob(final int channel, final OnModeChangeListener listener) throws IOException {
+	public RandomizedLobStandalone(final int channel, final OnModeChangeListener listener) throws IOException {
 		Sender sender = Sender.getInstance();
 		mChannelSender = sender.getChannelSender(channel);
 		mListener = listener;
@@ -106,7 +106,7 @@ public final class RandomizedLob implements Runnable {
 		mChannelSender.setButton1Listener(new ButtonListener() {
 			@Override
 			public void handleButtonDown() {
-				mMode = (mMode + 1) % RandomizedLob.MODE_COUNT;
+				mMode = (mMode + 1) % MODE_COUNT;
 				signal(mMode + 1, false);
 				if (mListener != null) {
 					mListener.onModeDetails(false, null, null, null, mMode, "", "");
@@ -124,10 +124,10 @@ public final class RandomizedLob implements Runnable {
 	public void signal(final int count, final boolean isLong) {
 		mIsRunning = false;
 		try {
-			mChannelSender.lob(0, RandomizedLob.SIGNAL_DURATION);
+			mChannelSender.lob(0, SIGNAL_DURATION, false);
 			for (int i = 0; i < count; i++) {
-				mChannelSender.lob(RandomizedLob.SIGNAL_POWER, isLong ? RandomizedLob.LONG_SIGNAL_WAIT_DURATION : RandomizedLob.SIGNAL_DURATION);
-				mChannelSender.lob(0, i == count - 1 ? RandomizedLob.LONG_SIGNAL_WAIT_DURATION : RandomizedLob.SIGNAL_DURATION);
+				mChannelSender.lob(SIGNAL_POWER, isLong ? LONG_SIGNAL_WAIT_DURATION : SIGNAL_DURATION, false);
+				mChannelSender.lob(0, i == count - 1 ? LONG_SIGNAL_WAIT_DURATION : SIGNAL_DURATION, false);
 			}
 		}
 		catch (InterruptedException e) {
@@ -150,7 +150,7 @@ public final class RandomizedLob implements Runnable {
 		// variables for mode 1
 		double cyclePoint = 0;
 
-		// variables for mode 2
+		// variables for mode 2-3
 		Random random = new Random();
 		long nextSignalChangeTime = System.currentTimeMillis();
 		boolean isHighPower = false;
@@ -194,7 +194,7 @@ public final class RandomizedLob implements Runnable {
 						lastRunningProbability = runningProbability;
 						long duration;
 						try {
-							duration = (int) (-RandomizedLob.AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
+							duration = (int) (-AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
 						}
 						catch (Exception e) {
 							duration = Integer.MAX_VALUE;

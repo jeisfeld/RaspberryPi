@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
-import de.jeisfeld.lut.bluetooth.message.ProcessingStatusMessage;
+import de.jeisfeld.lut.bluetooth.message.ProcessingStandaloneMessage;
 import de.jeisfeld.lut.bluetooth.message.StandaloneStatusMessage;
 
 /**
@@ -103,7 +103,7 @@ public class StatusViewModel extends ViewModel {
 	 *
 	 * @param processingStatusMessage The processing mode message.
 	 */
-	public void setProcessingStatus(final ProcessingStatusMessage processingStatusMessage) {
+	public void setProcessingStatus(final ProcessingStandaloneMessage processingStatusMessage) {
 		String processingStatus = "Channel: " + processingStatusMessage.getChannel() + "\n"
 				+ "Type: " + (processingStatusMessage.isTadel() ? "Tadel" : "Lob") + "\n"
 				+ (processingStatusMessage.getPower() == null ? ""
@@ -217,11 +217,11 @@ public class StatusViewModel extends ViewModel {
 	}
 
 	/**
-	 * Get the processing mode.
+	 * Get the processing status.
 	 *
-	 * @return The processing mode.
+	 * @return The processing status.
 	 */
-	public final LiveData<String> getProcessingMode() {
+	public final LiveData<String> getProcessingStatus() {
 		return mProcessingStatus;
 	}
 }

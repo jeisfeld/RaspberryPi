@@ -34,12 +34,13 @@ public class ChannelSender {
 	 *
 	 * @param power The power to be used.
 	 * @param duration The duration of the message in ms.
+	 * @param allowOverride Flag indicating if override is allowed.
 	 * @throws InterruptedException Thread interrupted
 	 */
-	public void lob(final int power, final long duration) throws InterruptedException {
+	public void lob(final int power, final long duration, final boolean allowOverride) throws InterruptedException {
 		long startTime = System.currentTimeMillis(); // SUPPRESS_CHECKSTYLE
 		Lob lob = new Lob(mChannel, power, duration);
-		if (duration >= Sender.SEND_DURATION) {
+		if (!allowOverride) {
 			lob.setNoOverride();
 		}
 		mSender.processCommands(lob);
@@ -56,7 +57,7 @@ public class ChannelSender {
 	 */
 	public void lob(final int power) {
 		try {
-			lob(power, Sender.SEND_DURATION);
+			lob(power, Sender.SEND_DURATION * mSender.getChannelCount(new Lob(mChannel, 0)), false);
 		}
 		catch (InterruptedException e) {
 			// ignore
@@ -74,13 +75,13 @@ public class ChannelSender {
 	public void lob(final int startPower, final int endPower, final long duration) throws InterruptedException {
 		long stepCount = duration / Sender.SEND_DURATION;
 		if (stepCount <= 1) {
-			lob(endPower, duration);
+			lob(endPower, duration, true);
 		}
 		else {
 			long stepDuration = duration / stepCount;
 			for (int i = 0; i < stepCount; i++) {
 				byte power = (byte) (startPower + (i * (endPower - startPower)) / (stepCount - 1));
-				lob(power, stepDuration);
+				lob(power, stepDuration, false);
 			}
 		}
 	}
@@ -92,12 +93,14 @@ public class ChannelSender {
 	 * @param frequency The frequency
 	 * @param wave The waveform
 	 * @param duration The duration
+	 * @param allowOverride Flag indicating if override is allowed.
 	 * @throws InterruptedException Thread interrupted.
 	 */
-	public void tadel(final int power, final int frequency, final int wave, final long duration) throws InterruptedException {
+	public void tadel(final int power, final int frequency, final int wave, final long duration, final boolean allowOverride)
+			throws InterruptedException {
 		long startTime = System.currentTimeMillis(); // SUPPRESS_CHECKSTYLE
 		Tadel tadel = new Tadel(mChannel, power, frequency, wave, duration);
-		if (duration >= Sender.SEND_DURATION) {
+		if (!allowOverride) {
 			tadel.setNoOverride();
 		}
 		mSender.processCommands(tadel);
@@ -116,7 +119,7 @@ public class ChannelSender {
 	 */
 	public void tadel(final int power, final int frequency, final int wave) {
 		try {
-			tadel(power, frequency, wave, Sender.SEND_DURATION);
+			tadel(power, frequency, wave, Sender.SEND_DURATION * mSender.getChannelCount(new Tadel(mChannel, 0, 0, 0)), false);
 		}
 		catch (InterruptedException e) {
 			// ignore
@@ -138,14 +141,14 @@ public class ChannelSender {
 			final long duration) throws InterruptedException {
 		long stepCount = duration / 200; // MAGIC_NUMBER
 		if (stepCount <= 1) {
-			tadel(endPower, endFrequency, wave, duration);
+			tadel(endPower, endFrequency, wave, duration, true);
 		}
 		else {
 			long stepDuration = duration / stepCount;
 			for (int i = 0; i < stepCount; i++) {
 				byte power = (byte) (startPower + (i * (endPower - startPower)) / (stepCount - 1));
 				byte frequency = (byte) (startFrequency + (i * (endFrequency - startFrequency)) / (stepCount - 1));
-				tadel(power, frequency, wave, stepDuration);
+				tadel(power, frequency, wave, stepDuration, false);
 			}
 		}
 	}

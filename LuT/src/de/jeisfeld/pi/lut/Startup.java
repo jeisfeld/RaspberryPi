@@ -1,11 +1,14 @@
 package de.jeisfeld.pi.lut;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.FreeTextMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
-import de.jeisfeld.lut.bluetooth.message.ProcessingStatusMessage;
+import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
+import de.jeisfeld.lut.bluetooth.message.ProcessingStandaloneMessage;
 import de.jeisfeld.lut.bluetooth.message.StandaloneStatusMessage;
 import de.jeisfeld.pi.bluetooth.BluetoothMessageHandler;
 import de.jeisfeld.pi.bluetooth.ConnectThread;
@@ -36,7 +39,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 	/**
 	 * The RandomizedLob instances.
 	 */
-	private static RandomizedLob[] mLobs;
+	private static RandomizedLobStandalone[] mLobs;
 	/**
 	 * The RandomizedTadel instances.
 	 */
@@ -45,6 +48,10 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 	 * Flag indicating if the standalone processing is active.
 	 */
 	private static boolean mIsStandaloneActive;
+	/**
+	 * A map for storing the bluetooth runnables.
+	 */
+	private static final Map<Boolean, Map<Integer, BluetoothRunnable>> BLUETOOTH_RUNNABLE_MAP = new HashMap<>();
 
 	/**
 	 * Main method.
@@ -71,14 +78,19 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 				else {
 					switch (message.getType()) {
 					case CONNECTED:
-						connectThread.write(new ProcessingStatusMessage(mChannel, mIsTadel, false, null, null, null, mMode, "", ""));
+						connectThread.write(new ProcessingStandaloneMessage(mChannel, mIsTadel, false, null, null, null, mMode, "", ""));
 						connectThread.write(new StandaloneStatusMessage(mIsStandaloneActive));
+						for (Map<Integer, BluetoothRunnable> threadMap : BLUETOOTH_RUNNABLE_MAP.values()) {
+							for (BluetoothRunnable thread : threadMap.values()) {
+								thread.sendStatus(connectThread);
+							}
+						}
 						break;
 					case PING:
 						Logger.info("Ping");
 						break;
 					case FREE_TEXT:
-						Logger.log("Received free text message: " + ((FreeTextMessage) message).getText());
+						Logger.info("Received free text message: " + ((FreeTextMessage) message).getText());
 						break;
 					case STANDALONE_STATUS:
 						if (((StandaloneStatusMessage) message).isActive()) {
@@ -91,17 +103,57 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 							}
 						}
 						else {
-							for (RandomizedLob lob : mLobs) {
-								lob.stop();
-							}
-							for (RandomizedTadel tadel : mTadels) {
-								tadel.stop();
-							}
+							stopStandaloneThreads();
 							mIsStandaloneActive = false;
 						}
 						break;
-					case PROCESSING_STATUS:
-					case BUTTON_STATUS:
+					case PROCESSING_BLUETOOTH:
+						ProcessingBluetoothMessage triggerMessage = (ProcessingBluetoothMessage) message;
+						boolean isActive = triggerMessage.isActive();
+						int channel = triggerMessage.getChannel();
+						boolean isTadel = triggerMessage.isTadel();
+
+						synchronized (BLUETOOTH_RUNNABLE_MAP) {
+							if (!BLUETOOTH_RUNNABLE_MAP.containsKey(isTadel)) {
+								BLUETOOTH_RUNNABLE_MAP.put(isTadel, new HashMap<Integer, BluetoothRunnable>());
+							}
+							Map<Integer, BluetoothRunnable> threadMap = BLUETOOTH_RUNNABLE_MAP.get(isTadel);
+
+							if (isActive) {
+								stopStandaloneThreads();
+								mIsStandaloneActive = false;
+								connectThread.write(new StandaloneStatusMessage(mIsStandaloneActive));
+
+								BluetoothRunnable bluetoothRunnable = threadMap.get(channel);
+
+								if (bluetoothRunnable == null) {
+									if (isTadel) {
+										// TODO
+									}
+									else {
+										try {
+											bluetoothRunnable = new RandomizedLobBluetooth(triggerMessage);
+											threadMap.put(channel, bluetoothRunnable);
+											new Thread(bluetoothRunnable).start();
+										}
+										catch (IOException e) {
+											Logger.error(e);
+										}
+									}
+								}
+								else {
+									bluetoothRunnable.updateValues(triggerMessage);
+								}
+							}
+							else {
+								if (threadMap.containsKey(channel)) {
+									threadMap.get(channel).stop();
+									threadMap.remove(channel);
+								}
+
+							}
+						}
+						break;
 					default:
 						Logger.error(new RuntimeException("Received unexpected message: " + data));
 					}
@@ -116,11 +168,11 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 			@Override
 			public void onModeDetails(final boolean isActive, final Integer power, final Integer frequency, final Integer wave,
 					final Integer mode, final String modeName, final String details) {
-				connectThread.write(new ProcessingStatusMessage(mChannel, mIsTadel, isActive, power, frequency, wave, mode, modeName, details));
+				connectThread.write(new ProcessingStandaloneMessage(mChannel, mIsTadel, isActive, power, frequency, wave, mode, modeName, details));
 			}
 		};
 
-		mLobs = new RandomizedLob[] {new RandomizedLob(0, listener), new RandomizedLob(1, listener)};
+		mLobs = new RandomizedLobStandalone[] {new RandomizedLobStandalone(0, listener), new RandomizedLobStandalone(1, listener)};
 		mTadels = new RandomizedTadel[] {new RandomizedTadel(0, listener), new RandomizedTadel(1, listener)};
 
 		Sender sender = Sender.getInstance();
@@ -130,18 +182,12 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 			@Override
 			public void handleButtonDown() {
 				mChannel = (mChannel + 1) % 2;
-
+				stopStandaloneThreads();
 				if (mIsTadel) {
-					for (RandomizedTadel tadel : mTadels) {
-						tadel.stop();
-					}
 					mLobs[mChannel].signal(2, true);
 					new Thread(mTadels[mChannel]).start();
 				}
 				else {
-					for (RandomizedLob lob : mLobs) {
-						lob.stop();
-					}
 					mLobs[mChannel].signal(1, true);
 					new Thread(mLobs[mChannel]).start();
 				}
@@ -152,18 +198,13 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 		sender.setButton1LongPressListener(new OnLongPressListener() {
 			@Override
 			public void handleLongTrigger() {
+				stopStandaloneThreads();
 				if (mIsTadel) {
-					for (RandomizedTadel tadel : mTadels) {
-						tadel.stop();
-					}
 					mLobs[mChannel].signal(1, true);
 					new Thread(mLobs[mChannel]).start();
 					mIsTadel = false;
 				}
 				else {
-					for (RandomizedLob lob : mLobs) {
-						lob.stop();
-					}
 					mLobs[mChannel].signal(2, true);
 					new Thread(mTadels[mChannel]).start();
 					mIsTadel = true;
@@ -182,6 +223,18 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 			}
 		});
 
+	}
+
+	/**
+	 * Stop the standalone threads.
+	 */
+	private static void stopStandaloneThreads() {
+		for (RandomizedLobStandalone lob : mLobs) {
+			lob.stop();
+		}
+		for (RandomizedTadel tadel : mTadels) {
+			tadel.stop();
+		}
 	}
 
 	/**

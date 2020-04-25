@@ -18,7 +18,7 @@ public class BluetoothMessageHandler extends Handler {
 	/**
 	 * The reconnect delay in ms.
 	 */
-	private static final int RECONNECT_DELAY = 1000;
+	private static final int RECONNECT_DELAY = 5000;
 	/**
 	 * The context.
 	 */
@@ -71,7 +71,7 @@ public class BluetoothMessageHandler extends Handler {
 			}
 			break;
 		default:
-			Log.i(TAG, "Received message: " + messageType.name() + (data == null ? "" : " - " + data));
+			break;
 		}
 	}
 
@@ -91,7 +91,7 @@ public class BluetoothMessageHandler extends Handler {
 	protected void sendReconnect() {
 		Message message = new Message();
 		message.what = MessageType.RECONNECT.ordinal();
-		sendMessageDelayed(message, BluetoothMessageHandler.RECONNECT_DELAY);
+		sendMessageDelayed(message, RECONNECT_DELAY);
 	}
 
 	/**

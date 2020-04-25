@@ -59,7 +59,7 @@ public class TadelTest { // SUPPRESS_CHECKSTYLE
 				channelSender.tadel(power, frequency, wave);
 			}
 			else {
-				channelSender.tadel(0, 0, 0, Sender.SEND_DURATION);
+				channelSender.tadel(0, 0, 0, Sender.SEND_DURATION, false);
 			}
 		}
 	}

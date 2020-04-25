@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/fragment_padding"
+    tools:context=".ui.lob.LobFragment">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/text_bluetooth_status"
+        android:textAlignment="center"
+        android:textSize="@dimen/text_header_size" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Switch
+            android:id="@+id/switchBluetoothStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:switchMinWidth="64dp" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutControlInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/seekbar_height" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/text_processing_status"
+            android:textAlignment="center"
+            android:textSize="@dimen/text_header_size" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Switch
+                android:id="@+id/switchActive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:switchMinWidth="64dp" />
+        </FrameLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/seekbar_height" />
+
+        <Spinner
+            android:id="@+id/spinnerMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/seekbar_height" />
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TableRow android:id="@+id/tableRowPower">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="0.23"
+                    android:text="@string/text_power" />
+
+                <SeekBar
+                    android:id="@+id/seekBarPower"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.65"
+                    android:max="255" />
+
+                <TextView
+                    android:id="@+id/textViewPower"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="viewEnd"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_weight="0.12" />
+
+            </TableRow>
+
+            <TableRow android:id="@+id/tableRowMinPower">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="0.23"
+                    android:text="@string/text_min_power" />
+
+                <SeekBar
+                    android:id="@+id/seekBarMinPower"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.65"
+                    android:max="255" />
+
+                <TextView
+                    android:id="@+id/textViewMinPower"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="viewEnd"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_weight="0.12" />
+
+            </TableRow>
+
+            <TableRow android:id="@+id/tableRowCycleLength">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="0.23"
+                    android:text="@string/text_cycle_length" />
+
+                <SeekBar
+                    android:id="@+id/seekBarCycleLength"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.65"
+                    android:max="25" />
+
+                <TextView
+                    android:id="@+id/textViewCycleLength"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="viewEnd"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_weight="0.12" />
+
+            </TableRow>
+
+            <TableRow android:id="@+id/tableRowRunningProbability">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="0.23"
+                    android:text="@string/text_running_probability" />
+
+                <SeekBar
+                    android:id="@+id/seekBarRunningProbability"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.65"
+                    android:max="100" />
+
+                <TextView
+                    android:id="@+id/textViewRunningProbability"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="viewEnd"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_weight="0.12" />
+
+            </TableRow>
+
+            <TableRow android:id="@+id/tableRowAvgOffDuration">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="0.23"
+                    android:text="@string/text_avg_off_duration" />
+
+                <SeekBar
+                    android:id="@+id/seekBarAvgOffDuration"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.65"
+                    android:max="255" />
+
+                <TextView
+                    android:id="@+id/textViewAvgOffDuration"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="viewEnd"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_weight="0.12" />
+
+            </TableRow>
+
+            <TableRow android:id="@+id/tableRowAvgOnDuration">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="0.23"
+                    android:text="@string/text_avg_on_duration" />
+
+                <SeekBar
+                    android:id="@+id/seekBarAvgOnDuration"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.65"
+                    android:max="255" />
+
+                <TextView
+                    android:id="@+id/textViewAvgOnDuration"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="viewEnd"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_weight="0.12" />
+
+            </TableRow>
+
+        </TableLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

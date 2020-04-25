@@ -3,7 +3,7 @@ package de.jeisfeld.lut.bluetooth.message;
 /**
  * A processing status message.
  */
-public class ProcessingStatusMessage extends Message {
+public class ProcessingStandaloneMessage extends Message {
 	/**
 	 * The current channel.
 	 */
@@ -46,7 +46,7 @@ public class ProcessingStatusMessage extends Message {
 	 *
 	 * @param dataString The data string.
 	 */
-	public ProcessingStatusMessage(final String dataString) {
+	public ProcessingStandaloneMessage(final String dataString) {
 		String[] splitData = dataString.split(SEP, -1);
 		mChannel = stringToInt(splitData[0]);
 		mIsTadel = Boolean.parseBoolean(splitData[1]);
@@ -72,7 +72,7 @@ public class ProcessingStatusMessage extends Message {
 	 * @param modeName The mode name.
 	 * @param details The details.
 	 */
-	public ProcessingStatusMessage(final int channel, final boolean isTadel, final boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
+	public ProcessingStandaloneMessage(final int channel, final boolean isTadel, final boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
 			final Integer frequency, final Integer wave, final Integer mode, final String modeName, final String details) {
 		mChannel = channel;
 		mIsTadel = isTadel;
@@ -87,7 +87,7 @@ public class ProcessingStatusMessage extends Message {
 
 	@Override
 	public final MessageType getType() {
-		return MessageType.PROCESSING_STATUS;
+		return MessageType.PROCESSING_STANDALONE;
 	}
 
 	@Override
@@ -176,26 +176,6 @@ public class ProcessingStatusMessage extends Message {
 	 */
 	public String getDetails() {
 		return mDetails;
-	}
-
-	/**
-	 * Convert integer to String.
-	 *
-	 * @param i the integer
-	 * @return the String
-	 */
-	private static String intToString(final Integer i) {
-		return i == null ? "" : i.toString();
-	}
-
-	/**
-	 * Convert String back to integer.
-	 *
-	 * @param s The string.
-	 * @return the integer.
-	 */
-	private static Integer stringToInt(final String s) {
-		return (s == null || s.isEmpty()) ? null : Integer.parseInt(s);
 	}
 
 }

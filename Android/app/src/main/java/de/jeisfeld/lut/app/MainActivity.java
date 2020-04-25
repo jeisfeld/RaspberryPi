@@ -17,10 +17,13 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import de.jeisfeld.lut.app.bluetooth.BluetoothMessageHandler;
 import de.jeisfeld.lut.app.bluetooth.ConnectThread;
+import de.jeisfeld.lut.app.ui.lob.Lob0ViewModel;
+import de.jeisfeld.lut.app.ui.lob.Lob1ViewModel;
 import de.jeisfeld.lut.app.ui.status.StatusViewModel;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
-import de.jeisfeld.lut.bluetooth.message.ProcessingStatusMessage;
+import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
+import de.jeisfeld.lut.bluetooth.message.ProcessingStandaloneMessage;
 import de.jeisfeld.lut.bluetooth.message.StandaloneStatusMessage;
 
 /**
@@ -59,10 +62,9 @@ public class MainActivity extends AppCompatActivity {
 		NavigationView navigationView = findViewById(R.id.nav_view);
 		// Passing each menu ID as a set of Ids because each
 		// menu should be considered as top level destinations.
-		mAppBarConfiguration = new AppBarConfiguration.Builder(
-				R.id.nav_home, R.id.nav_gallery, R.id.nav_status)
-						.setDrawerLayout(drawer)
-						.build();
+		mAppBarConfiguration = new AppBarConfiguration.Builder(R.id.nav_home, R.id.nav_lob_0, R.id.nav_lob_1, R.id.nav_status)
+				.setDrawerLayout(drawer)
+				.build();
 		NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 		NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
 		NavigationUI.setupWithNavController(navigationView, navController);
@@ -131,8 +133,26 @@ public class MainActivity extends AppCompatActivity {
 		case BUTTON_STATUS:
 			statusViewModel.setStatus((ButtonStatusMessage) message);
 			break;
-		case PROCESSING_STATUS:
-			statusViewModel.setProcessingStatus((ProcessingStatusMessage) message);
+		case PROCESSING_STANDALONE:
+			statusViewModel.setProcessingStatus((ProcessingStandaloneMessage) message);
+			break;
+		case PROCESSING_BLUETOOTH:
+			Log.i(TAG, message.toString());
+			ProcessingBluetoothMessage bluetoothMessage = (ProcessingBluetoothMessage) message;
+			if (bluetoothMessage.isTadel()) {
+				// TODO
+			}
+			else {
+				switch (bluetoothMessage.getChannel()) {
+				case 0:
+					new ViewModelProvider(this).get(Lob0ViewModel.class).setProcessingStatus(bluetoothMessage);
+					break;
+				case 1:
+				default:
+					new ViewModelProvider(this).get(Lob1ViewModel.class).setProcessingStatus(bluetoothMessage);
+					break;
+				}
+			}
 			break;
 		case STANDALONE_STATUS:
 			statusViewModel.setStandaloneStatus(((StandaloneStatusMessage) message).isActive());
@@ -149,7 +169,9 @@ public class MainActivity extends AppCompatActivity {
 	 */
 	public void updateConnectedStatus(final boolean connected) {
 		Log.i(TAG, "Bluetooth connection status: " + connected);
-		StatusViewModel statusViewModel = new ViewModelProvider(this).get(StatusViewModel.class);
-		statusViewModel.setBluetoothStatus(connected);
+		ViewModelProvider viewModelProvider = new ViewModelProvider(this);
+		viewModelProvider.get(StatusViewModel.class).setBluetoothStatus(connected);
+		viewModelProvider.get(Lob0ViewModel.class).setBluetoothStatus(connected);
+		viewModelProvider.get(Lob1ViewModel.class).setBluetoothStatus(connected);
 	}
 }

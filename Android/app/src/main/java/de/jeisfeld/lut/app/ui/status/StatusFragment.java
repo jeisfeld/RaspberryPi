@@ -15,6 +15,9 @@ import androidx.lifecycle.ViewModelProvider;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.app.R;
 
+/**
+ * The fragment for displaying status.
+ */
 public class StatusFragment extends Fragment {
 	/**
 	 * The view model.
@@ -30,8 +33,8 @@ public class StatusFragment extends Fragment {
 
 		final TextView textStatusMessage = root.findViewById(R.id.textControlStatusMessage);
 		mStatusViewModel.getControlStatusMessage().observe(getViewLifecycleOwner(), textStatusMessage::setText);
-		final TextView textProcessingMode = root.findViewById(R.id.textProcessingStatus);
-		mStatusViewModel.getProcessingMode().observe(getViewLifecycleOwner(), textProcessingMode::setText);
+		final TextView textProcessingStatus = root.findViewById(R.id.textProcessingStatus);
+		mStatusViewModel.getProcessingStatus().observe(getViewLifecycleOwner(), textProcessingStatus::setText);
 
 		final Switch switchBluetoothStatus = root.findViewById(R.id.switchBluetoothStatus);
 		final LinearLayout layoutControlInfo = root.findViewById(R.id.layoutControlInfo);
@@ -44,7 +47,7 @@ public class StatusFragment extends Fragment {
 		mStatusViewModel.getStatusStandalone().observe(getViewLifecycleOwner(), switchStandaloneStatus::setChecked);
 		switchStandaloneStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
 			mStatusViewModel.updateStandaloneStatus(isChecked);
-			textProcessingMode.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+			textProcessingStatus.setVisibility(isChecked ? View.VISIBLE : View.GONE);
 		});
 
 		final Switch switchButton1 = root.findViewById(R.id.switchButton1);

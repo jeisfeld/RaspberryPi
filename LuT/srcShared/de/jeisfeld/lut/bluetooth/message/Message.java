@@ -54,10 +54,10 @@ public abstract class Message {
 			return new FreeTextMessage(Message.decode(messageData));
 		case BUTTON_STATUS:
 			return new ButtonStatusMessage(messageData);
-		case PROCESSING_STATUS:
-			return new ProcessingStatusMessage(messageData);
-		case PROCESSING_TRIGGER:
-			return new ProcessingTriggerMessage(messageData);
+		case PROCESSING_STANDALONE:
+			return new ProcessingStandaloneMessage(messageData);
+		case PROCESSING_BLUETOOTH:
+			return new ProcessingBluetoothMessage(messageData);
 		case STANDALONE_STATUS:
 			return new StandaloneStatusMessage(messageData);
 		default:
@@ -86,6 +86,66 @@ public abstract class Message {
 	}
 
 	/**
+	 * Convert integer to String.
+	 *
+	 * @param i the integer
+	 * @return the String
+	 */
+	protected static String intToString(final Integer i) {
+		return i == null ? "" : i.toString();
+	}
+
+	/**
+	 * Convert String back to integer.
+	 *
+	 * @param s The string.
+	 * @return the integer.
+	 */
+	protected static Integer stringToInt(final String s) {
+		return (s == null || s.isEmpty()) ? null : Integer.parseInt(s);
+	}
+
+	/**
+	 * Convert long to String.
+	 *
+	 * @param i the long
+	 * @return the String
+	 */
+	protected static String longToString(final Long i) {
+		return i == null ? "" : i.toString();
+	}
+
+	/**
+	 * Convert String back to long.
+	 *
+	 * @param s The string.
+	 * @return the long.
+	 */
+	protected static Long stringToLong(final String s) {
+		return (s == null || s.isEmpty()) ? null : Long.parseLong(s);
+	}
+
+	/**
+	 * Convert double to String.
+	 *
+	 * @param d the double
+	 * @return the String
+	 */
+	protected static String doubleToString(final Double d) {
+		return d == null ? "" : d.toString();
+	}
+
+	/**
+	 * Convert String back to double.
+	 *
+	 * @param s The string.
+	 * @return the double.
+	 */
+	protected static Double stringToDouble(final String s) {
+		return (s == null || s.isEmpty()) ? null : Double.parseDouble(s);
+	}
+
+	/**
 	 * The types of bluetooth messages.
 	 */
 	public enum MessageType {
@@ -106,13 +166,13 @@ public abstract class Message {
 		 */
 		BUTTON_STATUS,
 		/**
-		 * The processing status of the Pi LuT application.
+		 * The processing status of the Pi LuT standalone processing.
 		 */
-		PROCESSING_STATUS,
+		PROCESSING_STANDALONE,
 		/**
-		 * A processing trigger of the Pi LuT application.
+		 * A processing trigger of the Pi LuT bluetooth controlled processing.
 		 */
-		PROCESSING_TRIGGER,
+		PROCESSING_BLUETOOTH,
 		/**
 		 * The status of standalone processing.
 		 */

@@ -78,4 +78,13 @@ public class Lob implements WriteCommand {
 	public final boolean isOverride() {
 		return mIsOverride;
 	}
+
+	/**
+	 * Get the channel.
+	 *
+	 * @return the channel.
+	 */
+	public final int getChannel() {
+		return mChannel;
+	}
 }

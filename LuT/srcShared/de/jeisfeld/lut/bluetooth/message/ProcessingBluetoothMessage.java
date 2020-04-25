@@ -3,7 +3,7 @@ package de.jeisfeld.lut.bluetooth.message;
 /**
  * A processing trigger message.
  */
-public class ProcessingTriggerMessage extends Message {
+public class ProcessingBluetoothMessage extends Message {
 	/**
 	 * The current channel.
 	 */
@@ -47,18 +47,18 @@ public class ProcessingTriggerMessage extends Message {
 	/**
 	 * The average off duration.
 	 */
-	private final Double mAvgOffDuration;
+	private final Long mAvgOffDuration;
 	/**
 	 * The average on duration.
 	 */
-	private final Double mAvgOnDuration;
+	private final Long mAvgOnDuration;
 
 	/**
 	 * Constructor to reconstruct from String representation.
 	 *
 	 * @param dataString The data string.
 	 */
-	public ProcessingTriggerMessage(final String dataString) {
+	public ProcessingBluetoothMessage(final String dataString) {
 		String[] splitData = dataString.split(SEP, -1);
 		mChannel = stringToInt(splitData[0]);
 		mIsTadel = Boolean.parseBoolean(splitData[1]);
@@ -70,8 +70,8 @@ public class ProcessingTriggerMessage extends Message {
 		mMinPower = stringToInt(splitData[7]); // MAGIC_NUMBER
 		mCycleLength = stringToInt(splitData[8]); // MAGIC_NUMBER
 		mRunningProbability = stringToDouble(splitData[9]); // MAGIC_NUMBER
-		mAvgOffDuration = stringToDouble(splitData[10]); // MAGIC_NUMBER
-		mAvgOnDuration = stringToDouble(splitData[11]); // MAGIC_NUMBER
+		mAvgOffDuration = stringToLong(splitData[10]); // MAGIC_NUMBER
+		mAvgOnDuration = stringToLong(splitData[11]); // MAGIC_NUMBER
 	}
 
 	/**
@@ -90,9 +90,9 @@ public class ProcessingTriggerMessage extends Message {
 	 * @param avgOffDuration The average off duration.
 	 * @param avgOnDuration The average on duration.
 	 */
-	public ProcessingTriggerMessage(final int channel, final boolean isTadel, final boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
-			final Integer frequency, final Integer wave, final Integer mode, final Integer minPower, final int cycleLength,
-			final Double runningProbability, final Double avgOffDuration, final Double avgOnDuration) {
+	public ProcessingBluetoothMessage(final int channel, final boolean isTadel, final boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
+			final Integer frequency, final Integer wave, final Integer mode, final Integer minPower, final Integer cycleLength,
+			final Double runningProbability, final Long avgOffDuration, final Long avgOnDuration) {
 		mChannel = channel;
 		mIsTadel = isTadel;
 		mIsActive = isActive;
@@ -109,7 +109,7 @@ public class ProcessingTriggerMessage extends Message {
 
 	@Override
 	public final MessageType getType() {
-		return MessageType.PROCESSING_STATUS;
+		return MessageType.PROCESSING_BLUETOOTH;
 	}
 
 	@Override
@@ -117,7 +117,7 @@ public class ProcessingTriggerMessage extends Message {
 		return mChannel + SEP + mIsTadel + SEP + mIsActive + SEP
 				+ intToString(mPower) + SEP + intToString(mFrequency) + SEP + intToString(mWave) + SEP
 				+ intToString(mMode) + SEP + intToString(mMinPower) + SEP + intToString(mCycleLength) + SEP
-				+ doubleToString(mRunningProbability) + SEP + doubleToString(mAvgOffDuration) + SEP + doubleToString(mAvgOnDuration);
+				+ doubleToString(mRunningProbability) + SEP + longToString(mAvgOffDuration) + SEP + longToString(mAvgOnDuration);
 	}
 
 	/**
@@ -215,7 +215,7 @@ public class ProcessingTriggerMessage extends Message {
 	 *
 	 * @return The average off duration
 	 */
-	public Double getAvgOffDuration() {
+	public Long getAvgOffDuration() {
 		return mAvgOffDuration;
 	}
 
@@ -224,48 +224,8 @@ public class ProcessingTriggerMessage extends Message {
 	 *
 	 * @return The average on duration
 	 */
-	public Double getAvgOnDuration() {
+	public Long getAvgOnDuration() {
 		return mAvgOnDuration;
-	}
-
-	/**
-	 * Convert integer to String.
-	 *
-	 * @param i the integer
-	 * @return the String
-	 */
-	private static String intToString(final Integer i) {
-		return i == null ? "" : i.toString();
-	}
-
-	/**
-	 * Convert String back to integer.
-	 *
-	 * @param s The string.
-	 * @return the integer.
-	 */
-	private static Integer stringToInt(final String s) {
-		return (s == null || s.isEmpty()) ? null : Integer.parseInt(s);
-	}
-
-	/**
-	 * Convert double to String.
-	 *
-	 * @param d the double
-	 * @return the String
-	 */
-	private static String doubleToString(final Double d) {
-		return d == null ? "" : d.toString();
-	}
-
-	/**
-	 * Convert String back to double.
-	 *
-	 * @param s The string.
-	 * @return the double.
-	 */
-	private static Double stringToDouble(final String s) {
-		return (s == null || s.isEmpty()) ? null : Double.parseDouble(s);
 	}
 
 }

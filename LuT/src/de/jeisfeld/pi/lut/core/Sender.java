@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -108,7 +110,7 @@ public final class Sender {
 	 * @throws IOException issues with connection
 	 */
 	private Sender() throws IOException {
-		this(Sender.DEFAULT_PORT);
+		this(DEFAULT_PORT);
 	}
 
 	/**
@@ -144,7 +146,7 @@ public final class Sender {
 
 		try {
 			// Do initial read, so that ButtonStatus is initialized on first read.
-			doProcessCommands(Sender.ALL_READ_COMMADS);
+			doProcessCommands(ALL_READ_COMMADS);
 		}
 		catch (IOException e) {
 			// ignore
@@ -160,10 +162,10 @@ public final class Sender {
 	 * @throws IOException issues with connection
 	 */
 	public static synchronized Sender getInstance() throws IOException {
-		if (Sender.mInstance == null) {
-			Sender.mInstance = new Sender();
+		if (mInstance == null) {
+			mInstance = new Sender();
 		}
-		return Sender.mInstance;
+		return mInstance;
 	}
 
 	/**
@@ -236,7 +238,7 @@ public final class Sender {
 			do {
 				String input = read();
 				while (input != null) {
-					Matcher matcher = Sender.RESPONSE_PATTERN.matcher(input);
+					Matcher matcher = RESPONSE_PATTERN.matcher(input);
 					if (!matcher.find()) {
 						break;
 					}
@@ -389,6 +391,32 @@ public final class Sender {
 	}
 
 	/**
+	 * Get the number of channels currently used by sender.
+	 *
+	 * @param newCommand The new command.
+	 * @return The send duration.
+	 */
+	public int getChannelCount(final WriteCommand newCommand) {
+		final Set<Integer> lobChannels = new HashSet<>();
+		final Set<Integer> tadelChannels = new HashSet<>();
+		List<Command> allCommands = new ArrayList<>();
+		allCommands.addAll(mQueuedCommands);
+		allCommands.addAll(mProcessingCommands);
+		if (newCommand != null) {
+			allCommands.add(newCommand);
+		}
+		for (Command command : allCommands) {
+			if (command instanceof Lob) {
+				lobChannels.add(((Lob) command).getChannel());
+			}
+			if (command instanceof Tadel) {
+				lobChannels.add(((Tadel) command).getChannel());
+			}
+		}
+		return lobChannels.size() + tadelChannels.size();
+	}
+
+	/**
 	 * The thread processing the command queue.
 	 */
 	private class ProcessingThread extends Thread {
@@ -417,29 +445,29 @@ public final class Sender {
 
 					synchronized (mQueuedCommands) {
 						if (mQueuedCommands.size() == 0) {
-							if (mLastCommand != null && System.currentTimeMillis() - mLastRetriggerTime > Sender.FORCED_RETRIGGER_DELAY) {
+							if (mLastCommand != null && System.currentTimeMillis() - mLastRetriggerTime > FORCED_RETRIGGER_DELAY) {
 								commandsForProcessing.add(mLastCommand);
 								mLastRetriggerTime = System.currentTimeMillis();
 								commandsForProcessing.add(mNextReadCommand);
 								mNextReadCommand = mNextReadCommand instanceof AnalogRead ? new DigitalRead() : new AnalogRead();
 							}
 							else {
-								commandsForProcessing = Sender.ALL_READ_COMMADS;
+								commandsForProcessing = ALL_READ_COMMADS;
 							}
 						}
 						else {
 							WriteCommand nextCommand = mQueuedCommands.get(0);
 							expectedDuration = nextCommand.getDuration();
 							if (nextCommand.getSerialString() == null) { // This is wait command
-								if (expectedDuration > Sender.SEND_DURATION && mLastCommand != null
-										&& System.currentTimeMillis() - mLastRetriggerTime > Sender.FORCED_RETRIGGER_DELAY) {
+								if (expectedDuration > SEND_DURATION && mLastCommand != null
+										&& System.currentTimeMillis() - mLastRetriggerTime > FORCED_RETRIGGER_DELAY) {
 									commandsForProcessing.add(mLastCommand);
 									mLastRetriggerTime = System.currentTimeMillis();
 									commandsForProcessing.add(mNextReadCommand);
 									mNextReadCommand = mNextReadCommand instanceof AnalogRead ? new DigitalRead() : new AnalogRead();
 								}
-								else if (expectedDuration > Sender.QUERY_DURATION) {
-									commandsForProcessing = Sender.ALL_READ_COMMADS;
+								else if (expectedDuration > QUERY_DURATION) {
+									commandsForProcessing = ALL_READ_COMMADS;
 								}
 							}
 							else {
@@ -459,8 +487,9 @@ public final class Sender {
 						mLastRetriggerTime = System.currentTimeMillis();
 					}
 					long remainingTime = expectedDuration - System.currentTimeMillis() + timeBefore;
-					if (remainingTime > 0 && !mIsClosing) {
-						if (remainingTime > Sender.QUERY_DURATION) {
+					// If working on single channel, try exact timing.
+					if (remainingTime > 0 && !mIsClosing && getChannelCount(null) < 2) {
+						if (remainingTime > QUERY_DURATION) {
 							synchronized (mQueuedCommands) {
 								mQueuedCommands.add(0, new Wait(remainingTime));
 							}

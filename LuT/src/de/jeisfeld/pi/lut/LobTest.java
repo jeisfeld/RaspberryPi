@@ -76,7 +76,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 		int delay = 50; // MAGIC_NUMBER
 
 		for (int power = 1; power < maxSignal; power++) {
-			channelSender.lob(power, delay);
+			channelSender.lob(power, delay, true);
 		}
 
 		channelSender.lob(1, maxSignal, delay * maxSignal);
@@ -119,7 +119,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 				ChannelSender oldChannelSender = channelSenderHolder[0];
 				channelSenderHolder[0] = oldChannelSender == channelSenders[0] ? channelSenders[1] : channelSenders[0];
 				try {
-					oldChannelSender.lob(0, 0);
+					oldChannelSender.lob(0, 0, true);
 				}
 				catch (InterruptedException e) {
 					// do nothing
@@ -214,7 +214,7 @@ public class LobTest { // SUPPRESS_CHECKSTYLE
 		Sender sender = Sender.getInstance();
 		ChannelSender channelSender = sender.getChannelSender(0);
 
-		channelSender.lob(100, duration); // MAGIC_NUMBER
+		channelSender.lob(100, duration, false); // MAGIC_NUMBER
 
 		sender.close();
 	}
