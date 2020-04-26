@@ -243,14 +243,14 @@ public final class RandomizedLobStandalone implements Runnable {
 					mChannelSender.lob(isHighPower ? power : 0);
 					break;
 				default:
-					mChannelSender.lob(0);
+					mChannelSender.lob(0, 0, true);
 					mListener.onModeDetails(false, 0, null, null, mMode, "Off", "");
 					Thread.sleep(Sender.QUERY_DURATION);
 					break;
 				}
 
 			}
-			mChannelSender.lob(0);
+			mChannelSender.lob(0, 0, true);
 		}
 		catch (InterruptedException e) {
 			Logger.error(e);

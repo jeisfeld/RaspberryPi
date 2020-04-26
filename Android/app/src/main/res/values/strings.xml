@@ -13,6 +13,7 @@
     <string name="text_power">Power:</string>
     <string name="text_min_power">Min Power:</string>
     <string name="text_cycle_length">Cyc Length:</string>
+    <string name="text_frequency">Frequency:</string>
     <string name="text_running_probability">Run Prob:</string>
     <string name="text_avg_off_duration">Avg Off Dur:</string>
     <string name="text_avg_on_duration">Avg On Dur:</string>
@@ -20,6 +21,8 @@
     <string name="menu_home">Home</string>
     <string name="menu_lob_0">Lob 0</string>
     <string name="menu_lob_1">Lob 1</string>
+    <string name="menu_tadel_0">Tadel 0</string>
+    <string name="menu_tadel_1">Tadel 1</string>
     <string name="menu_status">Status</string>
 _
     <string-array name="values_mode_lob">
@@ -28,4 +31,12 @@ _
         <item>Random 1</item>
         <item>Random 2</item>
     </string-array>
+
+    <string-array name="values_mode_tadel">
+        <item>Off</item>
+        <item>Fixed</item>
+        <item>Random 1</item>
+        <item>Random 2</item>
+    </string-array>
+
 </resources>

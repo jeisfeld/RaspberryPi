@@ -48,7 +48,7 @@ public final class Sender {
 	/**
 	 * The duration of a send command in ms. It is always above 200ms, the rest is buffer.
 	 */
-	public static final int SEND_DURATION = 205;
+	public static final int SEND_DURATION = 210;
 	/**
 	 * The duration of a query command in ms. It is always above 100ms, the rest is buffer.
 	 */
@@ -410,7 +410,7 @@ public final class Sender {
 				lobChannels.add(((Lob) command).getChannel());
 			}
 			if (command instanceof Tadel) {
-				lobChannels.add(((Tadel) command).getChannel());
+				tadelChannels.add(((Tadel) command).getChannel());
 			}
 		}
 		return lobChannels.size() + tadelChannels.size();

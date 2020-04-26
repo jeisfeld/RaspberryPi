@@ -7,6 +7,7 @@ import com.google.android.material.snackbar.Snackbar;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -17,8 +18,10 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import de.jeisfeld.lut.app.bluetooth.BluetoothMessageHandler;
 import de.jeisfeld.lut.app.bluetooth.ConnectThread;
-import de.jeisfeld.lut.app.ui.lob.Lob0ViewModel;
-import de.jeisfeld.lut.app.ui.lob.Lob1ViewModel;
+import de.jeisfeld.lut.app.ui.control.Lob0ViewModel;
+import de.jeisfeld.lut.app.ui.control.Lob1ViewModel;
+import de.jeisfeld.lut.app.ui.control.Tadel0ViewModel;
+import de.jeisfeld.lut.app.ui.control.Tadel1ViewModel;
 import de.jeisfeld.lut.app.ui.status.StatusViewModel;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
@@ -62,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
 		NavigationView navigationView = findViewById(R.id.nav_view);
 		// Passing each menu ID as a set of Ids because each
 		// menu should be considered as top level destinations.
-		mAppBarConfiguration = new AppBarConfiguration.Builder(R.id.nav_home, R.id.nav_lob_0, R.id.nav_lob_1, R.id.nav_status)
+		mAppBarConfiguration = new AppBarConfiguration
+				.Builder(R.id.nav_home, R.id.nav_lob_0, R.id.nav_tadel_0, R.id.nav_lob_1, R.id.nav_tadel_1, R.id.nav_status)
 				.setDrawerLayout(drawer)
 				.build();
 		NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -140,7 +144,15 @@ public class MainActivity extends AppCompatActivity {
 			Log.i(TAG, message.toString());
 			ProcessingBluetoothMessage bluetoothMessage = (ProcessingBluetoothMessage) message;
 			if (bluetoothMessage.isTadel()) {
-				// TODO
+				switch (bluetoothMessage.getChannel()) {
+				case 0:
+					new ViewModelProvider(this).get(Tadel0ViewModel.class).setProcessingStatus(bluetoothMessage);
+					break;
+				case 1:
+				default:
+					new ViewModelProvider(this).get(Tadel1ViewModel.class).setProcessingStatus(bluetoothMessage);
+					break;
+				}
 			}
 			else {
 				switch (bluetoothMessage.getChannel()) {
@@ -172,6 +184,8 @@ public class MainActivity extends AppCompatActivity {
 		ViewModelProvider viewModelProvider = new ViewModelProvider(this);
 		viewModelProvider.get(StatusViewModel.class).setBluetoothStatus(connected);
 		viewModelProvider.get(Lob0ViewModel.class).setBluetoothStatus(connected);
+		viewModelProvider.get(Tadel0ViewModel.class).setBluetoothStatus(connected);
 		viewModelProvider.get(Lob1ViewModel.class).setBluetoothStatus(connected);
+		viewModelProvider.get(Tadel1ViewModel.class).setBluetoothStatus(connected);
 	}
 }

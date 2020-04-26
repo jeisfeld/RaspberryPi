@@ -1,8 +1,7 @@
-package de.jeisfeld.lut.app.ui.lob;
+package de.jeisfeld.lut.app.ui.control;
 
 import java.lang.ref.WeakReference;
 
-import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -13,7 +12,7 @@ import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
 /**
  * The view model for the fragment.
  */
-public abstract class LobViewModel extends ViewModel {
+public abstract class ControlViewModel extends ViewModel {
 	/**
 	 * The max value of the seekbars.
 	 */
@@ -38,33 +37,36 @@ public abstract class LobViewModel extends ViewModel {
 	/**
 	 * The power.
 	 */
-	private final MutableLiveData<Integer> mPower = new MutableLiveData<>(0);
+	private final MutableLiveData<Integer> mPower = new MutableLiveData<>();
 	/**
 	 * The min power value.
 	 */
-	private final MutableLiveData<Integer> mMinPower = new MutableLiveData<>(0);
+	private final MutableLiveData<Integer> mMinPower = new MutableLiveData<>();
 	/**
 	 * The cycle length.
 	 */
-	private final MutableLiveData<Integer> mCycleLength = new MutableLiveData<>(0);
+	private final MutableLiveData<Integer> mCycleLength = new MutableLiveData<>();
+	/**
+	 * The frequency.
+	 */
+	private final MutableLiveData<Integer> mFrequency = new MutableLiveData<>();
 	/**
 	 * The running probability.
 	 */
-	private final MutableLiveData<Double> mRunningProbability = new MutableLiveData<>(0.0);
+	private final MutableLiveData<Double> mRunningProbability = new MutableLiveData<>();
 	/**
 	 * The average off duration.
 	 */
-	private final MutableLiveData<Long> mAvgOffDuration = new MutableLiveData<>(1000L);
+	private final MutableLiveData<Long> mAvgOffDuration = new MutableLiveData<>();
 	/**
 	 * The average off duration.
 	 */
-	private final MutableLiveData<Long> mAvgOnDuration = new MutableLiveData<>(1000L);
-
+	private final MutableLiveData<Long> mAvgOnDuration = new MutableLiveData<>();
 
 	/**
 	 * Constructor.
 	 */
-	public LobViewModel() {
+	public ControlViewModel() {
 	}
 
 	/**
@@ -73,6 +75,13 @@ public abstract class LobViewModel extends ViewModel {
 	 * @return The channel.
 	 */
 	protected abstract int getChannel();
+
+	/**
+	 * Get the flag indicating if it is lob or tadel.
+	 *
+	 * @return Flag indicating if it is lob or tadel
+	 */
+	protected abstract boolean isTadel();
 
 	/**
 	 * Set the activity.
@@ -89,11 +98,11 @@ public abstract class LobViewModel extends ViewModel {
 	 * @param processingBluetoothMessage The processing status message.
 	 */
 	public void setProcessingStatus(final ProcessingBluetoothMessage processingBluetoothMessage) {
-		Log.i("JE.LuT", "setProcessingStatus " + this.getClass().getName() + ": " + processingBluetoothMessage);
-		Log.i("JE.LuT", "isActive: " + processingBluetoothMessage.isActive());
 		mIsActive.postValue(processingBluetoothMessage.isActive());
 		if (processingBluetoothMessage.getMode() != null) {
-			mMode.postValue(Mode.fromOrdinal(processingBluetoothMessage.getMode()));
+			mMode.postValue(isTadel()
+					? Mode.fromTadelValue(processingBluetoothMessage.getMode())
+					: Mode.fromLobValue(processingBluetoothMessage.getMode()));
 		}
 		if (processingBluetoothMessage.getPower() != null) {
 			mPower.postValue(processingBluetoothMessage.getPower());
@@ -101,8 +110,11 @@ public abstract class LobViewModel extends ViewModel {
 		if (processingBluetoothMessage.getMinPower() != null) {
 			mMinPower.postValue(processingBluetoothMessage.getMinPower());
 		}
-		if (processingBluetoothMessage.getPower() != null) {
+		if (processingBluetoothMessage.getCycleLength() != null) {
 			mCycleLength.postValue(processingBluetoothMessage.getCycleLength());
+		}
+		if (processingBluetoothMessage.getFrequency() != null) {
+			mFrequency.postValue(processingBluetoothMessage.getFrequency());
 		}
 		if (processingBluetoothMessage.getRunningProbability() != null) {
 			mRunningProbability.postValue(processingBluetoothMessage.getRunningProbability());
@@ -131,10 +143,10 @@ public abstract class LobViewModel extends ViewModel {
 	 * Write the current data via bluetooth.
 	 */
 	private void writeBluetoothMessage() {
-		ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), false,
+		ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
 				mIsActive.getValue() == null ? false : mIsActive.getValue(),
-				mPower.getValue(), null, null,
-				mMode.getValue() == null ? 0 : mMode.getValue().ordinal(),
+				mPower.getValue(), mFrequency.getValue(), null,
+				mMode.getValue() == null ? 0 : (isTadel() ? mMode.getValue().getTadelValue() : mMode.getValue().getLobValue()),
 				mMinPower.getValue(), mCycleLength.getValue(), mRunningProbability.getValue(),
 				mAvgOffDuration.getValue(), mAvgOnDuration.getValue());
 		writeBluetoothMessage(message);
@@ -257,6 +269,25 @@ public abstract class LobViewModel extends ViewModel {
 	}
 
 	/**
+	 * Get the frequency.
+	 *
+	 * @return The frequency.
+	 */
+	protected MutableLiveData<Integer> getFrequency() {
+		return mFrequency;
+	}
+
+	/**
+	 * Update the frequency.
+	 *
+	 * @param frequency The new frequency.
+	 */
+	protected void updateFrequency(final int frequency) {
+		mFrequency.setValue(frequency);
+		writeBluetoothMessage();
+	}
+
+	/**
 	 * Get the running probability.
 	 *
 	 * @return The running probability.
@@ -314,20 +345,22 @@ public abstract class LobViewModel extends ViewModel {
 	}
 
 	/**
-	 * Convert seekbar value to value in ms for avg duration
+	 * Convert seekbar value to value in ms for avg duration.
+	 *
 	 * @param seekbarValue the seekbar value
 	 * @return The value
 	 */
 	protected static long avgDurationSeekbarToValue(final int seekbarValue) {
-		return Math.round(1000 * Math.exp(0.016 * seekbarValue));
+		return Math.round(1000 * Math.exp(0.016 * seekbarValue)); // MAGIC_NUMBER
 	}
 
 	/**
-	 * Convert value in ms to seekbar value for avg duration
+	 * Convert value in ms to seekbar value for avg duration.
+	 *
 	 * @param value the value in ms
 	 * @return The seekbar value
 	 */
 	protected static int avgDurationValueToSeekbar(final long value) {
-		return  (int) Math.round(Math.log(value / 1000.0) / 0.016);
+		return (int) Math.round(Math.log(value / 1000.0) / 0.016); // MAGIC_NUMBER
 	}
 }

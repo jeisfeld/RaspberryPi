@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/fragment_padding"
-    tools:context=".ui.lob.LobFragment">
+    tools:context=".ui.control.ControlFragment">
 
     <TextView
         android:layout_width="match_parent"
@@ -94,9 +94,9 @@
                     android:id="@+id/textViewPower"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textAlignment="viewEnd"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12" />
+                    android:layout_weight="0.12"
+                    android:textAlignment="viewEnd" />
 
             </TableRow>
 
@@ -121,13 +121,15 @@
                     android:id="@+id/textViewMinPower"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textAlignment="viewEnd"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12" />
+                    android:layout_weight="0.12"
+                    android:textAlignment="viewEnd" />
 
             </TableRow>
 
-            <TableRow android:id="@+id/tableRowCycleLength">
+            <TableRow
+                android:id="@+id/tableRowCycleLength"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="0dp"
@@ -148,9 +150,38 @@
                     android:id="@+id/textViewCycleLength"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textAlignment="viewEnd"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12" />
+                    android:layout_weight="0.12"
+                    android:textAlignment="viewEnd" />
+
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRowFrequency"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="0.23"
+                    android:text="@string/text_frequency" />
+
+                <SeekBar
+                    android:id="@+id/seekBarFrequency"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.65"
+                    android:max="255" />
+
+                <TextView
+                    android:id="@+id/textViewFrequency"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_weight="0.12"
+                    android:textAlignment="viewEnd" />
 
             </TableRow>
 
@@ -175,9 +206,9 @@
                     android:id="@+id/textViewRunningProbability"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textAlignment="viewEnd"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12" />
+                    android:layout_weight="0.12"
+                    android:textAlignment="viewEnd" />
 
             </TableRow>
 
@@ -202,9 +233,9 @@
                     android:id="@+id/textViewAvgOffDuration"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textAlignment="viewEnd"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12" />
+                    android:layout_weight="0.12"
+                    android:textAlignment="viewEnd" />
 
             </TableRow>
 
@@ -229,9 +260,9 @@
                     android:id="@+id/textViewAvgOnDuration"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textAlignment="viewEnd"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12" />
+                    android:layout_weight="0.12"
+                    android:textAlignment="viewEnd" />
 
             </TableRow>
 

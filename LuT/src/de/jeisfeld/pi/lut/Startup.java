@@ -43,7 +43,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 	/**
 	 * The RandomizedTadel instances.
 	 */
-	private static RandomizedTadel[] mTadels;
+	private static RandomizedTadelStandalone[] mTadels;
 	/**
 	 * Flag indicating if the standalone processing is active.
 	 */
@@ -128,7 +128,14 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 
 								if (bluetoothRunnable == null) {
 									if (isTadel) {
-										// TODO
+										try {
+											bluetoothRunnable = new RandomizedTadelBluetooth(triggerMessage);
+											threadMap.put(channel, bluetoothRunnable);
+											new Thread(bluetoothRunnable).start();
+										}
+										catch (IOException e) {
+											Logger.error(e);
+										}
 									}
 									else {
 										try {
@@ -173,7 +180,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 		};
 
 		mLobs = new RandomizedLobStandalone[] {new RandomizedLobStandalone(0, listener), new RandomizedLobStandalone(1, listener)};
-		mTadels = new RandomizedTadel[] {new RandomizedTadel(0, listener), new RandomizedTadel(1, listener)};
+		mTadels = new RandomizedTadelStandalone[] {new RandomizedTadelStandalone(0, listener), new RandomizedTadelStandalone(1, listener)};
 
 		Sender sender = Sender.getInstance();
 		sender.setButton2LongPressListener(new ShutdownListener(4000)); // MAGIC_NUMBER
@@ -232,7 +239,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 		for (RandomizedLobStandalone lob : mLobs) {
 			lob.stop();
 		}
-		for (RandomizedTadel tadel : mTadels) {
+		for (RandomizedTadelStandalone tadel : mTadels) {
 			tadel.stop();
 		}
 	}

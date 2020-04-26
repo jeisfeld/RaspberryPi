@@ -10,13 +10,21 @@ import de.jeisfeld.pi.lut.core.Sender;
 import de.jeisfeld.pi.util.Logger;
 
 /**
- * Class used for sending randomized Lob signals via LuT.
+ * Class used for sending randomized Tadel signals via LuT.
  */
-public final class RandomizedLobBluetooth implements BluetoothRunnable {
+public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	/**
 	 * The average duration of a signal.
 	 */
 	private static final long AVERAGE_SIGNAL_DURATION = 2000;
+	/**
+	 * The default wave.
+	 */
+	private static final int DEFAULT_WAVE = 0;
+	/**
+	 * The max power.
+	 */
+	private static final int MAX_POWER = 255;
 
 	/**
 	 * The channel.
@@ -41,11 +49,11 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	/**
 	 * The min power.
 	 */
-	private int mMinPower = 0;
+	private int mControlPower = 0;
 	/**
-	 * The cycle length.
+	 * The frequency.
 	 */
-	private int mCycleLength = 0;
+	private int mFrequency = 0;
 	/**
 	 * The running probability.
 	 */
@@ -58,6 +66,10 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	 * The average off duration.
 	 */
 	private long mAvgOffDuration = 1;
+	/**
+	 * The base time for automatic power change.
+	 */
+	private long mPowerBaseTime = System.currentTimeMillis();
 
 	/**
 	 * Constructor.
@@ -65,7 +77,7 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	 * @param message the triggering message.
 	 * @throws IOException Connection issues.
 	 */
-	public RandomizedLobBluetooth(final ProcessingBluetoothMessage message) throws IOException {
+	public RandomizedTadelBluetooth(final ProcessingBluetoothMessage message) throws IOException {
 		mChannel = message.getChannel();
 		Sender sender = Sender.getInstance();
 		mChannelSender = sender.getChannelSender(mChannel);
@@ -78,13 +90,10 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 			mMode = message.getMode();
 		}
 		if (message.getPower() != null) {
-			mPower = message.getPower();
+			mControlPower = message.getPower();
 		}
-		if (message.getMinPower() != null) {
-			mMinPower = message.getMinPower();
-		}
-		if (message.getCycleLength() != null) {
-			mCycleLength = message.getCycleLength();
+		if (message.getFrequency() != null) {
+			mFrequency = message.getFrequency();
 		}
 		if (message.getRunningProbability() != null) {
 			mRunningProbability = message.getRunningProbability();
@@ -101,13 +110,9 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	public void run() {
 		mIsRunning = true;
 
-		// variables for mode 1
-		double cyclePoint = 0;
-
-		// variables for mode 2-3
 		Random random = new Random();
 		long nextSignalChangeTime = System.currentTimeMillis();
-		boolean isHighPower = false;
+		boolean isPowered = false;
 		double lastRunningProbability = 0;
 		double lastAvgOffDuration = 0;
 		double lastAvgOnDuration = 0;
@@ -116,19 +121,13 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 			while (mIsRunning) {
 				switch (mMode) {
 				case 1:
-					// Wave up and down
-					int value = (int) ((1 - Math.cos(2 * Math.PI * cyclePoint)) / 2 * (mPower - mMinPower) + mMinPower);
-					mChannelSender.lob(value);
-
-					if (mCycleLength > 0) {
-						cyclePoint = (Math.round(cyclePoint * 2 * mCycleLength) + 1.0) / 2 / mCycleLength;
-					}
-					else {
-						cyclePoint = 0.5; // MAGIC_NUMBER
-					}
+					// constant power and frequency, both controllable. Serves to prepare base power for modes 2 and 3.
+					mPower = mControlPower;
+					mChannelSender.tadel(mPower, mFrequency, DEFAULT_WAVE);
+					mPowerBaseTime = System.currentTimeMillis();
 					break;
 				case 2:
-					// Random change between high/low level. Avg signal duration 2s. Levels and Probability controllable.
+					// Random change between on/off level. Avg signal duration 2s. Power, frequency and Probability controllable.
 					if (System.currentTimeMillis() > nextSignalChangeTime || mRunningProbability != lastRunningProbability) {
 						lastRunningProbability = mRunningProbability;
 						long duration;
@@ -139,22 +138,23 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 							duration = Integer.MAX_VALUE;
 						}
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
-						isHighPower = random.nextDouble() < mRunningProbability;
+						isPowered = random.nextDouble() < mRunningProbability;
 					}
 
-					mChannelSender.lob(isHighPower ? mPower : mMinPower);
+					mPower = getUpdatedPower(mPower, mControlPower);
+					mChannelSender.tadel(isPowered ? mPower : 0, mFrequency, DEFAULT_WAVE);
 					break;
 				case 3: // MAGIC_NUMBER
 					// Random change between on/off. On level and avg off/on duration controllable.
 					if (System.currentTimeMillis() > nextSignalChangeTime // BOOLEAN_EXPRESSION_COMPLEXITY
-							|| isHighPower && mAvgOnDuration != lastAvgOnDuration
-							|| !isHighPower && mAvgOffDuration != lastAvgOffDuration) {
+							|| isPowered && mAvgOnDuration != lastAvgOnDuration
+							|| !isPowered && mAvgOffDuration != lastAvgOffDuration) {
 						lastAvgOffDuration = mAvgOffDuration;
 						lastAvgOnDuration = mAvgOnDuration;
 						if (System.currentTimeMillis() > nextSignalChangeTime) {
-							isHighPower = !isHighPower;
+							isPowered = !isPowered;
 						}
-						double avgDuration = isHighPower ? mAvgOnDuration : mAvgOffDuration;
+						double avgDuration = isPowered ? mAvgOnDuration : mAvgOffDuration; // MAGIC_NUMBER
 						int duration;
 						try {
 							duration = (int) (-avgDuration * Math.log(random.nextFloat()));
@@ -164,21 +164,64 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 						}
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 					}
-
-					mChannelSender.lob(isHighPower ? mPower : mMinPower);
+					mPower = getUpdatedPower(mPower, mControlPower);
+					mChannelSender.tadel(isPowered ? mPower : 0, mFrequency, DEFAULT_WAVE);
 					break;
 				default:
-					mChannelSender.lob(0, 0, true);
+					mChannelSender.tadel(0, 0, 0, 0, true);
 					Thread.sleep(Sender.QUERY_DURATION);
 					break;
 				}
 
 			}
-			mChannelSender.lob(0, 0, true);
+			mChannelSender.tadel(0, 0, 0, 0, true);
 		}
 		catch (InterruptedException e) {
 			Logger.error(e);
 		}
+	}
+
+	/**
+	 * Update the power based on previous power and power control status. Serves to use control for controlling dynamic change.
+	 *
+	 * @param oldPower The old power.
+	 * @param controlPower The value of power control.
+	 * @return The new power.
+	 */
+	private int getUpdatedPower(final int oldPower, final int controlPower) {
+		int newPower = oldPower;
+		int millisUntilChange = getMillisUntilChange(controlPower);
+		if (System.currentTimeMillis() - mPowerBaseTime > millisUntilChange) {
+			newPower += getChangeDirection(controlPower) * ((System.currentTimeMillis() - mPowerBaseTime) / millisUntilChange);
+			mPowerBaseTime = System.currentTimeMillis();
+		}
+		if (newPower > MAX_POWER) {
+			newPower = MAX_POWER;
+		}
+		else if (newPower < 0) {
+			newPower = 0;
+		}
+		return newPower;
+	}
+
+	/**
+	 * Get the change direction.
+	 *
+	 * @param controlPower The value of power control.
+	 * @return The milliseconds until change.
+	 */
+	private int getChangeDirection(final int controlPower) {
+		return (int) Math.signum((int) ((controlPower - 127) / 16.0)); // MAGIC_NUMBER 0 in middle range, otherwise +-1
+	}
+
+	/**
+	 * Get milliseconds until change.
+	 *
+	 * @param controlPower The value of power control.
+	 * @return The milliseconds until change.
+	 */
+	private int getMillisUntilChange(final int controlPower) {
+		return (int) (150000 / Math.pow(1.04, Math.abs(controlPower - 127))); // MAGIC_NUMBER ca. 1 minute to 1 second
 	}
 
 	@Override
@@ -193,8 +236,8 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 
 	@Override
 	public void sendStatus(final ConnectThread connectThread) {
-		connectThread.write(new ProcessingBluetoothMessage(mChannel, false, mIsRunning, mPower, null, null, mMode,
-				mMinPower, mCycleLength, mRunningProbability, mAvgOffDuration, mAvgOnDuration));
+		connectThread.write(new ProcessingBluetoothMessage(mChannel, true, mIsRunning, mControlPower, mFrequency, null, mMode,
+				null, null, mRunningProbability, mAvgOffDuration, mAvgOnDuration));
 
 	}
 
