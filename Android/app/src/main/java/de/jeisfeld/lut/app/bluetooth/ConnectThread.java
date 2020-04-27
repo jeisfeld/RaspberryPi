@@ -79,7 +79,7 @@ public class ConnectThread extends Thread {
 		// Use a temporary object that is later assigned to mmSocket because mmSocket is final.
 		BluetoothSocket tmpSocket = null;
 		try {
-			tmpSocket = device.createRfcommSocketToServiceRecord(ConnectThread.APP_UUID);
+			tmpSocket = device.createInsecureRfcommSocketToServiceRecord(ConnectThread.APP_UUID);
 		}
 		catch (IOException e) {
 			Log.e(TAG, "Socket's create() method failed", e);
@@ -104,17 +104,7 @@ public class ConnectThread extends Thread {
 			return null;
 		}
 
-		Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-
-		if (pairedDevices.size() > 0) {
-			for (BluetoothDevice device : pairedDevices) {
-				String deviceHardwareAddress = device.getAddress(); // MAC address
-				if (mac.equals(deviceHardwareAddress)) {
-					return device;
-				}
-			}
-		}
-		return null;
+		return bluetoothAdapter.getRemoteDevice(mac);
 	}
 
 	@Override

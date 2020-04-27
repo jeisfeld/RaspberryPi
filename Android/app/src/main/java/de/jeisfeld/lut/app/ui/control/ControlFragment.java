@@ -2,6 +2,7 @@ package de.jeisfeld.lut.app.ui.control;
 
 import java.util.Locale;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,6 +60,7 @@ public abstract class ControlFragment extends Fragment {
 	 */
 	protected abstract OnItemSelectedListener getOnModeSelectedListener(View parentView, ControlViewModel viewModel);
 
+	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	public final View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
 		mControlViewModel = getLobViewModel();
@@ -90,6 +92,8 @@ public abstract class ControlFragment extends Fragment {
 		prepareSeekbarRunningProbability(root);
 		prepareSeekbarAvgOffDuration(root);
 		prepareSeekbarAvgOnDuration(root);
+
+		switchBluetoothStatus.setOnTouchListener((v, event) -> true);
 
 		return root;
 	}

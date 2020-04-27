@@ -1,5 +1,7 @@
 package de.jeisfeld.pi.bluetooth;
 
+import javax.bluetooth.DiscoveryAgent;
+import javax.bluetooth.LocalDevice;
 import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
@@ -67,9 +69,11 @@ public class ConnectThread extends Thread {
 		while (true) {
 			// Retry, so that after closing a connection, the next one will immediately reopen.
 			try {
+				LocalDevice.getLocalDevice().setDiscoverable(DiscoveryAgent.GIAC);
 				Logger.info("waiting for connection...");
 				connection = notifier.acceptAndOpen();
 				Logger.info("got connection.");
+				LocalDevice.getLocalDevice().setDiscoverable(DiscoveryAgent.NOT_DISCOVERABLE);
 				mHandler.onMessageReceived(new ConnectedMessage().toString());
 
 				ConnectedThread newConnectedThread = new ConnectedThread(mHandler, connection);
