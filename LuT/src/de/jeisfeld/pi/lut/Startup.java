@@ -82,7 +82,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 						connectThread.write(new StandaloneStatusMessage(mIsStandaloneActive));
 						for (Map<Integer, BluetoothRunnable> threadMap : BLUETOOTH_RUNNABLE_MAP.values()) {
 							for (BluetoothRunnable thread : threadMap.values()) {
-								thread.sendStatus(connectThread);
+								thread.sendStatus();
 							}
 						}
 						break;
@@ -129,7 +129,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 								if (bluetoothRunnable == null) {
 									if (isTadel) {
 										try {
-											bluetoothRunnable = new RandomizedTadelBluetooth(triggerMessage);
+											bluetoothRunnable = new RandomizedTadelBluetooth(triggerMessage, connectThread);
 											threadMap.put(channel, bluetoothRunnable);
 											new Thread(bluetoothRunnable).start();
 										}
@@ -139,7 +139,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 									}
 									else {
 										try {
-											bluetoothRunnable = new RandomizedLobBluetooth(triggerMessage);
+											bluetoothRunnable = new RandomizedLobBluetooth(triggerMessage, connectThread);
 											threadMap.put(channel, bluetoothRunnable);
 											new Thread(bluetoothRunnable).start();
 										}

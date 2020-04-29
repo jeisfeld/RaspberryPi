@@ -37,6 +37,10 @@ public class ProcessingBluetoothMessage extends Message {
 	 */
 	private final Integer mMinPower;
 	/**
+	 * The duration in ms after which power goes up (for positive values) or down (for negative values).
+	 */
+	private final Long mPowerChangeDuration;
+	/**
 	 * The cycle length.
 	 */
 	private final Integer mCycleLength;
@@ -68,10 +72,11 @@ public class ProcessingBluetoothMessage extends Message {
 		mWave = stringToInt(splitData[5]); // MAGIC_NUMBER
 		mMode = stringToInt(splitData[6]); // MAGIC_NUMBER
 		mMinPower = stringToInt(splitData[7]); // MAGIC_NUMBER
-		mCycleLength = stringToInt(splitData[8]); // MAGIC_NUMBER
-		mRunningProbability = stringToDouble(splitData[9]); // MAGIC_NUMBER
-		mAvgOffDuration = stringToLong(splitData[10]); // MAGIC_NUMBER
-		mAvgOnDuration = stringToLong(splitData[11]); // MAGIC_NUMBER
+		mPowerChangeDuration = stringToLong(splitData[8]); // MAGIC_NUMBER
+		mCycleLength = stringToInt(splitData[9]); // MAGIC_NUMBER
+		mRunningProbability = stringToDouble(splitData[10]); // MAGIC_NUMBER
+		mAvgOffDuration = stringToLong(splitData[11]); // MAGIC_NUMBER
+		mAvgOnDuration = stringToLong(splitData[12]); // MAGIC_NUMBER
 	}
 
 	/**
@@ -85,14 +90,15 @@ public class ProcessingBluetoothMessage extends Message {
 	 * @param wave The wave.
 	 * @param mode The processing mode.
 	 * @param minPower The minimum power.
+	 * @param powerChangeDuration The duration in ms after which power goes up (for positive values) or down (for negative values).
 	 * @param cycleLength The cycle length.
 	 * @param runningProbability The running probability.
 	 * @param avgOffDuration The average off duration.
 	 * @param avgOnDuration The average on duration.
 	 */
 	public ProcessingBluetoothMessage(final int channel, final boolean isTadel, final boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
-			final Integer frequency, final Integer wave, final Integer mode, final Integer minPower, final Integer cycleLength,
-			final Double runningProbability, final Long avgOffDuration, final Long avgOnDuration) {
+			final Integer frequency, final Integer wave, final Integer mode, final Integer minPower, final Long powerChangeDuration,
+			final Integer cycleLength, final Double runningProbability, final Long avgOffDuration, final Long avgOnDuration) {
 		mChannel = channel;
 		mIsTadel = isTadel;
 		mIsActive = isActive;
@@ -101,6 +107,7 @@ public class ProcessingBluetoothMessage extends Message {
 		mWave = wave;
 		mMode = mode;
 		mMinPower = minPower;
+		mPowerChangeDuration = powerChangeDuration;
 		mCycleLength = cycleLength;
 		mRunningProbability = runningProbability;
 		mAvgOffDuration = avgOffDuration;
@@ -116,8 +123,9 @@ public class ProcessingBluetoothMessage extends Message {
 	protected final String getDataString() {
 		return mChannel + SEP + mIsTadel + SEP + mIsActive + SEP
 				+ intToString(mPower) + SEP + intToString(mFrequency) + SEP + intToString(mWave) + SEP
-				+ intToString(mMode) + SEP + intToString(mMinPower) + SEP + intToString(mCycleLength) + SEP
-				+ doubleToString(mRunningProbability) + SEP + longToString(mAvgOffDuration) + SEP + longToString(mAvgOnDuration);
+				+ intToString(mMode) + SEP + intToString(mMinPower) + SEP + longToString(mPowerChangeDuration) + SEP
+				+ intToString(mCycleLength) + SEP + doubleToString(mRunningProbability) + SEP
+				+ longToString(mAvgOffDuration) + SEP + longToString(mAvgOnDuration);
 	}
 
 	/**
@@ -190,6 +198,15 @@ public class ProcessingBluetoothMessage extends Message {
 	 */
 	public Integer getMinPower() {
 		return mMinPower;
+	}
+
+	/**
+	 * Get the power change duration.
+	 *
+	 * @return The power change duration
+	 */
+	public Long getPowerChangeDuration() {
+		return mPowerChangeDuration;
 	}
 
 	/**

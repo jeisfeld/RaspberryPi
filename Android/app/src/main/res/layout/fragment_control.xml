@@ -100,7 +100,9 @@
 
             </TableRow>
 
-            <TableRow android:id="@+id/tableRowMinPower">
+            <TableRow
+                android:id="@+id/tableRowMinPower"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="0dp"
@@ -119,6 +121,36 @@
 
                 <TextView
                     android:id="@+id/textViewMinPower"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_weight="0.12"
+                    android:textAlignment="viewEnd" />
+
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRowPowerChangeDuration"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="0.23"
+                    android:text="@string/text_power_change_duration" />
+
+                <SeekBar
+                    android:id="@+id/seekBarPowerChangeDuration"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.65"
+                    android:max="256"
+                    android:progress="128" />
+
+                <TextView
+                    android:id="@+id/textViewPowerChangeDuration"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"

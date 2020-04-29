@@ -43,6 +43,10 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	private final MutableLiveData<Integer> mMinPower = new MutableLiveData<>();
 	/**
+	 * The min power value.
+	 */
+	private final MutableLiveData<Long> mPowerChangeDuration = new MutableLiveData<>();
+	/**
 	 * The cycle length.
 	 */
 	private final MutableLiveData<Integer> mCycleLength = new MutableLiveData<>();
@@ -110,6 +114,9 @@ public abstract class ControlViewModel extends ViewModel {
 		if (processingBluetoothMessage.getMinPower() != null) {
 			mMinPower.postValue(processingBluetoothMessage.getMinPower());
 		}
+		if (processingBluetoothMessage.getPowerChangeDuration() != null) {
+			mPowerChangeDuration.postValue(processingBluetoothMessage.getPowerChangeDuration());
+		}
 		if (processingBluetoothMessage.getCycleLength() != null) {
 			mCycleLength.postValue(processingBluetoothMessage.getCycleLength());
 		}
@@ -147,7 +154,8 @@ public abstract class ControlViewModel extends ViewModel {
 				mIsActive.getValue() == null ? false : mIsActive.getValue(),
 				mPower.getValue(), mFrequency.getValue(), null,
 				mMode.getValue() == null ? 0 : (isTadel() ? mMode.getValue().getTadelValue() : mMode.getValue().getLobValue()),
-				mMinPower.getValue(), mCycleLength.getValue(), mRunningProbability.getValue(),
+				mMinPower.getValue(), mPowerChangeDuration.getValue(),
+				mCycleLength.getValue(), mRunningProbability.getValue(),
 				mAvgOffDuration.getValue(), mAvgOnDuration.getValue());
 		writeBluetoothMessage(message);
 	}
@@ -247,6 +255,42 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	protected MutableLiveData<Integer> getMinPower() {
 		return mMinPower;
+	}
+
+	/**
+	 * Get the power change duration.
+	 *
+	 * @return The power change duration.
+	 */
+	protected MutableLiveData<Long> getPowerChangeDuration() {
+		return mPowerChangeDuration;
+	}
+
+	/**
+	 * Update the power change duration.
+	 *
+	 * @param powerChangeDurationSeekbarValue The power change duration seekbar value.
+	 */
+	protected void updatePowerChangeDuration(final int powerChangeDurationSeekbarValue) {
+		long powerChangeDuration = (int) (150000 / Math.pow(1.04, Math.abs(powerChangeDurationSeekbarValue - 128))); // MAGIC_NUMBER
+		int powerChangeSignum = (int) Math.signum((int) ((powerChangeDurationSeekbarValue - 128) / 16.0)); // MAGIC_NUMBER
+		mPowerChangeDuration.setValue(powerChangeSignum * powerChangeDuration);
+		writeBluetoothMessage();
+	}
+
+	/**
+	 * Convert value in ms to seekbar value for avg duration.
+	 *
+	 * @param powerChangeDuration the power change duration in ms
+	 * @return The seekbar value
+	 */
+	protected static int getPowerChangeDurationSeekbarValue(final long powerChangeDuration) {
+		if (powerChangeDuration == 0) {
+			return 128; // MAGIC_NUMBER
+		}
+		int signum = (int) Math.signum(powerChangeDuration);
+		int delta = (int) Math.min(128, Math.log(150000f / Math.abs(powerChangeDuration)) / Math.log(1.04)); // MAGIC_NUMBER
+		return 128 + signum * delta; // MAGIC_NUMBER
 	}
 
 	/**

@@ -1,7 +1,6 @@
 package de.jeisfeld.pi.lut;
 
 import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
-import de.jeisfeld.pi.bluetooth.ConnectThread;
 
 /**
  * A thread that can be used for processing from bluetooth.
@@ -16,10 +15,8 @@ public interface BluetoothRunnable extends Runnable {
 
 	/**
 	 * Send the status via bluetooth.
-	 *
-	 * @param connectThread The bluetooth connection.
 	 */
-	void sendStatus(ConnectThread connectThread);
+	void sendStatus();
 
 	/**
 	 * Get information if thread is running.

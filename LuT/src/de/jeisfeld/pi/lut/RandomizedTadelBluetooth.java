@@ -39,6 +39,10 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	 */
 	private boolean mIsRunning = false;
 	/**
+	 * The bluetooth connect thread.
+	 */
+	private final ConnectThread mConnectThread;
+	/**
 	 * The current running mode.
 	 */
 	private int mMode = 0;
@@ -47,9 +51,9 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	 */
 	private int mPower = 0;
 	/**
-	 * The min power.
+	 * The power change duration.
 	 */
-	private int mControlPower = 0;
+	private long mPowerChangeDuration = 0;
 	/**
 	 * The frequency.
 	 */
@@ -75,9 +79,11 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	 * Constructor.
 	 *
 	 * @param message the triggering message.
+	 * @param connectThread the bluetooth connect thread.
 	 * @throws IOException Connection issues.
 	 */
-	public RandomizedTadelBluetooth(final ProcessingBluetoothMessage message) throws IOException {
+	public RandomizedTadelBluetooth(final ProcessingBluetoothMessage message, final ConnectThread connectThread) throws IOException {
+		mConnectThread = connectThread;
 		mChannel = message.getChannel();
 		Sender sender = Sender.getInstance();
 		mChannelSender = sender.getChannelSender(mChannel);
@@ -89,8 +95,11 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 		if (message.getMode() != null) {
 			mMode = message.getMode();
 		}
-		if (message.getPower() != null) {
-			mControlPower = message.getPower();
+		if (message.getPower() != null && mMode == 1) {
+			mPower = message.getPower();
+		}
+		if (message.getPowerChangeDuration() != null) {
+			mPowerChangeDuration = message.getPowerChangeDuration();
 		}
 		if (message.getFrequency() != null) {
 			mFrequency = message.getFrequency();
@@ -122,7 +131,6 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 				switch (mMode) {
 				case 1:
 					// constant power and frequency, both controllable. Serves to prepare base power for modes 2 and 3.
-					mPower = mControlPower;
 					mChannelSender.tadel(mPower, mFrequency, DEFAULT_WAVE);
 					mPowerBaseTime = System.currentTimeMillis();
 					break;
@@ -140,9 +148,10 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 						isPowered = random.nextDouble() < mRunningProbability;
 					}
-
-					mPower = getUpdatedPower(mPower, mControlPower);
+					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
 					mChannelSender.tadel(isPowered ? mPower : 0, mFrequency, DEFAULT_WAVE);
+					mConnectThread.write(
+							new ProcessingBluetoothMessage(mChannel, true, mIsRunning, mPower, null, null, null, null, null, null, null, null, null));
 					break;
 				case 3: // MAGIC_NUMBER
 					// Random change between on/off. On level and avg off/on duration controllable.
@@ -164,8 +173,10 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 						}
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 					}
-					mPower = getUpdatedPower(mPower, mControlPower);
+					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
 					mChannelSender.tadel(isPowered ? mPower : 0, mFrequency, DEFAULT_WAVE);
+					mConnectThread.write(
+							new ProcessingBluetoothMessage(mChannel, true, mIsRunning, mPower, null, null, null, null, null, null, null, null, null));
 					break;
 				default:
 					mChannelSender.tadel(0, 0, 0, 0, true);
@@ -182,17 +193,21 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	}
 
 	/**
-	 * Update the power based on previous power and power control status. Serves to use control for controlling dynamic change.
+	 * Update the power based on previous power and power change duration. Serves to use control for controlling dynamic change.
 	 *
 	 * @param oldPower The old power.
-	 * @param controlPower The value of power control.
+	 * @param powerChangeDuration The power change duration.
 	 * @return The new power.
 	 */
-	private int getUpdatedPower(final int oldPower, final int controlPower) {
+	private int getUpdatedPower(final int oldPower, final long powerChangeDuration) {
+		if (powerChangeDuration == 0) {
+			mPowerBaseTime = System.currentTimeMillis();
+			return oldPower;
+		}
 		int newPower = oldPower;
-		int millisUntilChange = getMillisUntilChange(controlPower);
-		if (System.currentTimeMillis() - mPowerBaseTime > millisUntilChange) {
-			newPower += getChangeDirection(controlPower) * ((System.currentTimeMillis() - mPowerBaseTime) / millisUntilChange);
+		// int millisUntilChange = getMillisUntilChange(controlPower);
+		if (System.currentTimeMillis() - mPowerBaseTime > Math.abs(powerChangeDuration)) {
+			newPower += (int) ((System.currentTimeMillis() - mPowerBaseTime) / powerChangeDuration);
 			mPowerBaseTime = System.currentTimeMillis();
 		}
 		if (newPower > MAX_POWER) {
@@ -202,26 +217,6 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 			newPower = 0;
 		}
 		return newPower;
-	}
-
-	/**
-	 * Get the change direction.
-	 *
-	 * @param controlPower The value of power control.
-	 * @return The milliseconds until change.
-	 */
-	private int getChangeDirection(final int controlPower) {
-		return (int) Math.signum((int) ((controlPower - 127) / 16.0)); // MAGIC_NUMBER 0 in middle range, otherwise +-1
-	}
-
-	/**
-	 * Get milliseconds until change.
-	 *
-	 * @param controlPower The value of power control.
-	 * @return The milliseconds until change.
-	 */
-	private int getMillisUntilChange(final int controlPower) {
-		return (int) (150000 / Math.pow(1.04, Math.abs(controlPower - 127))); // MAGIC_NUMBER ca. 1 minute to 1 second
 	}
 
 	@Override
@@ -235,10 +230,9 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	}
 
 	@Override
-	public void sendStatus(final ConnectThread connectThread) {
-		connectThread.write(new ProcessingBluetoothMessage(mChannel, true, mIsRunning, mControlPower, mFrequency, null, mMode,
-				null, null, mRunningProbability, mAvgOffDuration, mAvgOnDuration));
-
+	public void sendStatus() {
+		mConnectThread.write(new ProcessingBluetoothMessage(mChannel, true, mIsRunning, mPower, mFrequency, null, mMode,
+				null, mPowerChangeDuration, null, mRunningProbability, mAvgOffDuration, mAvgOnDuration));
 	}
 
 }

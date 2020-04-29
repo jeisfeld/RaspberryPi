@@ -87,6 +87,7 @@ public abstract class ControlFragment extends Fragment {
 		spinnerMode.setOnItemSelectedListener(getOnModeSelectedListener(root, mControlViewModel));
 
 		prepareSeekbarsPower(root);
+		prepareSeekbarPowerChangeDuration(root);
 		prepareSeekbarCycleLength(root);
 		prepareSeekbarFrequency(root);
 		prepareSeekbarRunningProbability(root);
@@ -126,6 +127,24 @@ public abstract class ControlFragment extends Fragment {
 				(OnSeekBarProgressChangedListener) progress -> mControlViewModel.updatePower(progress, seekbarMinPower.getProgress()));
 		seekbarMinPower.setOnSeekBarChangeListener(
 				(OnSeekBarProgressChangedListener) progress -> mControlViewModel.updatePower(seekbarPower.getProgress(), progress));
+	}
+
+	/**
+	 * Prepare the power change duration seekbar.
+	 *
+	 * @param root The parent view.
+	 */
+	private void prepareSeekbarPowerChangeDuration(final View root) {
+		final SeekBar seekbarPowerChangeDuration = root.findViewById(R.id.seekBarPowerChangeDuration);
+		final TextView textViewPowerChangeDuration = root.findViewById(R.id.textViewPowerChangeDuration);
+		textViewPowerChangeDuration.setText(String.format(Locale.getDefault(), "%.1fs", 0.0));
+		mControlViewModel.getPowerChangeDuration().observe(getViewLifecycleOwner(), powerChangeDuration -> {
+			int seekbarValue = ControlViewModel.getPowerChangeDurationSeekbarValue(powerChangeDuration);
+			seekbarPowerChangeDuration.setProgress(seekbarValue);
+			textViewPowerChangeDuration.setText(String.format(Locale.getDefault(), "%.1fs", powerChangeDuration / 1000.0)); // MAGIC_NUMBER
+		});
+		seekbarPowerChangeDuration.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress ->
+				mControlViewModel.updatePowerChangeDuration(progress));
 	}
 
 	/**

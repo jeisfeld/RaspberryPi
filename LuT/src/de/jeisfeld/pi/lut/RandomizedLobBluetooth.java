@@ -31,6 +31,10 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	 */
 	private boolean mIsRunning = false;
 	/**
+	 * The bluetooth connect thread.
+	 */
+	private final ConnectThread mConnectThread;
+	/**
 	 * The current running mode.
 	 */
 	private int mMode = 0;
@@ -63,9 +67,11 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	 * Constructor.
 	 *
 	 * @param message the triggering message.
+	 * @param connectThread the bluetooth connect thread.
 	 * @throws IOException Connection issues.
 	 */
-	public RandomizedLobBluetooth(final ProcessingBluetoothMessage message) throws IOException {
+	public RandomizedLobBluetooth(final ProcessingBluetoothMessage message, final ConnectThread connectThread) throws IOException {
+		mConnectThread = connectThread;
 		mChannel = message.getChannel();
 		Sender sender = Sender.getInstance();
 		mChannelSender = sender.getChannelSender(mChannel);
@@ -192,9 +198,9 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	}
 
 	@Override
-	public void sendStatus(final ConnectThread connectThread) {
-		connectThread.write(new ProcessingBluetoothMessage(mChannel, false, mIsRunning, mPower, null, null, mMode,
-				mMinPower, mCycleLength, mRunningProbability, mAvgOffDuration, mAvgOnDuration));
+	public void sendStatus() {
+		mConnectThread.write(new ProcessingBluetoothMessage(mChannel, false, mIsRunning, mPower, null, null, mMode,
+				mMinPower, null, mCycleLength, mRunningProbability, mAvgOffDuration, mAvgOnDuration));
 
 	}
 

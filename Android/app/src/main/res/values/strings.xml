@@ -12,6 +12,7 @@
     <string name="text_processing_status">Processing Status:</string>
     <string name="text_power">Power:</string>
     <string name="text_min_power">Min Power:</string>
+    <string name="text_power_change_duration">Pow Control:</string>
     <string name="text_cycle_length">Cyc Length:</string>
     <string name="text_frequency">Frequency:</string>
     <string name="text_running_probability">Run Prob:</string>

@@ -1,7 +1,6 @@
 package de.jeisfeld.lut.app.bluetooth;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.UUID;
 
 import android.bluetooth.BluetoothAdapter;
