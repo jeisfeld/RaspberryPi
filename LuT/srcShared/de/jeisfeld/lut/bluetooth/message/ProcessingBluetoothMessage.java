@@ -15,7 +15,7 @@ public class ProcessingBluetoothMessage extends Message {
 	/**
 	 * Flag if the process is active.
 	 */
-	private final boolean mIsActive;
+	private final Boolean mIsActive;
 	/**
 	 * The power.
 	 */
@@ -35,7 +35,7 @@ public class ProcessingBluetoothMessage extends Message {
 	/**
 	 * The minimum power.
 	 */
-	private final Integer mMinPower;
+	private final Double mMinPower;
 	/**
 	 * The duration in ms after which power goes up (for positive values) or down (for negative values).
 	 */
@@ -65,13 +65,13 @@ public class ProcessingBluetoothMessage extends Message {
 	public ProcessingBluetoothMessage(final String dataString) {
 		String[] splitData = dataString.split(SEP, -1);
 		mChannel = stringToInt(splitData[0]);
-		mIsTadel = Boolean.parseBoolean(splitData[1]);
-		mIsActive = Boolean.parseBoolean(splitData[2]);
+		mIsTadel = stringToBoolean(splitData[1]);
+		mIsActive = stringToBoolean(splitData[2]);
 		mPower = stringToInt(splitData[3]); // MAGIC_NUMBER
 		mFrequency = stringToInt(splitData[4]); // MAGIC_NUMBER
 		mWave = stringToInt(splitData[5]); // MAGIC_NUMBER
 		mMode = stringToInt(splitData[6]); // MAGIC_NUMBER
-		mMinPower = stringToInt(splitData[7]); // MAGIC_NUMBER
+		mMinPower = stringToDouble(splitData[7]); // MAGIC_NUMBER
 		mPowerChangeDuration = stringToLong(splitData[8]); // MAGIC_NUMBER
 		mCycleLength = stringToInt(splitData[9]); // MAGIC_NUMBER
 		mRunningProbability = stringToDouble(splitData[10]); // MAGIC_NUMBER
@@ -96,8 +96,8 @@ public class ProcessingBluetoothMessage extends Message {
 	 * @param avgOffDuration The average off duration.
 	 * @param avgOnDuration The average on duration.
 	 */
-	public ProcessingBluetoothMessage(final int channel, final boolean isTadel, final boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
-			final Integer frequency, final Integer wave, final Integer mode, final Integer minPower, final Long powerChangeDuration,
+	public ProcessingBluetoothMessage(final int channel, final boolean isTadel, final Boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
+			final Integer frequency, final Integer wave, final Integer mode, final Double minPower, final Long powerChangeDuration,
 			final Integer cycleLength, final Double runningProbability, final Long avgOffDuration, final Long avgOnDuration) {
 		mChannel = channel;
 		mIsTadel = isTadel;
@@ -121,9 +121,9 @@ public class ProcessingBluetoothMessage extends Message {
 
 	@Override
 	protected final String getDataString() {
-		return mChannel + SEP + mIsTadel + SEP + mIsActive + SEP
+		return mChannel + SEP + mIsTadel + SEP + booleanToString(mIsActive) + SEP
 				+ intToString(mPower) + SEP + intToString(mFrequency) + SEP + intToString(mWave) + SEP
-				+ intToString(mMode) + SEP + intToString(mMinPower) + SEP + longToString(mPowerChangeDuration) + SEP
+				+ intToString(mMode) + SEP + doubleToString(mMinPower) + SEP + longToString(mPowerChangeDuration) + SEP
 				+ intToString(mCycleLength) + SEP + doubleToString(mRunningProbability) + SEP
 				+ longToString(mAvgOffDuration) + SEP + longToString(mAvgOnDuration);
 	}
@@ -151,7 +151,7 @@ public class ProcessingBluetoothMessage extends Message {
 	 *
 	 * @return True if active
 	 */
-	public boolean isActive() {
+	public Boolean isActive() {
 		return mIsActive;
 	}
 
@@ -196,7 +196,7 @@ public class ProcessingBluetoothMessage extends Message {
 	 *
 	 * @return The min power
 	 */
-	public Integer getMinPower() {
+	public Double getMinPower() {
 		return mMinPower;
 	}
 

@@ -86,9 +86,9 @@ public abstract class Message {
 	}
 
 	/**
-	 * Convert integer to String.
+	 * Convert Integer to String.
 	 *
-	 * @param i the integer
+	 * @param i the Integer
 	 * @return the String
 	 */
 	protected static String intToString(final Integer i) {
@@ -96,33 +96,53 @@ public abstract class Message {
 	}
 
 	/**
-	 * Convert String back to integer.
+	 * Convert String back to Integer.
 	 *
 	 * @param s The string.
-	 * @return the integer.
+	 * @return the Integer.
 	 */
 	protected static Integer stringToInt(final String s) {
 		return (s == null || s.isEmpty()) ? null : Integer.parseInt(s);
 	}
 
 	/**
-	 * Convert long to String.
+	 * Convert Long to String.
 	 *
-	 * @param i the long
+	 * @param l the Long
 	 * @return the String
 	 */
-	protected static String longToString(final Long i) {
-		return i == null ? "" : i.toString();
+	protected static String longToString(final Long l) {
+		return l == null ? "" : l.toString();
 	}
 
 	/**
-	 * Convert String back to long.
+	 * Convert String back to Long.
 	 *
 	 * @param s The string.
-	 * @return the long.
+	 * @return the Long.
 	 */
 	protected static Long stringToLong(final String s) {
 		return (s == null || s.isEmpty()) ? null : Long.parseLong(s);
+	}
+
+	/**
+	 * Convert Boolean to String.
+	 *
+	 * @param b the Boolean
+	 * @return the String
+	 */
+	protected static String booleanToString(final Boolean b) {
+		return b == null ? "" : b.toString();
+	}
+
+	/**
+	 * Convert String back to Boolean.
+	 *
+	 * @param s The string.
+	 * @return the Boolean.
+	 */
+	protected static Boolean stringToBoolean(final String s) {
+		return (s == null || s.isEmpty()) ? null : Boolean.parseBoolean(s);
 	}
 
 	/**

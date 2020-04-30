@@ -43,9 +43,9 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	 */
 	private int mPower = 0;
 	/**
-	 * The min power.
+	 * The min power (as percentage of power).
 	 */
-	private int mMinPower = 0;
+	private double mMinPower = 0;
 	/**
 	 * The cycle length.
 	 */
@@ -123,7 +123,7 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 				switch (mMode) {
 				case 1:
 					// Wave up and down
-					int value = (int) ((1 - Math.cos(2 * Math.PI * cyclePoint)) / 2 * (mPower - mMinPower) + mMinPower);
+					int value = (int) ((1 - Math.cos(2 * Math.PI * cyclePoint)) / 2 * mPower * (1 - mMinPower) + mPower * mMinPower);
 					mChannelSender.lob(value);
 
 					if (mCycleLength > 0) {
@@ -148,7 +148,7 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 						isHighPower = random.nextDouble() < mRunningProbability;
 					}
 
-					mChannelSender.lob(isHighPower ? mPower : mMinPower);
+					mChannelSender.lob(isHighPower ? mPower : (int) (mMinPower * mPower));
 					break;
 				case 3: // MAGIC_NUMBER
 					// Random change between on/off. On level and avg off/on duration controllable.
@@ -171,7 +171,7 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 					}
 
-					mChannelSender.lob(isHighPower ? mPower : mMinPower);
+					mChannelSender.lob(isHighPower ? mPower : (int) (mMinPower * mPower));
 					break;
 				default:
 					mChannelSender.lob(0, 0, true);

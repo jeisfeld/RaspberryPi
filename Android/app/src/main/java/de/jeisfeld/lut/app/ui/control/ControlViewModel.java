@@ -41,7 +41,7 @@ public abstract class ControlViewModel extends ViewModel {
 	/**
 	 * The min power value.
 	 */
-	private final MutableLiveData<Integer> mMinPower = new MutableLiveData<>();
+	private final MutableLiveData<Double> mMinPower = new MutableLiveData<>();
 	/**
 	 * The min power value.
 	 */
@@ -102,7 +102,9 @@ public abstract class ControlViewModel extends ViewModel {
 	 * @param processingBluetoothMessage The processing status message.
 	 */
 	public void setProcessingStatus(final ProcessingBluetoothMessage processingBluetoothMessage) {
-		mIsActive.postValue(processingBluetoothMessage.isActive());
+		if (processingBluetoothMessage.isActive() != null) {
+			mIsActive.postValue(processingBluetoothMessage.isActive());
+		}
 		if (processingBluetoothMessage.getMode() != null) {
 			mMode.postValue(isTadel()
 					? Mode.fromTadelValue(processingBluetoothMessage.getMode())
@@ -151,8 +153,7 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	private void writeBluetoothMessage() {
 		ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
-				mIsActive.getValue() == null ? false : mIsActive.getValue(),
-				mPower.getValue(), mFrequency.getValue(), null,
+				mIsActive.getValue(), mPower.getValue(), mFrequency.getValue(), null,
 				mMode.getValue() == null ? 0 : (isTadel() ? mMode.getValue().getTadelValue() : mMode.getValue().getLobValue()),
 				mMinPower.getValue(), mPowerChangeDuration.getValue(),
 				mCycleLength.getValue(), mRunningProbability.getValue(),
@@ -229,23 +230,10 @@ public abstract class ControlViewModel extends ViewModel {
 	 * Update the power.
 	 *
 	 * @param power The new power.
-	 * @param minPowerSeekbarValue The new value of minPower seekbar
 	 */
-	protected void updatePower(final int power, final int minPowerSeekbarValue) {
+	protected void updatePower(final int power) {
 		mPower.setValue(power);
-		mMinPower.setValue((int) Math.round((double) minPowerSeekbarValue * power / MIN_POWER_SEEKBAR_MAX_VALUE));
 		writeBluetoothMessage();
-	}
-
-	/**
-	 * Calculate min power seekbar value from min power.
-	 *
-	 * @param minPower The min power.
-	 * @return The seekbar value.
-	 */
-	protected int getMinPowerSeekbarValue(final int minPower) {
-		return (mPower.getValue() == null || mPower.getValue() == 0) ? 0
-				: (int) Math.round(Math.min(MIN_POWER_SEEKBAR_MAX_VALUE, (double) minPower * MIN_POWER_SEEKBAR_MAX_VALUE / mPower.getValue()));
 	}
 
 	/**
@@ -253,8 +241,18 @@ public abstract class ControlViewModel extends ViewModel {
 	 *
 	 * @return The min power value.
 	 */
-	protected MutableLiveData<Integer> getMinPower() {
+	protected MutableLiveData<Double> getMinPower() {
 		return mMinPower;
+	}
+
+	/**
+	 * Update the min power.
+	 *
+	 * @param minPower The new min power.
+	 */
+	protected void updateMinPower(final double minPower) {
+		mMinPower.setValue(minPower);
+		writeBluetoothMessage();
 	}
 
 	/**

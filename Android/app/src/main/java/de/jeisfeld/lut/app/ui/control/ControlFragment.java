@@ -86,7 +86,8 @@ public abstract class ControlFragment extends Fragment {
 
 		spinnerMode.setOnItemSelectedListener(getOnModeSelectedListener(root, mControlViewModel));
 
-		prepareSeekbarsPower(root);
+		prepareSeekbarPower(root);
+		prepareSeekbarMinPower(root);
 		prepareSeekbarPowerChangeDuration(root);
 		prepareSeekbarCycleLength(root);
 		prepareSeekbarFrequency(root);
@@ -104,29 +105,38 @@ public abstract class ControlFragment extends Fragment {
 	 *
 	 * @param root The parent view.
 	 */
-	private void prepareSeekbarsPower(final View root) {
+	private void prepareSeekbarPower(final View root) {
 		final SeekBar seekbarPower = root.findViewById(R.id.seekBarPower);
 		final TextView textViewPower = root.findViewById(R.id.textViewPower);
 
-		final SeekBar seekbarMinPower = root.findViewById(R.id.seekBarMinPower);
-		final TextView textViewMinPower = root.findViewById(R.id.textViewMinPower);
-
 		textViewPower.setText(String.format(Locale.getDefault(), "%d", seekbarPower.getProgress()));
-		textViewMinPower.setText(String.format(Locale.getDefault(), "%d", seekbarMinPower.getProgress()));
 
 		mControlViewModel.getPower().observe(getViewLifecycleOwner(), power -> {
 			seekbarPower.setProgress(power);
 			textViewPower.setText(String.format(Locale.getDefault(), "%d", power));
 		});
-		mControlViewModel.getMinPower().observe(getViewLifecycleOwner(), minPower -> {
-			seekbarMinPower.setProgress(mControlViewModel.getMinPowerSeekbarValue(minPower));
-			textViewMinPower.setText(String.format(Locale.getDefault(), "%d", minPower));
-		});
-
 		seekbarPower.setOnSeekBarChangeListener(
-				(OnSeekBarProgressChangedListener) progress -> mControlViewModel.updatePower(progress, seekbarMinPower.getProgress()));
+				(OnSeekBarProgressChangedListener) progress -> mControlViewModel.updatePower(progress));
+	}
+
+	/**
+	 * Prepare the min power seekbar.
+	 *
+	 * @param root The parent view.
+	 */
+	private void prepareSeekbarMinPower(final View root) {
+		final SeekBar seekbarMinPower = root.findViewById(R.id.seekBarMinPower);
+		final TextView textViewMinPower = root.findViewById(R.id.textViewMinPower);
+
+		textViewMinPower.setText(String.format(Locale.getDefault(), "%d%%", seekbarMinPower.getProgress()));
+
+		mControlViewModel.getMinPower().observe(getViewLifecycleOwner(), minPower -> {
+			int percentage = (int) Math.round(minPower * 100); // MAGIC_NUMBER
+			seekbarMinPower.setProgress(percentage);
+			textViewMinPower.setText(String.format(Locale.getDefault(), "%d%%", percentage));
+		});
 		seekbarMinPower.setOnSeekBarChangeListener(
-				(OnSeekBarProgressChangedListener) progress -> mControlViewModel.updatePower(seekbarPower.getProgress(), progress));
+				(OnSeekBarProgressChangedListener) progress -> mControlViewModel.updateMinPower((double) progress / seekbarMinPower.getMax()));
 	}
 
 	/**

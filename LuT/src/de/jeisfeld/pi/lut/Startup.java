@@ -109,7 +109,7 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 						break;
 					case PROCESSING_BLUETOOTH:
 						ProcessingBluetoothMessage triggerMessage = (ProcessingBluetoothMessage) message;
-						boolean isActive = triggerMessage.isActive();
+						boolean isActive = triggerMessage.isActive() == null ? false : triggerMessage.isActive();
 						int channel = triggerMessage.getChannel();
 						boolean isTadel = triggerMessage.isTadel();
 

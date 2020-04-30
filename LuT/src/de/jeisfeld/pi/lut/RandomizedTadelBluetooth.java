@@ -151,7 +151,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
 					mChannelSender.tadel(isPowered ? mPower : 0, mFrequency, DEFAULT_WAVE);
 					mConnectThread.write(
-							new ProcessingBluetoothMessage(mChannel, true, mIsRunning, mPower, null, null, null, null, null, null, null, null, null));
+							new ProcessingBluetoothMessage(mChannel, true, null, mPower, null, null, null, null, null, null, null, null, null));
 					break;
 				case 3: // MAGIC_NUMBER
 					// Random change between on/off. On level and avg off/on duration controllable.
@@ -176,7 +176,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
 					mChannelSender.tadel(isPowered ? mPower : 0, mFrequency, DEFAULT_WAVE);
 					mConnectThread.write(
-							new ProcessingBluetoothMessage(mChannel, true, mIsRunning, mPower, null, null, null, null, null, null, null, null, null));
+							new ProcessingBluetoothMessage(mChannel, true, null, mPower, null, null, null, null, null, null, null, null, null));
 					break;
 				default:
 					mChannelSender.tadel(0, 0, 0, 0, true);
