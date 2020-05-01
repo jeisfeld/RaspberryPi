@@ -100,9 +100,7 @@
 
             </TableRow>
 
-            <TableRow
-                android:id="@+id/tableRowMinPower"
-                android:visibility="gone">
+            <TableRow android:id="@+id/tableRowMinPower">
 
                 <TextView
                     android:layout_width="0dp"
@@ -232,7 +230,8 @@
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0.65"
-                    android:max="100" />
+                    android:max="100"
+                    android:progress="50" />
 
                 <TextView
                     android:id="@+id/textViewRunningProbability"

@@ -200,7 +200,7 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	@Override
 	public void sendStatus() {
 		mConnectThread.write(new ProcessingBluetoothMessage(mChannel, false, mIsRunning, mPower, null, null, mMode,
-				mMinPower, null, mCycleLength, mRunningProbability, mAvgOffDuration, mAvgOnDuration));
+				mMinPower, null, null, mCycleLength, mRunningProbability, mAvgOffDuration, mAvgOnDuration));
 
 	}
 

@@ -37,35 +37,35 @@ public abstract class ControlViewModel extends ViewModel {
 	/**
 	 * The power.
 	 */
-	private final MutableLiveData<Integer> mPower = new MutableLiveData<>();
+	private final MutableLiveData<Integer> mPower = new MutableLiveData<>(0);
 	/**
 	 * The min power value.
 	 */
-	private final MutableLiveData<Double> mMinPower = new MutableLiveData<>();
+	private final MutableLiveData<Double> mMinPower = new MutableLiveData<>(0.0);
 	/**
 	 * The min power value.
 	 */
-	private final MutableLiveData<Long> mPowerChangeDuration = new MutableLiveData<>();
+	private final MutableLiveData<Long> mPowerChangeDuration = new MutableLiveData<>(0L);
 	/**
 	 * The cycle length.
 	 */
-	private final MutableLiveData<Integer> mCycleLength = new MutableLiveData<>();
+	private final MutableLiveData<Integer> mCycleLength = new MutableLiveData<>(0);
 	/**
 	 * The frequency.
 	 */
-	private final MutableLiveData<Integer> mFrequency = new MutableLiveData<>();
+	private final MutableLiveData<Integer> mFrequency = new MutableLiveData<>(1);
 	/**
 	 * The running probability.
 	 */
-	private final MutableLiveData<Double> mRunningProbability = new MutableLiveData<>();
+	private final MutableLiveData<Double> mRunningProbability = new MutableLiveData<>(0.5);
 	/**
 	 * The average off duration.
 	 */
-	private final MutableLiveData<Long> mAvgOffDuration = new MutableLiveData<>();
+	private final MutableLiveData<Long> mAvgOffDuration = new MutableLiveData<>(1000L);
 	/**
 	 * The average off duration.
 	 */
-	private final MutableLiveData<Long> mAvgOnDuration = new MutableLiveData<>();
+	private final MutableLiveData<Long> mAvgOnDuration = new MutableLiveData<>(1000L);
 
 	/**
 	 * Constructor.
@@ -155,7 +155,7 @@ public abstract class ControlViewModel extends ViewModel {
 		ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
 				mIsActive.getValue(), mPower.getValue(), mFrequency.getValue(), null,
 				mMode.getValue() == null ? 0 : (isTadel() ? mMode.getValue().getTadelValue() : mMode.getValue().getLobValue()),
-				mMinPower.getValue(), mPowerChangeDuration.getValue(),
+				mMinPower.getValue(), null, mPowerChangeDuration.getValue(),
 				mCycleLength.getValue(), mRunningProbability.getValue(),
 				mAvgOffDuration.getValue(), mAvgOnDuration.getValue());
 		writeBluetoothMessage(message);

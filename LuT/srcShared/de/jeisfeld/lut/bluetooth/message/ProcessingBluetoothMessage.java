@@ -37,6 +37,10 @@ public class ProcessingBluetoothMessage extends Message {
 	 */
 	private final Double mMinPower;
 	/**
+	 * Flag indicating if the signal is on high power.
+	 */
+	private final Boolean mIsHighPower;
+	/**
 	 * The duration in ms after which power goes up (for positive values) or down (for negative values).
 	 */
 	private final Long mPowerChangeDuration;
@@ -72,11 +76,12 @@ public class ProcessingBluetoothMessage extends Message {
 		mWave = stringToInt(splitData[5]); // MAGIC_NUMBER
 		mMode = stringToInt(splitData[6]); // MAGIC_NUMBER
 		mMinPower = stringToDouble(splitData[7]); // MAGIC_NUMBER
-		mPowerChangeDuration = stringToLong(splitData[8]); // MAGIC_NUMBER
-		mCycleLength = stringToInt(splitData[9]); // MAGIC_NUMBER
-		mRunningProbability = stringToDouble(splitData[10]); // MAGIC_NUMBER
-		mAvgOffDuration = stringToLong(splitData[11]); // MAGIC_NUMBER
-		mAvgOnDuration = stringToLong(splitData[12]); // MAGIC_NUMBER
+		mIsHighPower = stringToBoolean(splitData[8]); // MAGIC_NUMBER
+		mPowerChangeDuration = stringToLong(splitData[9]); // MAGIC_NUMBER
+		mCycleLength = stringToInt(splitData[10]); // MAGIC_NUMBER
+		mRunningProbability = stringToDouble(splitData[11]); // MAGIC_NUMBER
+		mAvgOffDuration = stringToLong(splitData[12]); // MAGIC_NUMBER
+		mAvgOnDuration = stringToLong(splitData[13]); // MAGIC_NUMBER
 	}
 
 	/**
@@ -90,6 +95,7 @@ public class ProcessingBluetoothMessage extends Message {
 	 * @param wave The wave.
 	 * @param mode The processing mode.
 	 * @param minPower The minimum power.
+	 * @param isHighPower Flag indicating if the signak us on high power.
 	 * @param powerChangeDuration The duration in ms after which power goes up (for positive values) or down (for negative values).
 	 * @param cycleLength The cycle length.
 	 * @param runningProbability The running probability.
@@ -97,8 +103,9 @@ public class ProcessingBluetoothMessage extends Message {
 	 * @param avgOnDuration The average on duration.
 	 */
 	public ProcessingBluetoothMessage(final int channel, final boolean isTadel, final Boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
-			final Integer frequency, final Integer wave, final Integer mode, final Double minPower, final Long powerChangeDuration,
-			final Integer cycleLength, final Double runningProbability, final Long avgOffDuration, final Long avgOnDuration) {
+			final Integer frequency, final Integer wave, final Integer mode, final Double minPower, final Boolean isHighPower,
+			final Long powerChangeDuration, final Integer cycleLength, final Double runningProbability,
+			final Long avgOffDuration, final Long avgOnDuration) {
 		mChannel = channel;
 		mIsTadel = isTadel;
 		mIsActive = isActive;
@@ -107,6 +114,7 @@ public class ProcessingBluetoothMessage extends Message {
 		mWave = wave;
 		mMode = mode;
 		mMinPower = minPower;
+		mIsHighPower = isHighPower;
 		mPowerChangeDuration = powerChangeDuration;
 		mCycleLength = cycleLength;
 		mRunningProbability = runningProbability;
@@ -123,8 +131,8 @@ public class ProcessingBluetoothMessage extends Message {
 	protected final String getDataString() {
 		return mChannel + SEP + mIsTadel + SEP + booleanToString(mIsActive) + SEP
 				+ intToString(mPower) + SEP + intToString(mFrequency) + SEP + intToString(mWave) + SEP
-				+ intToString(mMode) + SEP + doubleToString(mMinPower) + SEP + longToString(mPowerChangeDuration) + SEP
-				+ intToString(mCycleLength) + SEP + doubleToString(mRunningProbability) + SEP
+				+ intToString(mMode) + SEP + doubleToString(mMinPower) + SEP + booleanToString(mIsHighPower) + SEP
+				+ longToString(mPowerChangeDuration) + SEP + intToString(mCycleLength) + SEP + doubleToString(mRunningProbability) + SEP
 				+ longToString(mAvgOffDuration) + SEP + longToString(mAvgOnDuration);
 	}
 
@@ -198,6 +206,15 @@ public class ProcessingBluetoothMessage extends Message {
 	 */
 	public Double getMinPower() {
 		return mMinPower;
+	}
+
+	/**
+	 * Get information if the signal is on high power.
+	 *
+	 * @return True if the signal is on high power.
+	 */
+	public Boolean isHighPower() {
+		return mIsHighPower;
 	}
 
 	/**

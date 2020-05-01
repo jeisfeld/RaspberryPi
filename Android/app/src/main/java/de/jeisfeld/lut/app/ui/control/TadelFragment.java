@@ -23,6 +23,7 @@ public abstract class TadelFragment extends ControlFragment {
 	@Override
 	protected final OnItemSelectedListener getOnModeSelectedListener(final View parentView, final ControlViewModel viewModel) {
 		TableRow tableRowPower = parentView.findViewById(R.id.tableRowPower);
+		TableRow tableRowMinPower = parentView.findViewById(R.id.tableRowMinPower);
 		TableRow tableRowPowerChangeDuration = parentView.findViewById(R.id.tableRowPowerChangeDuration);
 		TableRow tableRowFrequency = parentView.findViewById(R.id.tableRowFrequency);
 		TableRow tableRowRunningProbability = parentView.findViewById(R.id.tableRowRunningProbability);
@@ -36,6 +37,7 @@ public abstract class TadelFragment extends ControlFragment {
 				switch (mode) {
 				case OFF:
 					tableRowPower.setVisibility(View.GONE);
+					tableRowMinPower.setVisibility(View.GONE);
 					tableRowPowerChangeDuration.setVisibility(View.GONE);
 					tableRowFrequency.setVisibility(View.GONE);
 					tableRowRunningProbability.setVisibility(View.GONE);
@@ -45,7 +47,8 @@ public abstract class TadelFragment extends ControlFragment {
 					break;
 				case FIXED:
 					tableRowPower.setVisibility(View.VISIBLE);
-					tableRowPowerChangeDuration.setVisibility(View.GONE);
+					tableRowMinPower.setVisibility(View.GONE);
+					tableRowPowerChangeDuration.setVisibility(View.VISIBLE);
 					tableRowFrequency.setVisibility(View.VISIBLE);
 					tableRowRunningProbability.setVisibility(View.GONE);
 					tableRowAvgOffDuration.setVisibility(View.GONE);
@@ -54,6 +57,7 @@ public abstract class TadelFragment extends ControlFragment {
 					break;
 				case RANDOM_1:
 					tableRowPower.setVisibility(View.VISIBLE);
+					tableRowMinPower.setVisibility(View.VISIBLE);
 					tableRowPowerChangeDuration.setVisibility(View.VISIBLE);
 					tableRowFrequency.setVisibility(View.GONE);
 					tableRowRunningProbability.setVisibility(View.VISIBLE);
@@ -63,6 +67,7 @@ public abstract class TadelFragment extends ControlFragment {
 					break;
 				case RANDOM_2:
 					tableRowPower.setVisibility(View.VISIBLE);
+					tableRowMinPower.setVisibility(View.VISIBLE);
 					tableRowPowerChangeDuration.setVisibility(View.VISIBLE);
 					tableRowFrequency.setVisibility(View.GONE);
 					tableRowRunningProbability.setVisibility(View.GONE);
