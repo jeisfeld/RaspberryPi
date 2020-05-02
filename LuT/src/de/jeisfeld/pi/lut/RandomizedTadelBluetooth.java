@@ -99,7 +99,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 		if (message.getMode() != null) {
 			mMode = message.getMode();
 		}
-		if (message.getPower() != null && mMode == 1) {
+		if (message.getPower() != null) {
 			mPower = message.getPower();
 		}
 		if (message.getMinPower() != null) {
@@ -188,6 +188,8 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null));
 					break;
 				default:
+					mPower = 0;
+					mPowerBaseTime = System.currentTimeMillis();
 					mChannelSender.tadel(0, 0, 0, 0, true);
 					Thread.sleep(Sender.QUERY_DURATION);
 					break;

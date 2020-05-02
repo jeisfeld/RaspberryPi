@@ -1,7 +1,5 @@
 package de.jeisfeld.lut.app.ui.control;
 
-import java.util.Locale;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +13,9 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+
+import java.util.Locale;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import de.jeisfeld.lut.app.MainActivity;
@@ -181,13 +182,14 @@ public abstract class ControlFragment extends Fragment {
 	private void prepareSeekbarFrequency(final View root) {
 		final SeekBar seekbarFrequency = root.findViewById(R.id.seekBarFrequency);
 		final TextView textViewFrequency = root.findViewById(R.id.textViewFrequency);
-		textViewFrequency.setText(String.format(Locale.getDefault(), "%d", seekbarFrequency.getProgress() + 1));
+		// Put values from 2-255 followed by 0, as 0 is highest frequency and 1 is unreliable when switching power quickly
+		textViewFrequency.setText(String.format(Locale.getDefault(), "%d", (seekbarFrequency.getProgress() + 2) % 256)); // MAGIC_NUMBER
 		mControlViewModel.getFrequency().observe(getViewLifecycleOwner(), frequency -> {
-			seekbarFrequency.setProgress((frequency + 255) % 256); // MAGIC_NUMBER
+			seekbarFrequency.setProgress((frequency + 254) % 256); // MAGIC_NUMBER
 			textViewFrequency.setText(String.format(Locale.getDefault(), "%d", frequency));
 		});
 		seekbarFrequency.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress ->
-				mControlViewModel.updateFrequency((progress + 1) % 256)); // MAGIC_NUMBER
+				mControlViewModel.updateFrequency((progress + 2) % 256)); // MAGIC_NUMBER
 	}
 
 	/**

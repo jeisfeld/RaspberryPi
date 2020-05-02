@@ -141,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
 			statusViewModel.setProcessingStatus((ProcessingStandaloneMessage) message);
 			break;
 		case PROCESSING_BLUETOOTH:
-			Log.i(TAG, message.toString());
 			ProcessingBluetoothMessage bluetoothMessage = (ProcessingBluetoothMessage) message;
 			if (bluetoothMessage.isTadel()) {
 				switch (bluetoothMessage.getChannel()) {

@@ -14,9 +14,9 @@ import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
  */
 public abstract class ControlViewModel extends ViewModel {
 	/**
-	 * The max value of the seekbars.
+	 * The min duration for increasing tadel power by 1.
 	 */
-	protected static final int MIN_POWER_SEEKBAR_MAX_VALUE = 255;
+	protected static final int MIN_POWER_STEP_DURATION = 200;
 
 	/**
 	 * A reference to the starting activity.
@@ -53,7 +53,7 @@ public abstract class ControlViewModel extends ViewModel {
 	/**
 	 * The frequency.
 	 */
-	private final MutableLiveData<Integer> mFrequency = new MutableLiveData<>(1);
+	private final MutableLiveData<Integer> mFrequency = new MutableLiveData<>(32);
 	/**
 	 * The running probability.
 	 */
@@ -110,7 +110,7 @@ public abstract class ControlViewModel extends ViewModel {
 					? Mode.fromTadelValue(processingBluetoothMessage.getMode())
 					: Mode.fromLobValue(processingBluetoothMessage.getMode()));
 		}
-		if (processingBluetoothMessage.getPower() != null) {
+		if (processingBluetoothMessage.getPower() != null && mMode.getValue() != Mode.OFF) {
 			mPower.postValue(processingBluetoothMessage.getPower());
 		}
 		if (processingBluetoothMessage.getMinPower() != null) {
@@ -214,6 +214,9 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	protected void updateMode(final Mode mode) {
 		mMode.setValue(mode);
+		if (isTadel() && mode == Mode.OFF) {
+			mPower.setValue(0);
+		}
 		writeBluetoothMessage();
 	}
 
@@ -232,7 +235,8 @@ public abstract class ControlViewModel extends ViewModel {
 	 * @param power The new power.
 	 */
 	protected void updatePower(final int power) {
-		mPower.setValue(power);
+		int oldPower = mPower.getValue() == null ? 0 : mPower.getValue();
+		mPower.setValue(isTadel() && power > oldPower ? oldPower : power);
 		writeBluetoothMessage();
 	}
 
@@ -270,9 +274,8 @@ public abstract class ControlViewModel extends ViewModel {
 	 * @param powerChangeDurationSeekbarValue The power change duration seekbar value.
 	 */
 	protected void updatePowerChangeDuration(final int powerChangeDurationSeekbarValue) {
-		long powerChangeDuration = (int) (150000 / Math.pow(1.04, Math.abs(powerChangeDurationSeekbarValue - 128))); // MAGIC_NUMBER
-		int powerChangeSignum = (int) Math.signum((int) ((powerChangeDurationSeekbarValue - 128) / 16.0)); // MAGIC_NUMBER
-		mPowerChangeDuration.setValue(powerChangeSignum * powerChangeDuration);
+		long powerChangeDuration = (int) (99000 / Math.pow(1.06, powerChangeDurationSeekbarValue - 10)); // MAGIC_NUMBER
+		mPowerChangeDuration.setValue(powerChangeDurationSeekbarValue < 10 ? 0 : powerChangeDuration); // MAGIC_NUMBER
 		writeBluetoothMessage();
 	}
 
@@ -284,11 +287,9 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	protected static int getPowerChangeDurationSeekbarValue(final long powerChangeDuration) {
 		if (powerChangeDuration == 0) {
-			return 128; // MAGIC_NUMBER
+			return 0; // MAGIC_NUMBER
 		}
-		int signum = (int) Math.signum(powerChangeDuration);
-		int delta = (int) Math.min(128, Math.log(150000f / Math.abs(powerChangeDuration)) / Math.log(1.04)); // MAGIC_NUMBER
-		return 128 + signum * delta; // MAGIC_NUMBER
+		return (int) Math.min(255, 10 + Math.log(99000f / powerChangeDuration) / Math.log(1.06)); // MAGIC_NUMBER
 	}
 
 	/**
