@@ -55,6 +55,10 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	private final MutableLiveData<Integer> mFrequency = new MutableLiveData<>(32);
 	/**
+	 * The wave.
+	 */
+	private final MutableLiveData<Wave> mWave = new MutableLiveData<>(Wave.CONSTANT);
+	/**
 	 * The running probability.
 	 */
 	private final MutableLiveData<Double> mRunningProbability = new MutableLiveData<>(0.5);
@@ -125,6 +129,9 @@ public abstract class ControlViewModel extends ViewModel {
 		if (processingBluetoothMessage.getFrequency() != null) {
 			mFrequency.postValue(processingBluetoothMessage.getFrequency());
 		}
+		if (processingBluetoothMessage.getWave() != null) {
+			mWave.postValue(Wave.fromTadelValue(processingBluetoothMessage.getWave()));
+		}
 		if (processingBluetoothMessage.getRunningProbability() != null) {
 			mRunningProbability.postValue(processingBluetoothMessage.getRunningProbability());
 		}
@@ -153,7 +160,8 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	private void writeBluetoothMessage() {
 		ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
-				mIsActive.getValue(), mPower.getValue(), mFrequency.getValue(), null,
+				mIsActive.getValue(), mPower.getValue(), mFrequency.getValue(),
+				isTadel() && mWave.getValue() != null ? mWave.getValue().getTadelValue() : null,
 				mMode.getValue() == null ? 0 : (isTadel() ? mMode.getValue().getTadelValue() : mMode.getValue().getLobValue()),
 				mMinPower.getValue(), null, mPowerChangeDuration.getValue(),
 				mCycleLength.getValue(), mRunningProbability.getValue(),
@@ -217,6 +225,25 @@ public abstract class ControlViewModel extends ViewModel {
 		if (isTadel() && mode == Mode.OFF) {
 			mPower.setValue(0);
 		}
+		writeBluetoothMessage();
+	}
+
+	/**
+	 * Get the wave.
+	 *
+	 * @return The wave.
+	 */
+	public final LiveData<Wave> getWave() {
+		return mWave;
+	}
+
+	/**
+	 * Update the wave.
+	 *
+	 * @param wave The new wave.
+	 */
+	protected void updateWave(final Wave wave) {
+		mWave.setValue(wave);
 		writeBluetoothMessage();
 	}
 

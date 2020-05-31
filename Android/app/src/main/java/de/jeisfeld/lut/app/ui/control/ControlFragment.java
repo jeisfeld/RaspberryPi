@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
@@ -15,7 +16,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import de.jeisfeld.lut.app.MainActivity;
@@ -38,11 +38,20 @@ public abstract class ControlFragment extends Fragment {
 	protected abstract ControlViewModel getLobViewModel();
 
 	/**
-	 * Get the values in spinner dropdown.
+	 * Get the values in mode spinner dropdown.
 	 *
-	 * @return The values in spinner dropdown.
+	 * @return The values in mode spinner dropdown.
 	 */
 	protected abstract String[] getModeSpinnerValues();
+
+	/**
+	 * Get the values in wave spinner dropdown.
+	 *
+	 * @return The values in wave spinner dropdown.
+	 */
+	protected final String[] getWaveSpinnerValues() {
+		return getResources().getStringArray(R.array.values_wave_tadel);
+	}
 
 	/**
 	 * Get the integer value from a mode.
@@ -56,7 +65,7 @@ public abstract class ControlFragment extends Fragment {
 	 * Get the listener on mode change.
 	 *
 	 * @param parentView The parent view.
-	 * @param viewModel  The view model.
+	 * @param viewModel The view model.
 	 * @return The listener.
 	 */
 	protected abstract OnItemSelectedListener getOnModeSelectedListener(View parentView, ControlViewModel viewModel);
@@ -79,13 +88,28 @@ public abstract class ControlFragment extends Fragment {
 		mControlViewModel.getIsActive().observe(getViewLifecycleOwner(), switchActive::setChecked);
 
 		final Spinner spinnerMode = root.findViewById(R.id.spinnerMode);
-		spinnerMode.setAdapter(new ArrayAdapter<>(requireContext(), R.layout.spinner_item, getModeSpinnerValues()));
+		spinnerMode.setAdapter(new ArrayAdapter<>(requireContext(), R.layout.spinner_item_mode, getModeSpinnerValues()));
 		mControlViewModel.getMode().observe(getViewLifecycleOwner(), mode -> spinnerMode.setSelection(modeToInt(mode)));
+
+		final Spinner spinnerWave = root.findViewById(R.id.spinnerWave);
+		spinnerWave.setAdapter(new ArrayAdapter<>(requireContext(), R.layout.spinner_item_wave, getWaveSpinnerValues()));
+		mControlViewModel.getWave().observe(getViewLifecycleOwner(), wave -> spinnerWave.setSelection(wave.ordinal()));
 
 		switchActive.setOnCheckedChangeListener((buttonView, isChecked) -> mControlViewModel.updateActiveStatus(isChecked));
 		switchActive.setOnClickListener(v -> mControlViewModel.updateMode(Mode.OFF));
 
 		spinnerMode.setOnItemSelectedListener(getOnModeSelectedListener(root, mControlViewModel));
+		spinnerWave.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
+				mControlViewModel.updateWave(Wave.fromOrdinal(position));
+			}
+
+			@Override
+			public void onNothingSelected(final AdapterView<?> parent) {
+				// do nothing
+			}
+		});
 
 		prepareSeekbarPower(root);
 		prepareSeekbarMinPower(root);
@@ -213,7 +237,7 @@ public abstract class ControlFragment extends Fragment {
 		});
 		seekbarRunningProbability
 				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> //
-						mControlViewModel.updateRunningProbability(progress / 100.0)); // MAGIC_NUMBER
+				mControlViewModel.updateRunningProbability(progress / 100.0)); // MAGIC_NUMBER
 	}
 
 	/**
@@ -279,7 +303,7 @@ public abstract class ControlFragment extends Fragment {
 		});
 		seekbarAvgOnDuration
 				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> //
-						mControlViewModel.updateAvgOnDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
+				mControlViewModel.updateAvgOnDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
 	}
 
 	/**

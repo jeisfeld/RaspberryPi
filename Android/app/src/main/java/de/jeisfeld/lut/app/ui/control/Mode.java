@@ -83,9 +83,9 @@ public enum Mode {
 	}
 
 	/**
-	 * Get mode from its lob value.
+	 * Get mode from its Tadel value.
 	 *
-	 * @param tadelValue The lob value.
+	 * @param tadelValue The Tadel value.
 	 * @return The corresponding mode.
 	 */
 	public static Mode fromTadelValue(final int tadelValue) {

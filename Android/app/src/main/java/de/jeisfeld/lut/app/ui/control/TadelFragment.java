@@ -26,6 +26,7 @@ public abstract class TadelFragment extends ControlFragment {
 		TableRow tableRowMinPower = parentView.findViewById(R.id.tableRowMinPower);
 		TableRow tableRowPowerChangeDuration = parentView.findViewById(R.id.tableRowPowerChangeDuration);
 		TableRow tableRowFrequency = parentView.findViewById(R.id.tableRowFrequency);
+		TableRow tableRowWave = parentView.findViewById(R.id.tableRowWave);
 		TableRow tableRowRunningProbability = parentView.findViewById(R.id.tableRowRunningProbability);
 		TableRow tableRowAvgOffDuration = parentView.findViewById(R.id.tableRowAvgOffDuration);
 		TableRow tableRowAvgOnDuration = parentView.findViewById(R.id.tableRowAvgOnDuration);
@@ -40,6 +41,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowMinPower.setVisibility(View.GONE);
 					tableRowPowerChangeDuration.setVisibility(View.GONE);
 					tableRowFrequency.setVisibility(View.GONE);
+					tableRowWave.setVisibility(View.GONE);
 					tableRowRunningProbability.setVisibility(View.GONE);
 					tableRowAvgOffDuration.setVisibility(View.GONE);
 					tableRowAvgOnDuration.setVisibility(View.GONE);
@@ -50,6 +52,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowMinPower.setVisibility(View.GONE);
 					tableRowPowerChangeDuration.setVisibility(View.VISIBLE);
 					tableRowFrequency.setVisibility(View.VISIBLE);
+					tableRowWave.setVisibility(View.VISIBLE);
 					tableRowRunningProbability.setVisibility(View.GONE);
 					tableRowAvgOffDuration.setVisibility(View.GONE);
 					tableRowAvgOnDuration.setVisibility(View.GONE);
@@ -60,6 +63,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowMinPower.setVisibility(View.VISIBLE);
 					tableRowPowerChangeDuration.setVisibility(View.VISIBLE);
 					tableRowFrequency.setVisibility(View.VISIBLE);
+					tableRowWave.setVisibility(View.VISIBLE);
 					tableRowRunningProbability.setVisibility(View.VISIBLE);
 					tableRowAvgOffDuration.setVisibility(View.GONE);
 					tableRowAvgOnDuration.setVisibility(View.GONE);
@@ -70,6 +74,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowMinPower.setVisibility(View.VISIBLE);
 					tableRowPowerChangeDuration.setVisibility(View.VISIBLE);
 					tableRowFrequency.setVisibility(View.VISIBLE);
+					tableRowWave.setVisibility(View.VISIBLE);
 					tableRowRunningProbability.setVisibility(View.GONE);
 					tableRowAvgOffDuration.setVisibility(View.VISIBLE);
 					tableRowAvgOnDuration.setVisibility(View.VISIBLE);

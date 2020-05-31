@@ -18,10 +18,6 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	 */
 	private static final long AVERAGE_SIGNAL_DURATION = 2000;
 	/**
-	 * The default wave.
-	 */
-	private static final int DEFAULT_WAVE = 0;
-	/**
 	 * The max power.
 	 */
 	private static final int MAX_POWER = 255;
@@ -62,6 +58,10 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	 * The frequency.
 	 */
 	private int mFrequency = 0;
+	/**
+	 * The wave.
+	 */
+	private int mWave = 0;
 	/**
 	 * The running probability.
 	 */
@@ -111,6 +111,9 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 		if (message.getFrequency() != null) {
 			mFrequency = message.getFrequency();
 		}
+		if (message.getWave() != null) {
+			mWave = message.getWave();
+		}
 		if (message.getRunningProbability() != null) {
 			mRunningProbability = message.getRunningProbability();
 		}
@@ -139,7 +142,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 				case 1:
 					// constant power and frequency, both controllable. Serves to prepare base power for modes 2 and 3.
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
-					mChannelSender.tadel(mPower, mFrequency, DEFAULT_WAVE);
+					mChannelSender.tadel(mPower, mFrequency, mWave);
 					mConnectThread.write(new ProcessingBluetoothMessage(
 							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null));
 					break;
@@ -158,7 +161,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 						isPowered = random.nextDouble() < mRunningProbability;
 					}
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
-					mChannelSender.tadel(isPowered ? mPower : (int) (mMinPower * mPower), mFrequency, DEFAULT_WAVE);
+					mChannelSender.tadel(isPowered ? mPower : (int) (mMinPower * mPower), mFrequency, mWave);
 					mConnectThread.write(new ProcessingBluetoothMessage(
 							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null));
 					break;
@@ -183,7 +186,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 					}
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
-					mChannelSender.tadel(isPowered ? mPower : (int) (mMinPower * mPower), mFrequency, DEFAULT_WAVE);
+					mChannelSender.tadel(isPowered ? mPower : (int) (mMinPower * mPower), mFrequency, mWave);
 					mConnectThread.write(new ProcessingBluetoothMessage(
 							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null));
 					break;
@@ -242,7 +245,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 
 	@Override
 	public void sendStatus() {
-		mConnectThread.write(new ProcessingBluetoothMessage(mChannel, true, mIsRunning, mPower, mFrequency, null, mMode,
+		mConnectThread.write(new ProcessingBluetoothMessage(mChannel, true, mIsRunning, mPower, mFrequency, mWave, mMode,
 				null, null, mPowerChangeDuration, null, mRunningProbability, mAvgOffDuration, mAvgOnDuration));
 	}
 

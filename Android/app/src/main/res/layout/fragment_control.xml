@@ -144,7 +144,7 @@
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0.65"
-                    android:max="255"/>
+                    android:max="255" />
 
                 <TextView
                     android:id="@+id/textViewPowerChangeDuration"
@@ -202,8 +202,8 @@
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0.65"
-                    android:progress="30"
-                    android:max="254" />
+                    android:max="254"
+                    android:progress="30" />
 
                 <TextView
                     android:id="@+id/textViewFrequency"
@@ -213,6 +213,25 @@
                     android:layout_weight="0.12"
                     android:textAlignment="viewEnd" />
 
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRowWave"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="0.23"
+                    android:text="@string/text_wave" />
+
+                <Spinner
+                    android:id="@+id/spinnerWave"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.77" />
             </TableRow>
 
             <TableRow android:id="@+id/tableRowRunningProbability">
