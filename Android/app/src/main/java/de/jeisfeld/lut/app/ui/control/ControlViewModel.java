@@ -274,8 +274,8 @@ public abstract class ControlViewModel extends ViewModel {
 	 * @param powerChangeDurationSeekbarValue The power change duration seekbar value.
 	 */
 	protected void updatePowerChangeDuration(final int powerChangeDurationSeekbarValue) {
-		long powerChangeDuration = (int) (99000 / Math.pow(1.06, powerChangeDurationSeekbarValue - 10)); // MAGIC_NUMBER
-		mPowerChangeDuration.setValue(powerChangeDurationSeekbarValue < 10 ? 0 : powerChangeDuration); // MAGIC_NUMBER
+		long powerChangeDuration = (int) (599400 / Math.pow(1.04, powerChangeDurationSeekbarValue - 20)); // MAGIC_NUMBER
+		mPowerChangeDuration.setValue(powerChangeDurationSeekbarValue < 20 ? 0 : powerChangeDuration); // MAGIC_NUMBER
 		writeBluetoothMessage();
 	}
 
@@ -289,7 +289,7 @@ public abstract class ControlViewModel extends ViewModel {
 		if (powerChangeDuration == 0) {
 			return 0; // MAGIC_NUMBER
 		}
-		return (int) Math.min(255, 10 + Math.log(99000f / powerChangeDuration) / Math.log(1.06)); // MAGIC_NUMBER
+		return (int) Math.min(255, 20 + Math.log(599400f / powerChangeDuration) / Math.log(1.04)); // MAGIC_NUMBER
 	}
 
 	/**
@@ -394,7 +394,7 @@ public abstract class ControlViewModel extends ViewModel {
 	 * @return The value
 	 */
 	protected static long avgDurationSeekbarToValue(final int seekbarValue) {
-		return Math.round(1000 * Math.exp(0.016 * seekbarValue)); // MAGIC_NUMBER
+		return Math.round(1000 * Math.exp(0.025 * seekbarValue)); // MAGIC_NUMBER
 	}
 
 	/**
@@ -404,6 +404,6 @@ public abstract class ControlViewModel extends ViewModel {
 	 * @return The seekbar value
 	 */
 	protected static int avgDurationValueToSeekbar(final long value) {
-		return (int) Math.round(Math.log(value / 1000.0) / 0.016); // MAGIC_NUMBER
+		return (int) Math.round(Math.log(value / 1000.0) / 0.025); // MAGIC_NUMBER
 	}
 }
