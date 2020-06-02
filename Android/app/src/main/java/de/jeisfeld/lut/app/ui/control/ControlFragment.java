@@ -212,13 +212,12 @@ public abstract class ControlFragment extends Fragment {
 		final SeekBar seekbarFrequency = root.findViewById(R.id.seekBarFrequency);
 		final TextView textViewFrequency = root.findViewById(R.id.textViewFrequency);
 		// Put values from 2-255 followed by 0, as 0 is highest frequency and 1 is unreliable when switching power quickly
-		textViewFrequency.setText(String.format(Locale.getDefault(), "%d", (seekbarFrequency.getProgress() + 2) % 256)); // MAGIC_NUMBER
+		textViewFrequency.setText(String.format(Locale.getDefault(), "%d", 0));
 		mControlViewModel.getFrequency().observe(getViewLifecycleOwner(), frequency -> {
-			seekbarFrequency.setProgress((frequency + 254) % 256); // MAGIC_NUMBER
+			seekbarFrequency.setProgress(ControlViewModel.getFrequencySeekbarValue(frequency));
 			textViewFrequency.setText(String.format(Locale.getDefault(), "%d", frequency));
 		});
-		seekbarFrequency.setOnSeekBarChangeListener(
-				(OnSeekBarProgressChangedListener) progress -> mControlViewModel.updateFrequency((progress + 2) % 256)); // MAGIC_NUMBER
+		seekbarFrequency.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> mControlViewModel.updateFrequency(progress));
 	}
 
 	/**

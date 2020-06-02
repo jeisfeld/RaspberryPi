@@ -307,7 +307,7 @@ public abstract class ControlViewModel extends ViewModel {
 	}
 
 	/**
-	 * Convert value in ms to seekbar value for avg duration.
+	 * Convert value in ms to seekbar value for power change duration.
 	 *
 	 * @param powerChangeDuration the power change duration in ms
 	 * @return The seekbar value
@@ -348,11 +348,31 @@ public abstract class ControlViewModel extends ViewModel {
 	}
 
 	/**
+	 * Convert value to seekbar value for frequency.
+	 *
+	 * @param frequency the frequency
+	 * @return The seekbar value
+	 */
+	protected static int getFrequencySeekbarValue(final int frequency) {
+		if (frequency == 0) {
+			return 1000; // MAGIC_NUMBER
+		}
+		return (int) (1000 * Math.pow(frequency / 256.0, 2.0 / 3.0)); // MAGIC_NUMBER
+	}
+
+	/**
 	 * Update the frequency.
 	 *
-	 * @param frequency The new frequency.
+	 * @param frequencySeekbarValue The seekbar value of the new frequency.
 	 */
-	protected void updateFrequency(final int frequency) {
+	protected void updateFrequency(final int frequencySeekbarValue) {
+		int frequency = 0;
+		if (frequencySeekbarValue < 1000) { // MAGIC_NUMBER
+			frequency = (int) (Math.pow(frequencySeekbarValue / 1000.0, 1.5) * 256); // MAGIC_NUMBER
+			if (frequency < 2) {
+				frequency = 2;
+			}
+		}
 		mFrequency.setValue(frequency);
 		writeBluetoothMessage();
 	}

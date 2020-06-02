@@ -202,8 +202,8 @@
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0.65"
-                    android:max="254"
-                    android:progress="30" />
+                    android:max="1000"
+                    android:progress="1000" />
 
                 <TextView
                     android:id="@+id/textViewFrequency"
