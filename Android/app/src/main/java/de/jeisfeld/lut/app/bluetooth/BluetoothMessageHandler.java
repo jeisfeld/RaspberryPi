@@ -14,7 +14,7 @@ public class BluetoothMessageHandler extends Handler {
 	/**
 	 * The logging tag.
 	 */
-	private static final String TAG = "JE.LuT.BTMessageHandler";
+	private static final String TAG = "LuT.JE.BTMessageHandler";
 	/**
 	 * The reconnect delay in ms.
 	 */

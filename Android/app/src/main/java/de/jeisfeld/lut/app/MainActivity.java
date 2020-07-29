@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -27,6 +28,7 @@ import de.jeisfeld.lut.app.ui.control.Lob1ViewModel;
 import de.jeisfeld.lut.app.ui.control.Tadel0ViewModel;
 import de.jeisfeld.lut.app.ui.control.Tadel1ViewModel;
 import de.jeisfeld.lut.app.ui.status.StatusViewModel;
+import de.jeisfeld.lut.app.util.PreferenceUtil;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
 import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 	/**
 	 * The logging tag.
 	 */
-	private static final String TAG = "JE.LuT.MainActivity";
+	private static final String TAG = "LuT.JE.MainActivity";
 	/**
 	 * The navigation bar configuration.
 	 */
@@ -75,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
 		// Passing each menu ID as a set of Ids because each
 		// menu should be considered as top level destinations.
 		mAppBarConfiguration = new AppBarConfiguration
-				.Builder(R.id.nav_home, R.id.nav_lob_0, R.id.nav_tadel_0, R.id.nav_lob_1, R.id.nav_tadel_1, R.id.nav_status)
-				.setDrawerLayout(drawer)
+				.Builder(R.id.nav_lob_0, R.id.nav_tadel_0, R.id.nav_lob_1, R.id.nav_tadel_1, R.id.nav_status, R.id.nav_settings)
+				.setOpenableLayout(drawer)
 				.build();
 		NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 		NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
@@ -111,6 +113,10 @@ public class MainActivity extends AppCompatActivity {
 	 * Create bluetooth connection.
 	 */
 	public void connect() {
+		if (PreferenceUtil.getSharedPreferenceBoolean(R.string.key_pref_prevent_screen_timeout, true)) {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		}
+
 		if (mConnectThread != null) {
 			mConnectThread.cancel();
 		}

@@ -20,7 +20,7 @@ public class ConnectedThread extends Thread {
 	/**
 	 * The logging tag.
 	 */
-	private static final String TAG = "JE.LuT.ConnectedThread";
+	private static final String TAG = "LuT.JE.ConnectedThread";
 	/**
 	 * The context.
 	 */

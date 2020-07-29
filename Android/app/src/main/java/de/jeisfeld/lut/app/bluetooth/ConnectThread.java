@@ -18,7 +18,7 @@ public class ConnectThread extends Thread {
 	/**
 	 * The logging tag.
 	 */
-	private static final String TAG = "JE.LuT.ConnectThread";
+	private static final String TAG = "LuT.JE.ConnectThread";
 	/**
 	 * The UUID used for bluetooth.
 	 */

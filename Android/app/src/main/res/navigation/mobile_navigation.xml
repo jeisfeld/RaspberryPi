@@ -6,12 +6,6 @@
     app:startDestination="@+id/nav_status">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="de.jeisfeld.lut.app.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home"/>
-
-    <fragment
         android:id="@+id/nav_lob_0"
         android:name="de.jeisfeld.lut.app.ui.control.Lob0Fragment"
         android:label="@string/menu_lob_0"
@@ -40,4 +34,10 @@
         android:name="de.jeisfeld.lut.app.ui.status.StatusFragment"
         android:label="@string/menu_status"
         tools:layout="@layout/fragment_status" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="de.jeisfeld.lut.app.ui.settings.SettingsFragment"
+        android:label="@string/menu_settings" />
+
 </navigation>
