@@ -1,14 +1,16 @@
 package de.jeisfeld.lut.app.bluetooth;
 
-import java.io.IOException;
-import java.util.UUID;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
+
+import java.io.IOException;
+import java.util.UUID;
+
+import de.jeisfeld.lut.app.R;
+import de.jeisfeld.lut.app.util.DialogUtil;
 import de.jeisfeld.lut.bluetooth.message.Message;
 
 /**
@@ -136,7 +138,7 @@ public class ConnectThread extends Thread {
 	 */
 	private void write(final String message) {
 		if (mConnectedThread == null) {
-			Toast.makeText(mContext, "Failed to send message - no connection available", Toast.LENGTH_SHORT).show();
+			DialogUtil.displayToast(mContext, R.string.toast_failed_send);
 			Log.e(TAG, "Failed to send message - no connection available");
 		}
 		else {

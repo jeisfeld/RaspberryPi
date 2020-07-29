@@ -7,4 +7,9 @@
         android:key="@string/key_pref_prevent_screen_timeout"
         android:title="@string/pref_title_prevent_screen_timeout"
         app:iconSpaceReserved="false" />
+
+    <Preference
+        android:key="@string/key_pref_dummy_shutdown_raspi"
+        android:title="@string/pref_title_dummy_shutdown_raspi"
+        app:iconSpaceReserved="false" />
 </PreferenceScreen>

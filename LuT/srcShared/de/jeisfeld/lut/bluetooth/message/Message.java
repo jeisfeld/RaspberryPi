@@ -60,6 +60,8 @@ public abstract class Message {
 			return new ProcessingBluetoothMessage(messageData);
 		case STANDALONE_STATUS:
 			return new StandaloneStatusMessage(messageData);
+		case SHUTDOWN:
+			return new ShutdownMessage();
 		default:
 			return null;
 		}
@@ -196,7 +198,11 @@ public abstract class Message {
 		/**
 		 * The status of standalone processing.
 		 */
-		STANDALONE_STATUS
+		STANDALONE_STATUS,
+		/**
+		 * Shutdown message.
+		 */
+		SHUTDOWN
 	}
 
 }

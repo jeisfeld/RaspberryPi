@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -28,6 +27,7 @@ import de.jeisfeld.lut.app.ui.control.Lob1ViewModel;
 import de.jeisfeld.lut.app.ui.control.Tadel0ViewModel;
 import de.jeisfeld.lut.app.ui.control.Tadel1ViewModel;
 import de.jeisfeld.lut.app.ui.status.StatusViewModel;
+import de.jeisfeld.lut.app.util.DialogUtil;
 import de.jeisfeld.lut.app.util.PreferenceUtil;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
 		BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (bluetoothAdapter == null) {
-			Toast.makeText(this, R.string.message_bluetooth_required, Toast.LENGTH_LONG).show();
+			DialogUtil.displayToast(this, R.string.toast_bluetooth_required);
 			finish();
 			return;
 		}
@@ -136,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
 			connectThread.write(message);
 		}
 		else {
+			DialogUtil.displayToast(this, R.string.toast_failed_send);
 			Log.e(TAG, "ConnectedThread not existing");
 		}
 	}
@@ -223,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
 				connect();
 			}
 			else {
-				Toast.makeText(this, R.string.message_bluetooth_required, Toast.LENGTH_LONG).show();
+				DialogUtil.displayToast(this, R.string.toast_bluetooth_required);
 				finish();
 			}
 		}

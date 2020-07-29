@@ -89,6 +89,14 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 					case PING:
 						Logger.info("Ping");
 						break;
+					case SHUTDOWN:
+						try {
+							Runtime.getRuntime().exec("sudo shutdown -h now");
+						}
+						catch (IOException e1) {
+							Logger.error(e1);
+						}
+						break;
 					case FREE_TEXT:
 						Logger.info("Received free text message: " + ((FreeTextMessage) message).getText());
 						break;
