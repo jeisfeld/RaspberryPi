@@ -7,7 +7,7 @@
     <string name="nav_header_subtitle">googleplay@jeisfeld.de</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-    <string name="text_bluetooth_status">Bluetooth Status:</string>
+    <string name="text_bluetooth_status">Connection Status:</string>
     <string name="text_standalone_status">Standalone Processing Status:</string>
     <string name="text_processing_status">Processing Status:</string>
     <string name="text_power">Power:</string>
@@ -19,6 +19,7 @@
     <string name="text_running_probability">Run Prob:</string>
     <string name="text_avg_off_duration">Avg Off Dur:</string>
     <string name="text_avg_on_duration">Avg On Dur:</string>
+    <string name="message_bluetooth_required">Bluetooth not available - closing app.</string>
 
     <string name="menu_home">Home</string>
     <string name="menu_lob_0">Lob 0</string>

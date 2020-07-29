@@ -1,13 +1,17 @@
 package de.jeisfeld.lut.app;
 
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.widget.Toast;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -33,6 +37,11 @@ import de.jeisfeld.lut.bluetooth.message.StandaloneStatusMessage;
  * Main activity of the app.
  */
 public class MainActivity extends AppCompatActivity {
+	/**
+	 * Request code for enabling bluetooth.
+	 */
+	private static final int REQUEST_ENABLE_BLUETOOTH = 1;
+
 	/**
 	 * The logging tag.
 	 */
@@ -74,6 +83,19 @@ public class MainActivity extends AppCompatActivity {
 		NavigationUI.setupWithNavController(navigationView, navController);
 
 		mHandler = new BluetoothMessageHandler(this);
+
+		BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+		if (bluetoothAdapter == null) {
+			Toast.makeText(this, R.string.message_bluetooth_required, Toast.LENGTH_LONG).show();
+			finish();
+			return;
+		}
+		else if (!bluetoothAdapter.isEnabled()) {
+			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
+			return;
+		}
+
 		connect();
 	}
 
@@ -186,5 +208,21 @@ public class MainActivity extends AppCompatActivity {
 		viewModelProvider.get(Tadel0ViewModel.class).setBluetoothStatus(connected);
 		viewModelProvider.get(Lob1ViewModel.class).setBluetoothStatus(connected);
 		viewModelProvider.get(Tadel1ViewModel.class).setBluetoothStatus(connected);
+	}
+
+	@Override
+	protected final void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
+		if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
+			if (resultCode == RESULT_OK) {
+				connect();
+			}
+			else {
+				Toast.makeText(this, R.string.message_bluetooth_required, Toast.LENGTH_LONG).show();
+				finish();
+			}
+		}
+		else {
+			super.onActivityResult(requestCode, resultCode, data);
+		}
 	}
 }
