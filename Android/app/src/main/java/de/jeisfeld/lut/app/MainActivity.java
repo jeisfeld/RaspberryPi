@@ -68,15 +68,17 @@ public class MainActivity extends AppCompatActivity {
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		DrawerLayout drawer = findViewById(R.id.drawer_layout);
-		NavigationView navigationView = findViewById(R.id.nav_view);
 		// Passing each menu ID as a set of Ids because each
 		// menu should be considered as top level destinations.
-		mAppBarConfiguration = new AppBarConfiguration
-				.Builder(R.id.nav_lob_0, R.id.nav_tadel_0, R.id.nav_lob_1, R.id.nav_tadel_1, R.id.nav_status, R.id.nav_settings)
-				.setOpenableLayout(drawer)
-				.build();
+		AppBarConfiguration.Builder builder = new AppBarConfiguration.Builder(
+				R.id.nav_lob_0, R.id.nav_tadel_0, R.id.nav_lob_1, R.id.nav_tadel_1, R.id.nav_status, R.id.nav_settings);
+		if (findViewById(R.id.tabletIntermediateLayout) == null) {
+			builder.setOpenableLayout(drawer);
+		}
+		mAppBarConfiguration = builder.build();
 		NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 		NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+		NavigationView navigationView = findViewById(R.id.nav_view);
 		NavigationUI.setupWithNavController(navigationView, navController);
 
 		mHandler = new BluetoothMessageHandler(this);
