@@ -5,25 +5,25 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_lob_0"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/menu_lob_0" />
-        <item
-            android:id="@+id/nav_tadel_0"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/menu_tadel_0" />
-        <item
-            android:id="@+id/nav_lob_1"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/menu_lob_1" />
-        <item
-            android:id="@+id/nav_tadel_1"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/menu_tadel_1" />
-        <item
             android:id="@+id/nav_status"
             android:icon="@drawable/ic_menu_status"
             android:title="@string/menu_status" />
+        <item
+            android:id="@+id/nav_lob_0"
+            android:icon="@drawable/ic_menu_control"
+            android:title="@string/menu_lob_0" />
+        <item
+            android:id="@+id/nav_tadel_0"
+            android:icon="@drawable/ic_menu_control"
+            android:title="@string/menu_tadel_0" />
+        <item
+            android:id="@+id/nav_lob_1"
+            android:icon="@drawable/ic_menu_control"
+            android:title="@string/menu_lob_1" />
+        <item
+            android:id="@+id/nav_tadel_1"
+            android:icon="@drawable/ic_menu_control"
+            android:title="@string/menu_tadel_1" />
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_menu_settings"
