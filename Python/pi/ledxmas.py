@@ -52,7 +52,7 @@ def getNewMatrix(brightness=None):
 def getNewCandleMatrix(brightness):
     hour = datetime.now().hour + datetime.now().minute / 60
     date = datetime.now().day
-    candleCount = 4 if date >= 20 else 3 if date >= 13 else 2 if date >= 6 else 1
+    candleCount = 1 if date >= 25 else 4 if date >= 20 else 3 if date >= 13 else 2 if date >= 6 else 1
 
     if candleCount == 1:
         if hour > 22 or hour < 4:
