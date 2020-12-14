@@ -1,0 +1,2 @@
+#!/bin/bash
+ps -ef | grep java | grep de.jeisfeld.lifx.CandleAnimation | awk '{print "kill " $2}' | sh
