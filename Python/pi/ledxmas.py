@@ -8,7 +8,7 @@ from colormatrix.ImageMatrix import ImageMatrix
 from colormatrix.MatrixAnimator import MatrixAnimator
 from colormatrix.CandleMatrix import CandleMatrix
 from time import sleep
-from datetime import datetime
+from datetime import datetime, timedelta
 from random import random
 from sys import argv
 
@@ -51,8 +51,18 @@ def getNewMatrix(brightness=None):
 
 def getNewCandleMatrix(brightness):
     hour = datetime.now().hour + datetime.now().minute / 60
-    date = datetime.now().day
-    candleCount = 1 if date >= 25 else 4 if date >= 20 else 3 if date >= 13 else 2 if date >= 6 else 1
+    currentday = datetime.now() - timedelta(hours = 4)
+    date = currentday.day
+    month = currentday.month
+        
+    if month == 1:
+        candleCount = 3 if date > 6 else 4
+    elif month == 11:
+        candleCount = 1 if date >= 28 else 3
+    elif month == 12:
+        candleCount = 4 if date >= 19 else 3 if date >= 12 else 2 if date >= 5 else 1
+    else:
+        candleCount = 3
 
     if candleCount == 1:
         if hour > 22 or hour < 4:
