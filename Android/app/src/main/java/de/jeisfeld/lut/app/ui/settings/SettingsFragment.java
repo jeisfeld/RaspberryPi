@@ -1,6 +1,11 @@
 package de.jeisfeld.lut.app.ui.settings;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -16,7 +21,29 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 	@Override
 	public final void onCreatePreferences(final Bundle savedInstanceState, final String rootKey) {
 		setPreferencesFromResource(R.xml.preferences, rootKey);
+		configureBatteryOptimizationButton();
 		configureShutdownButton();
+	}
+
+	/**
+	 * Configure the button for battery optimization.
+	 */
+	private void configureBatteryOptimizationButton() {
+		Preference batteryOptimizationPreference = findPreference(getString(R.string.key_pref_dummy_setting_battery_optimizations));
+		assert batteryOptimizationPreference != null;
+		batteryOptimizationPreference.setOnPreferenceClickListener(preference -> {
+			PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+			Intent intent = new Intent();
+			if (pm.isIgnoringBatteryOptimizations(getContext().getPackageName())) {
+				intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+			}
+			else {
+				intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+				intent.setData(Uri.parse("package:" + getContext().getPackageName()));
+			}
+			startActivity(intent);
+			return true;
+		});
 	}
 
 	/**

@@ -9,6 +9,11 @@
         app:iconSpaceReserved="false" />
 
     <Preference
+        android:key="@string/key_pref_dummy_setting_battery_optimizations"
+        android:title="@string/pref_title_dummy_setting_battery_optimizations"
+        app:iconSpaceReserved="false" />
+
+    <Preference
         android:key="@string/key_pref_dummy_shutdown_raspi"
         android:title="@string/pref_title_dummy_shutdown_raspi"
         app:iconSpaceReserved="false" />

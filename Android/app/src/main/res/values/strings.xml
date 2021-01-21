@@ -39,7 +39,9 @@
     <string name="key_statistics_countstarts" translatable="false">statistics_countstarts</string>
     <string name="key_pref_prevent_screen_timeout" translatable="false">pref_prevent_screen_timeout</string>
     <string name="pref_title_prevent_screen_timeout">Prevent Screen Timeout</string>
+    <string name="key_pref_dummy_setting_battery_optimizations" translatable="false">pref_dummy_setting_battery_optimizations</string>
     <string name="key_pref_dummy_shutdown_raspi" translatable="false">pref_dummy_shutdown_raspi</string>
+    <string name="pref_title_dummy_setting_battery_optimizations">Configure battery optimizations</string>
     <string name="pref_title_dummy_shutdown_raspi">Shutdown Raspberry Pi</string>
 _
     <string-array name="values_mode_lob">
