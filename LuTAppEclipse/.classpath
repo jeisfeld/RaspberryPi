@@ -37,9 +37,9 @@
 	<classpathentry kind="lib" path="libs-local/appcompat-1.2.0.jar"/>
 	<classpathentry kind="lib" path="libs-local/constraintlayout-2.0.4.jar"/>
 	<classpathentry kind="lib" path="libs-local/material-1.2.1.jar"/>
-	<classpathentry kind="lib" path="libs-local/navigation-common-2.3.2.jar"/>
-	<classpathentry kind="lib" path="libs-local/navigation-fragment-2.3.2.jar"/>
-	<classpathentry kind="lib" path="libs-local/navigation-runtime-2.3.2.jar"/>
-	<classpathentry kind="lib" path="libs-local/navigation-ui-2.3.2.jar"/>
+	<classpathentry kind="lib" path="libs-local/navigation-common-2.3.3.jar"/>
+	<classpathentry kind="lib" path="libs-local/navigation-fragment-2.3.3.jar"/>
+	<classpathentry kind="lib" path="libs-local/navigation-runtime-2.3.3.jar"/>
+	<classpathentry kind="lib" path="libs-local/navigation-ui-2.3.3.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
