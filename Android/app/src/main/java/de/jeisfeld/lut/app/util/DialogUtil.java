@@ -101,7 +101,12 @@ public final class DialogUtil {
 		ConfirmDialogFragment fragment = new ConfirmDialogFragment();
 		fragment.setListener(listener);
 		fragment.setArguments(bundle);
-		fragment.show(activity.getSupportFragmentManager(), fragment.getClass().toString());
+		try {
+			fragment.show(activity.getSupportFragmentManager(), fragment.getClass().toString());
+		}
+		catch (IllegalStateException e) {
+			// May appear if activity is not active any more - ignore.
+		}
 	}
 
 	/**
