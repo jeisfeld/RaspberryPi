@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -18,12 +19,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switchBluetoothStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:switchMinWidth="64dp" />
+            app:switchMinWidth="64dp" />
     </FrameLayout>
 
     <LinearLayout
@@ -33,7 +34,7 @@
         android:orientation="vertical"
         android:visibility="gone">
 
-        <Space
+        <android.widget.Space
             android:layout_width="match_parent"
             android:layout_height="@dimen/seekbar_height" />
 
@@ -48,15 +49,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switchActive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:switchMinWidth="64dp" />
+                app:switchMinWidth="64dp" />
         </FrameLayout>
 
-        <Space
+        <android.widget.Space
             android:layout_width="match_parent"
             android:layout_height="@dimen/seekbar_height" />
 
@@ -65,7 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <Space
+        <android.widget.Space
             android:layout_width="match_parent"
             android:layout_height="@dimen/seekbar_height" />
 
@@ -79,7 +80,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_weight="0.23"
+                    android:layout_weight="@integer/selector_label_width"
                     android:text="@string/text_power" />
 
                 <SeekBar
@@ -87,7 +88,7 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="0.65"
+                    android:layout_weight="@integer/selector_seekbar_width"
                     android:max="255" />
 
                 <TextView
@@ -95,7 +96,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12"
+                    android:layout_weight="@integer/selector_text_width"
                     android:textAlignment="viewEnd" />
 
             </TableRow>
@@ -106,7 +107,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_weight="0.23"
+                    android:layout_weight="@integer/selector_label_width"
                     android:text="@string/text_min_power" />
 
                 <SeekBar
@@ -114,7 +115,7 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="0.65"
+                    android:layout_weight="@integer/selector_seekbar_width"
                     android:max="100" />
 
                 <TextView
@@ -122,7 +123,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12"
+                    android:layout_weight="@integer/selector_text_width"
                     android:textAlignment="viewEnd" />
 
             </TableRow>
@@ -135,7 +136,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_weight="0.23"
+                    android:layout_weight="@integer/selector_label_width"
                     android:text="@string/text_power_change_duration" />
 
                 <SeekBar
@@ -143,7 +144,7 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="0.65"
+                    android:layout_weight="@integer/selector_seekbar_width"
                     android:max="255" />
 
                 <TextView
@@ -151,7 +152,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12"
+                    android:layout_weight="@integer/selector_text_width"
                     android:textAlignment="viewEnd" />
 
             </TableRow>
@@ -164,7 +165,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_weight="0.23"
+                    android:layout_weight="@integer/selector_label_width"
                     android:text="@string/text_cycle_length" />
 
                 <SeekBar
@@ -172,7 +173,7 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="0.65"
+                    android:layout_weight="@integer/selector_seekbar_width"
                     android:max="25" />
 
                 <TextView
@@ -180,7 +181,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12"
+                    android:layout_weight="@integer/selector_text_width"
                     android:textAlignment="viewEnd" />
 
             </TableRow>
@@ -193,7 +194,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_weight="0.23"
+                    android:layout_weight="@integer/selector_label_width"
                     android:text="@string/text_frequency" />
 
                 <SeekBar
@@ -201,7 +202,7 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="0.65"
+                    android:layout_weight="@integer/selector_seekbar_width"
                     android:max="1000"
                     android:progress="1000" />
 
@@ -210,7 +211,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12"
+                    android:layout_weight="@integer/selector_text_width"
                     android:textAlignment="viewEnd" />
 
             </TableRow>
@@ -223,7 +224,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_weight="0.23"
+                    android:layout_weight="@integer/selector_label_width"
                     android:text="@string/text_wave" />
 
                 <Spinner
@@ -231,7 +232,9 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="0.77" />
+                    android:paddingStart="@dimen/non_seekbar_left_padding"
+                    android:layout_weight="@integer/selector_spinner_width"
+                    tools:ignore="RtlSymmetry" />
             </TableRow>
 
             <TableRow android:id="@+id/tableRowRunningProbability">
@@ -240,7 +243,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_weight="0.23"
+                    android:layout_weight="@integer/selector_label_width"
                     android:text="@string/text_running_probability" />
 
                 <SeekBar
@@ -248,7 +251,7 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="0.65"
+                    android:layout_weight="@integer/selector_seekbar_width"
                     android:max="100"
                     android:progress="50" />
 
@@ -257,7 +260,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12"
+                    android:layout_weight="@integer/selector_text_width"
                     android:textAlignment="viewEnd" />
 
             </TableRow>
@@ -268,7 +271,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_weight="0.23"
+                    android:layout_weight="@integer/selector_label_width"
                     android:text="@string/text_avg_off_duration" />
 
                 <SeekBar
@@ -276,7 +279,7 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="0.65"
+                    android:layout_weight="@integer/selector_seekbar_width"
                     android:max="255" />
 
                 <TextView
@@ -284,7 +287,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12"
+                    android:layout_weight="@integer/selector_text_width"
                     android:textAlignment="viewEnd" />
 
             </TableRow>
@@ -295,7 +298,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|start"
-                    android:layout_weight="0.23"
+                    android:layout_weight="@integer/selector_label_width"
                     android:text="@string/text_avg_on_duration" />
 
                 <SeekBar
@@ -303,7 +306,7 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="0.65"
+                    android:layout_weight="@integer/selector_seekbar_width"
                     android:max="255" />
 
                 <TextView
@@ -311,7 +314,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_weight="0.12"
+                    android:layout_weight="@integer/selector_text_width"
                     android:textAlignment="viewEnd" />
 
             </TableRow>

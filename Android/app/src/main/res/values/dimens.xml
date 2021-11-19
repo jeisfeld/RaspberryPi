@@ -9,4 +9,10 @@
 
     <dimen name="seekbar_height">32dp</dimen>
     <dimen name="fragment_padding">16dp</dimen>
+    <dimen name="non_seekbar_left_padding">10dp</dimen>
+
+    <integer name="selector_label_width">25</integer>
+    <integer name="selector_seekbar_width">63</integer>
+    <integer name="selector_spinner_width">75</integer>
+    <integer name="selector_text_width">12</integer>
 </resources>

@@ -1,7 +1,5 @@
 package de.jeisfeld.lut.app.ui.control;
 
-import java.util.Locale;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,9 +12,12 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
+
+import java.util.Locale;
+
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.app.R;
@@ -65,7 +66,7 @@ public abstract class ControlFragment extends Fragment {
 	 * Get the listener on mode change.
 	 *
 	 * @param parentView The parent view.
-	 * @param viewModel The view model.
+	 * @param viewModel  The view model.
 	 * @return The listener.
 	 */
 	protected abstract OnItemSelectedListener getOnModeSelectedListener(View parentView, ControlViewModel viewModel);
@@ -77,14 +78,14 @@ public abstract class ControlFragment extends Fragment {
 		mControlViewModel.setActivity((MainActivity) requireActivity());
 		View root = inflater.inflate(R.layout.fragment_control, container, false);
 
-		final Switch switchBluetoothStatus = root.findViewById(R.id.switchBluetoothStatus);
+		final SwitchCompat switchBluetoothStatus = root.findViewById(R.id.switchBluetoothStatus);
 		final LinearLayout layoutControlInfo = root.findViewById(R.id.layoutControlInfo);
 		mControlViewModel.getStatusBluetooth().observe(getViewLifecycleOwner(), checked -> {
 			switchBluetoothStatus.setChecked(checked);
 			layoutControlInfo.setVisibility(checked ? View.VISIBLE : View.GONE);
 		});
 
-		final Switch switchActive = root.findViewById(R.id.switchActive);
+		final SwitchCompat switchActive = root.findViewById(R.id.switchActive);
 		mControlViewModel.getIsActive().observe(getViewLifecycleOwner(), switchActive::setChecked);
 
 		final Spinner spinnerMode = root.findViewById(R.id.spinnerMode);
@@ -236,7 +237,7 @@ public abstract class ControlFragment extends Fragment {
 		});
 		seekbarRunningProbability
 				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> //
-				mControlViewModel.updateRunningProbability(progress / 100.0)); // MAGIC_NUMBER
+						mControlViewModel.updateRunningProbability(progress / 100.0)); // MAGIC_NUMBER
 	}
 
 	/**
@@ -302,7 +303,7 @@ public abstract class ControlFragment extends Fragment {
 		});
 		seekbarAvgOnDuration
 				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> //
-				mControlViewModel.updateAvgOnDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
+						mControlViewModel.updateAvgOnDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
 	}
 
 	/**

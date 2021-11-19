@@ -7,9 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import de.jeisfeld.lut.app.MainActivity;
@@ -36,23 +37,23 @@ public class StatusFragment extends Fragment {
 		final TextView textProcessingStatus = root.findViewById(R.id.textProcessingStatus);
 		mStatusViewModel.getProcessingStatus().observe(getViewLifecycleOwner(), textProcessingStatus::setText);
 
-		final Switch switchBluetoothStatus = root.findViewById(R.id.switchBluetoothStatus);
+		final SwitchCompat switchBluetoothStatus = root.findViewById(R.id.switchBluetoothStatus);
 		final LinearLayout layoutControlInfo = root.findViewById(R.id.layoutControlInfo);
 		mStatusViewModel.getStatusBluetooth().observe(getViewLifecycleOwner(), checked -> {
 			switchBluetoothStatus.setChecked(checked);
 			layoutControlInfo.setVisibility(checked ? View.VISIBLE : View.GONE);
 		});
 
-		final Switch switchStandaloneStatus = root.findViewById(R.id.switchStandaloneStatus);
+		final SwitchCompat switchStandaloneStatus = root.findViewById(R.id.switchStandaloneStatus);
 		mStatusViewModel.getStatusStandalone().observe(getViewLifecycleOwner(), switchStandaloneStatus::setChecked);
 		switchStandaloneStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
 			mStatusViewModel.updateStandaloneStatus(isChecked);
 			textProcessingStatus.setVisibility(isChecked ? View.VISIBLE : View.GONE);
 		});
 
-		final Switch switchButton1 = root.findViewById(R.id.switchButton1);
+		final SwitchCompat switchButton1 = root.findViewById(R.id.switchButton1);
 		mStatusViewModel.getStatusButton1().observe(getViewLifecycleOwner(), switchButton1::setChecked);
-		final Switch switchButton2 = root.findViewById(R.id.switchButton2);
+		final SwitchCompat switchButton2 = root.findViewById(R.id.switchButton2);
 		mStatusViewModel.getStatusButton2().observe(getViewLifecycleOwner(), switchButton2::setChecked);
 
 		final SeekBar seekbarControl1 = root.findViewById(R.id.seekBarControl1);
