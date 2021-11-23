@@ -2,7 +2,9 @@ package de.jeisfeld.lut.app;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.WindowManager;
@@ -26,6 +28,7 @@ import de.jeisfeld.lut.app.ui.control.Tadel0ViewModel;
 import de.jeisfeld.lut.app.ui.control.Tadel1ViewModel;
 import de.jeisfeld.lut.app.ui.status.StatusViewModel;
 import de.jeisfeld.lut.app.util.DialogUtil;
+import de.jeisfeld.lut.app.util.ExternalTriggerReceiver;
 import de.jeisfeld.lut.app.util.PreferenceUtil;
 import de.jeisfeld.lut.bluetooth.message.ButtonStatusMessage;
 import de.jeisfeld.lut.bluetooth.message.Message;
@@ -61,6 +64,11 @@ public class MainActivity extends AppCompatActivity {
 	 */
 	private BluetoothMessageHandler mHandler;
 
+	/**
+	 * The receiver for external messages.
+	 */
+	private ExternalTriggerReceiver mTriggerReceiver;
+
 	@Override
 	protected final void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -95,6 +103,13 @@ public class MainActivity extends AppCompatActivity {
 			return;
 		}
 
+		mTriggerReceiver = new ExternalTriggerReceiver();
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction("de.jeisfeld.randomimage.DISPLAY_RANDOM_IMAGE");
+		intentFilter.addAction("de.jeisfeld.randomimage.DISPLAY_NOTIFICATION");
+		intentFilter.addAction("de.jeisfeld.breathtraining.BREATH_EXERCISE");
+		registerReceiver(mTriggerReceiver, intentFilter);
+
 		connect();
 	}
 
@@ -104,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
 		if (mConnectThread != null) {
 			mConnectThread.cancel();
 		}
+		unregisterReceiver(mTriggerReceiver);
 	}
 
 	/**

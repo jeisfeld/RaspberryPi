@@ -144,7 +144,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
 					mChannelSender.tadel(mPower, mFrequency, mWave);
 					mConnectThread.write(new ProcessingBluetoothMessage(
-							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null));
+							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null, null));
 					break;
 				case 2:
 					// Random change between on/off level. Avg signal duration 2s. Power, frequency and Probability controllable.
@@ -163,7 +163,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
 					mChannelSender.tadel(isPowered ? mPower : (int) (mMinPower * mPower), mFrequency, mWave);
 					mConnectThread.write(new ProcessingBluetoothMessage(
-							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null));
+							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null, null));
 					break;
 				case 3: // MAGIC_NUMBER
 					// Random change between on/off. On level and avg off/on duration controllable.
@@ -188,7 +188,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
 					mChannelSender.tadel(isPowered ? mPower : (int) (mMinPower * mPower), mFrequency, mWave);
 					mConnectThread.write(new ProcessingBluetoothMessage(
-							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null));
+							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null, null));
 					break;
 				default:
 					mPower = 0;
@@ -246,7 +246,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	@Override
 	public void sendStatus() {
 		mConnectThread.write(new ProcessingBluetoothMessage(mChannel, true, mIsRunning, mPower, mFrequency, mWave, mMode,
-				null, null, mPowerChangeDuration, null, mRunningProbability, mAvgOffDuration, mAvgOnDuration));
+				null, null, mPowerChangeDuration, null, mRunningProbability, mAvgOffDuration, mAvgOnDuration, null));
 	}
 
 }

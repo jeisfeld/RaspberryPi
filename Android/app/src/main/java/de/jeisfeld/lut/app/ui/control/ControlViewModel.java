@@ -165,7 +165,7 @@ public abstract class ControlViewModel extends ViewModel {
 				mMode.getValue() == null ? 0 : (isTadel() ? mMode.getValue().getTadelValue() : mMode.getValue().getLobValue()),
 				mMinPower.getValue(), null, mPowerChangeDuration.getValue(),
 				mCycleLength.getValue(), mRunningProbability.getValue(),
-				mAvgOffDuration.getValue(), mAvgOnDuration.getValue());
+				mAvgOffDuration.getValue(), mAvgOnDuration.getValue(), null);
 		writeBluetoothMessage(message);
 	}
 
