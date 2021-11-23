@@ -29,7 +29,7 @@ public class ProcessingBluetoothMessage extends Message {
 	 */
 	private final Integer mWave;
 	/**
-	 * The processing mode.
+	 * The processing mode (as int value).
 	 */
 	private final Integer mMode;
 	/**

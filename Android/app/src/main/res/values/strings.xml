@@ -18,6 +18,8 @@
     <string name="text_running_probability">Run Prob:</string>
     <string name="text_avg_off_duration">Avg Off Dur:</string>
     <string name="text_avg_on_duration">Avg On Dur:</string>
+    <string name="text_pulse_trigger">Trigger:</string>
+    <string name="text_pulse_duration">Pulse Dur:</string>
 
     <string name="menu_lob_0">Lob 0</string>
     <string name="menu_lob_1">Lob 1</string>
@@ -49,6 +51,7 @@ _
         <item>Wave</item>
         <item>Random 1</item>
         <item>Random 2</item>
+        <item>External Input</item>
     </string-array>
 
     <string-array name="values_mode_tadel">
@@ -56,6 +59,7 @@ _
         <item>Fixed</item>
         <item>Random 1</item>
         <item>Random 2</item>
+        <item>External Input</item>
     </string-array>
 
     <string-array name="values_wave_tadel">
@@ -68,5 +72,10 @@ _
         <item>Ramp up/down wobble</item>
         <item>Frequency up/wobble</item>
         <item>Ramp up/down impulse</item>
+    </string-array>
+
+    <string-array name="values_pulse_trigger">
+        <item>Random Image Display</item>
+        <item>Breath Training Hold</item>
     </string-array>
 </resources>

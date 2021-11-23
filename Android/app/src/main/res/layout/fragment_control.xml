@@ -319,6 +319,53 @@
 
             </TableRow>
 
+            <TableRow
+                android:id="@+id/tableRowPulseTrigger"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="@integer/selector_label_width"
+                    android:text="@string/text_pulse_trigger" />
+
+                <Spinner
+                    android:id="@+id/spinnerPulseTrigger"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:paddingStart="@dimen/non_seekbar_left_padding"
+                    android:layout_weight="@integer/selector_spinner_width"
+                    tools:ignore="RtlSymmetry" />
+            </TableRow>
+
+            <TableRow android:id="@+id/tableRowPulseDuration">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="@integer/selector_label_width"
+                    android:text="@string/text_pulse_duration" />
+
+                <SeekBar
+                    android:id="@+id/seekBarPulseDuration"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="@integer/selector_seekbar_width"
+                    android:max="255" />
+
+                <TextView
+                    android:id="@+id/textViewPulseDuration"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_weight="@integer/selector_text_width"
+                    android:textAlignment="viewEnd" />
+
+            </TableRow>
         </TableLayout>
 
     </LinearLayout>

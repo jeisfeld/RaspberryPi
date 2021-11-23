@@ -23,7 +23,11 @@ public enum Mode {
 	/**
 	 * Random change between on/off. On level and avg off/on duration controllable.
 	 */
-	RANDOM_2(3, 3);
+	RANDOM_2(3, 3),
+	/**
+	 * Individual pulses controlled by client.
+	 */
+	PULSE(4, 4);
 
 	/**
 	 * The integer value / dropdown position for Lob.

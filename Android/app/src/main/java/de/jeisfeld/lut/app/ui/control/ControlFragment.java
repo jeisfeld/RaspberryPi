@@ -47,15 +47,6 @@ public abstract class ControlFragment extends Fragment {
 	protected abstract String[] getModeSpinnerValues();
 
 	/**
-	 * Get the values in wave spinner dropdown.
-	 *
-	 * @return The values in wave spinner dropdown.
-	 */
-	protected final String[] getWaveSpinnerValues() {
-		return getResources().getStringArray(R.array.values_wave_tadel);
-	}
-
-	/**
 	 * Get the integer value from a mode.
 	 *
 	 * @param mode The mode.
@@ -94,8 +85,15 @@ public abstract class ControlFragment extends Fragment {
 		mControlViewModel.getMode().observe(getViewLifecycleOwner(), mode -> spinnerMode.setSelection(modeToInt(mode)));
 
 		final Spinner spinnerWave = root.findViewById(R.id.spinnerWave);
-		spinnerWave.setAdapter(new ArrayAdapter<>(requireContext(), R.layout.spinner_item_wave, getWaveSpinnerValues()));
+		spinnerWave.setAdapter(new ArrayAdapter<>(requireContext(), R.layout.spinner_item_standard,
+				getResources().getStringArray(R.array.values_wave_tadel)));
 		mControlViewModel.getWave().observe(getViewLifecycleOwner(), wave -> spinnerWave.setSelection(wave.ordinal()));
+
+		final Spinner spinnerPulseTrigger = root.findViewById(R.id.spinnerPulseTrigger);
+		spinnerPulseTrigger.setAdapter(new ArrayAdapter<>(requireContext(), R.layout.spinner_item_standard,
+				getResources().getStringArray(R.array.values_pulse_trigger)));
+		mControlViewModel.getPulseTrigger().observe(getViewLifecycleOwner(),
+				pulseTrigger -> spinnerPulseTrigger.setSelection(pulseTrigger.ordinal()));
 
 		switchActive.setOnCheckedChangeListener((buttonView, isChecked) -> mControlViewModel.updateActiveStatus(isChecked));
 		switchActive.setOnClickListener(v -> mControlViewModel.updateMode(Mode.OFF));
@@ -112,6 +110,21 @@ public abstract class ControlFragment extends Fragment {
 				// do nothing
 			}
 		});
+		spinnerPulseTrigger.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
+				PulseTrigger pulseTrigger = PulseTrigger.fromOrdinal(position);
+				mControlViewModel.updatePulseTrigger(pulseTrigger);
+				if (mControlViewModel.getMode().getValue() == Mode.PULSE) {
+					root.findViewById(R.id.tableRowPulseDuration).setVisibility(pulseTrigger.isWithDuration() ? View.VISIBLE : View.GONE);
+				}
+			}
+
+			@Override
+			public void onNothingSelected(final AdapterView<?> parent) {
+				// do nothing
+			}
+		});
 
 		prepareSeekbarPower(root);
 		prepareSeekbarMinPower(root);
@@ -121,6 +134,7 @@ public abstract class ControlFragment extends Fragment {
 		prepareSeekbarRunningProbability(root);
 		prepareSeekbarAvgOffDuration(root);
 		prepareSeekbarAvgOnDuration(root);
+		prepareSeekbarPulseDuration(root);
 
 		switchBluetoothStatus.setOnTouchListener((v, event) -> true);
 
@@ -305,6 +319,36 @@ public abstract class ControlFragment extends Fragment {
 		seekbarAvgOnDuration
 				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> //
 						mControlViewModel.updateAvgOnDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
+	}
+
+	/**
+	 * Prepare the pulse duration seekbar.
+	 *
+	 * @param root The parent view.
+	 */
+	private void prepareSeekbarPulseDuration(final View root) {
+		final SeekBar seekbarPulseDuration = root.findViewById(R.id.seekBarPulseDuration);
+		final TextView textViewPulseDuration = root.findViewById(R.id.textViewPulseDuration);
+		long pulseDuration1 = ControlViewModel.avgDurationSeekbarToValue(seekbarPulseDuration.getProgress());
+		if (pulseDuration1 >= 99900) { // MAGIC_NUMBER
+			textViewPulseDuration.setText(String.format(Locale.getDefault(), "%.2fm", pulseDuration1 / 60000.0)); // MAGIC_NUMBER
+		}
+		else {
+			textViewPulseDuration.setText(String.format(Locale.getDefault(), "%.1fs", pulseDuration1 / 1000.0)); // MAGIC_NUMBER
+		}
+		mControlViewModel.getPulseDuration().observe(getViewLifecycleOwner(), pulseDuration -> {
+			int seekbarValue = ControlViewModel.avgDurationValueToSeekbar(pulseDuration);
+			seekbarPulseDuration.setProgress(seekbarValue);
+			if (pulseDuration >= 99900) { // MAGIC_NUMBER
+				textViewPulseDuration.setText(String.format(Locale.getDefault(), "%.2fm", pulseDuration / 60000.0)); // MAGIC_NUMBER
+			}
+			else {
+				textViewPulseDuration.setText(String.format(Locale.getDefault(), "%.1fs", pulseDuration / 1000.0)); // MAGIC_NUMBER
+			}
+		});
+		seekbarPulseDuration
+				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> //
+						mControlViewModel.updatePulseDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
 	}
 
 	/**

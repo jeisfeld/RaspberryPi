@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 			return;
 		}
 
-		mTriggerReceiver = new ExternalTriggerReceiver();
+		mTriggerReceiver = new ExternalTriggerReceiver(this);
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("de.jeisfeld.randomimage.DISPLAY_RANDOM_IMAGE");
 		intentFilter.addAction("de.jeisfeld.randomimage.DISPLAY_NOTIFICATION");

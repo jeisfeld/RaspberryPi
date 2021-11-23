@@ -1,6 +1,7 @@
 package de.jeisfeld.lut.app.ui.control;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -71,6 +72,14 @@ public abstract class ControlViewModel extends ViewModel {
 	 * The average off duration.
 	 */
 	private final MutableLiveData<Long> mAvgOnDuration = new MutableLiveData<>(1000L);
+	/**
+	 * The pulse trigger.
+	 */
+	private final MutableLiveData<PulseTrigger> mPulseTrigger = new MutableLiveData<>(PulseTrigger.RANDOM_IMAGE_DISPLAY);
+	/**
+	 * The pulse duration.
+	 */
+	private final MutableLiveData<Long> mPulseDuration = new MutableLiveData<>(1000L);
 
 	/**
 	 * Constructor.
@@ -140,6 +149,9 @@ public abstract class ControlViewModel extends ViewModel {
 		if (processingBluetoothMessage.getAvgOnDuration() != null) {
 			mAvgOnDuration.postValue(processingBluetoothMessage.getAvgOnDuration());
 		}
+		if (processingBluetoothMessage.getPulseDuration() != null) {
+			mPulseDuration.postValue(processingBluetoothMessage.getPulseDuration());
+		}
 	}
 
 	/**
@@ -163,8 +175,26 @@ public abstract class ControlViewModel extends ViewModel {
 				isTadel() && mWave.getValue() != null ? mWave.getValue().getTadelValue() : null,
 				mMode.getValue(), mMinPower.getValue(), null, mPowerChangeDuration.getValue(),
 				mCycleLength.getValue(), mRunningProbability.getValue(),
-				mAvgOffDuration.getValue(), mAvgOnDuration.getValue(), null);
+				mAvgOffDuration.getValue(), mAvgOnDuration.getValue(), mPulseDuration.getValue());
 		writeBluetoothMessage(message);
+	}
+
+	/**
+	 * Write bluetooth message to trigger pulse based on external trigger, if applicable.
+	 *
+	 * @param pulseTrigger The pulse trigger.
+	 * @param isHighPower true for setting pulse, false for stopping pulse.
+	 */
+	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower) {
+		if (mMode.getValue() == Mode.PULSE && mPulseTrigger.getValue() == pulseTrigger) {
+			ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
+					mIsActive.getValue(), mPower.getValue(), mFrequency.getValue(),
+					isTadel() && mWave.getValue() != null ? mWave.getValue().getTadelValue() : null,
+					mMode.getValue(), mMinPower.getValue(), isHighPower, mPowerChangeDuration.getValue(), mCycleLength.getValue(),
+					mRunningProbability.getValue(), mAvgOffDuration.getValue(), mAvgOnDuration.getValue(),
+					Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? mPulseDuration.getValue() : Long.MAX_VALUE);
+			writeBluetoothMessage(message);
+		}
 	}
 
 	/**
@@ -429,6 +459,43 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	protected void updateAvgOnDuration(final long avgOnDuration) {
 		mAvgOnDuration.setValue(avgOnDuration);
+		writeBluetoothMessage();
+	}
+
+	/**
+	 * Get the pulse trigger.
+	 *
+	 * @return The pulse trigger.
+	 */
+	public final LiveData<PulseTrigger> getPulseTrigger() {
+		return mPulseTrigger;
+	}
+
+	/**
+	 * Update the pulse trigger.
+	 *
+	 * @param pulseTrigger The new pulse trigger.
+	 */
+	protected void updatePulseTrigger(final PulseTrigger pulseTrigger) {
+		mPulseTrigger.setValue(pulseTrigger);
+	}
+
+	/**
+	 * Get the pulse duration.
+	 *
+	 * @return The pulse duration.
+	 */
+	protected MutableLiveData<Long> getPulseDuration() {
+		return mPulseDuration;
+	}
+
+	/**
+	 * Update the pulse duration.
+	 *
+	 * @param pulseDuration The new pulse duration
+	 */
+	protected void updatePulseDuration(final long pulseDuration) {
+		mPulseDuration.setValue(pulseDuration);
 		writeBluetoothMessage();
 	}
 

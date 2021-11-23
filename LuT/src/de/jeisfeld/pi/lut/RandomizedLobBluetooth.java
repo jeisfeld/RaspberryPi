@@ -63,6 +63,14 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	 * The average off duration.
 	 */
 	private long mAvgOffDuration = 1;
+	/**
+	 * The pulse duration.
+	 */
+	private long mPulseDuration = 1;
+	/**
+	 * Flag indicating if power is high.
+	 */
+	private boolean mIsHighPower = false;
 
 	/**
 	 * Constructor.
@@ -83,6 +91,9 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	public void updateValues(final ProcessingBluetoothMessage message) {
 		if (message.getMode() != null) {
 			mMode = message.getMode();
+			if (mMode == Mode.PULSE && message.isHighPower() != null) {
+				mIsHighPower = message.isHighPower();
+			}
 		}
 		if (message.getPower() != null) {
 			mPower = message.getPower();
@@ -102,6 +113,9 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 		if (message.getAvgOnDuration() != null) {
 			mAvgOnDuration = message.getAvgOnDuration();
 		}
+		if (message.getPulseDuration() != null) {
+			mPulseDuration = message.getPulseDuration();
+		}
 	}
 
 	@Override
@@ -114,7 +128,6 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 		// variables for mode 2-3
 		Random random = new Random();
 		long nextSignalChangeTime = System.currentTimeMillis();
-		boolean isHighPower = false;
 		double lastRunningProbability = 0;
 		double lastAvgOffDuration = 0;
 		double lastAvgOnDuration = 0;
@@ -146,22 +159,22 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 							duration = Integer.MAX_VALUE;
 						}
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
-						isHighPower = random.nextDouble() < mRunningProbability;
+						mIsHighPower = random.nextDouble() < mRunningProbability;
 					}
 
-					mChannelSender.lob(isHighPower ? mPower : (int) (mMinPower * mPower));
+					mChannelSender.lob(mIsHighPower ? mPower : (int) (mMinPower * mPower));
 					break;
 				case RANDOM_2: // MAGIC_NUMBER
 					// Random change between on/off. On level and avg off/on duration controllable.
 					if (System.currentTimeMillis() > nextSignalChangeTime // BOOLEAN_EXPRESSION_COMPLEXITY
-							|| isHighPower && mAvgOnDuration != lastAvgOnDuration
-							|| !isHighPower && mAvgOffDuration != lastAvgOffDuration) {
+							|| mIsHighPower && mAvgOnDuration != lastAvgOnDuration
+							|| !mIsHighPower && mAvgOffDuration != lastAvgOffDuration) {
 						lastAvgOffDuration = mAvgOffDuration;
 						lastAvgOnDuration = mAvgOnDuration;
 						if (System.currentTimeMillis() > nextSignalChangeTime) {
-							isHighPower = !isHighPower;
+							mIsHighPower = !mIsHighPower;
 						}
-						double avgDuration = isHighPower ? mAvgOnDuration : mAvgOffDuration;
+						double avgDuration = mIsHighPower ? mAvgOnDuration : mAvgOffDuration;
 						int duration;
 						try {
 							duration = (int) (-avgDuration * Math.log(random.nextFloat()));
@@ -172,7 +185,28 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 					}
 
-					mChannelSender.lob(isHighPower ? mPower : (int) (mMinPower * mPower));
+					mChannelSender.lob(mIsHighPower ? mPower : (int) (mMinPower * mPower));
+					break;
+				case PULSE:
+					if (mIsHighPower) {
+						if (mPulseDuration > 0) {
+							if (mPulseDuration == Long.MAX_VALUE) {
+								nextSignalChangeTime = Long.MAX_VALUE;
+							}
+							else {
+								nextSignalChangeTime = System.currentTimeMillis() + mPulseDuration;
+							}
+							mPulseDuration = 0;
+						}
+						else if (System.currentTimeMillis() > nextSignalChangeTime) {
+							mIsHighPower = false;
+						}
+					}
+					else {
+						mPulseDuration = 0;
+						nextSignalChangeTime = 0;
+					}
+					mChannelSender.lob(mIsHighPower ? mPower : (int) (mMinPower * mPower));
 					break;
 				default:
 					mChannelSender.lob(0, 0, true);
