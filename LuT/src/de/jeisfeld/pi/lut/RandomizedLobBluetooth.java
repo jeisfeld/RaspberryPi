@@ -3,6 +3,7 @@ package de.jeisfeld.pi.lut;
 import java.io.IOException;
 import java.util.Random;
 
+import de.jeisfeld.lut.bluetooth.message.Mode;
 import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
 import de.jeisfeld.pi.bluetooth.ConnectThread;
 import de.jeisfeld.pi.lut.core.ChannelSender;
@@ -37,7 +38,7 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	/**
 	 * The current running mode.
 	 */
-	private int mMode = 0;
+	private Mode mMode = Mode.OFF;
 	/**
 	 * The power.
 	 */
@@ -121,7 +122,7 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 		try {
 			while (mIsRunning) {
 				switch (mMode) {
-				case 1:
+				case WAVE:
 					// Wave up and down
 					int value = (int) ((1 - Math.cos(2 * Math.PI * cyclePoint)) / 2 * mPower * (1 - mMinPower) + mPower * mMinPower);
 					mChannelSender.lob(value);
@@ -133,7 +134,7 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 						cyclePoint = 0.5; // MAGIC_NUMBER
 					}
 					break;
-				case 2:
+				case RANDOM_1:
 					// Random change between high/low level. Avg signal duration 2s. Levels and Probability controllable.
 					if (System.currentTimeMillis() > nextSignalChangeTime || mRunningProbability != lastRunningProbability) {
 						lastRunningProbability = mRunningProbability;
@@ -150,7 +151,7 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 
 					mChannelSender.lob(isHighPower ? mPower : (int) (mMinPower * mPower));
 					break;
-				case 3: // MAGIC_NUMBER
+				case RANDOM_2: // MAGIC_NUMBER
 					// Random change between on/off. On level and avg off/on duration controllable.
 					if (System.currentTimeMillis() > nextSignalChangeTime // BOOLEAN_EXPRESSION_COMPLEXITY
 							|| isHighPower && mAvgOnDuration != lastAvgOnDuration

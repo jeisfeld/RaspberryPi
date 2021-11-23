@@ -5,6 +5,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.TableRow;
 import de.jeisfeld.lut.app.R;
+import de.jeisfeld.lut.bluetooth.message.Mode;
 
 /**
  * The fragment for managing Lob messages.

@@ -1,4 +1,4 @@
-package de.jeisfeld.lut.app.ui.control;
+package de.jeisfeld.lut.bluetooth.message;
 
 /**
  * The Lob modes.

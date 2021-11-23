@@ -21,6 +21,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.app.R;
+import de.jeisfeld.lut.bluetooth.message.Mode;
 
 /**
  * The fragment for managing Lob or Tadel messages.

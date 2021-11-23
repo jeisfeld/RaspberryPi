@@ -109,7 +109,7 @@ public class ProcessingBluetoothMessage extends Message {
 	 * @param pulseDuration The duration of a one time pulse.
 	 */
 	public ProcessingBluetoothMessage(final int channel, final boolean isTadel, final Boolean isActive, final Integer power, // SUPPRESS_CHECKSTYLE
-			final Integer frequency, final Integer wave, final Integer mode, final Double minPower, final Boolean isHighPower,
+			final Integer frequency, final Integer wave, final Mode mode, final Double minPower, final Boolean isHighPower,
 			final Long powerChangeDuration, final Integer cycleLength, final Double runningProbability,
 			final Long avgOffDuration, final Long avgOnDuration, final Long pulseDuration) {
 		mChannel = channel;
@@ -118,7 +118,7 @@ public class ProcessingBluetoothMessage extends Message {
 		mPower = power;
 		mFrequency = frequency;
 		mWave = wave;
-		mMode = mode;
+		mMode = mode == null ? null : isTadel ? mode.getTadelValue() : mode.getLobValue();
 		mMinPower = minPower;
 		mIsHighPower = isHighPower;
 		mPowerChangeDuration = powerChangeDuration;
@@ -202,8 +202,16 @@ public class ProcessingBluetoothMessage extends Message {
 	 *
 	 * @return The mode
 	 */
-	public Integer getMode() {
-		return mMode;
+	public Mode getMode() {
+		if (mMode == null) {
+			return null;
+		}
+		else if (mIsTadel) {
+			return Mode.fromTadelValue(mMode);
+		}
+		else {
+			return Mode.fromLobValue(mMode);
+		}
 	}
 
 	/**

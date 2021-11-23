@@ -3,6 +3,7 @@ package de.jeisfeld.pi.lut;
 import java.io.IOException;
 import java.util.Random;
 
+import de.jeisfeld.lut.bluetooth.message.Mode;
 import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
 import de.jeisfeld.pi.bluetooth.ConnectThread;
 import de.jeisfeld.pi.lut.core.ChannelSender;
@@ -41,7 +42,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	/**
 	 * The current running mode.
 	 */
-	private int mMode = 0;
+	private Mode mMode = Mode.OFF;
 	/**
 	 * The power.
 	 */
@@ -139,14 +140,14 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 		try {
 			while (mIsRunning) {
 				switch (mMode) {
-				case 1:
+				case FIXED:
 					// constant power and frequency, both controllable. Serves to prepare base power for modes 2 and 3.
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
 					mChannelSender.tadel(mPower, mFrequency, mWave);
 					mConnectThread.write(new ProcessingBluetoothMessage(
 							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null, null));
 					break;
-				case 2:
+				case RANDOM_1:
 					// Random change between on/off level. Avg signal duration 2s. Power, frequency and Probability controllable.
 					if (System.currentTimeMillis() > nextSignalChangeTime || mRunningProbability != lastRunningProbability) {
 						lastRunningProbability = mRunningProbability;
@@ -165,7 +166,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 					mConnectThread.write(new ProcessingBluetoothMessage(
 							mChannel, true, null, mPower, null, null, null, null, isPowered, null, null, null, null, null, null));
 					break;
-				case 3: // MAGIC_NUMBER
+				case RANDOM_2: // MAGIC_NUMBER
 					// Random change between on/off. On level and avg off/on duration controllable.
 					if (System.currentTimeMillis() > nextSignalChangeTime // BOOLEAN_EXPRESSION_COMPLEXITY
 							|| isPowered && mAvgOnDuration != lastAvgOnDuration

@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.bluetooth.message.Message;
+import de.jeisfeld.lut.bluetooth.message.Mode;
 import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
 
 /**
@@ -110,9 +111,7 @@ public abstract class ControlViewModel extends ViewModel {
 			mIsActive.postValue(processingBluetoothMessage.isActive());
 		}
 		if (processingBluetoothMessage.getMode() != null) {
-			mMode.postValue(isTadel()
-					? Mode.fromTadelValue(processingBluetoothMessage.getMode())
-					: Mode.fromLobValue(processingBluetoothMessage.getMode()));
+			mMode.postValue(processingBluetoothMessage.getMode());
 		}
 		if (processingBluetoothMessage.getPower() != null && mMode.getValue() != Mode.OFF) {
 			mPower.postValue(processingBluetoothMessage.getPower());
@@ -162,8 +161,7 @@ public abstract class ControlViewModel extends ViewModel {
 		ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
 				mIsActive.getValue(), mPower.getValue(), mFrequency.getValue(),
 				isTadel() && mWave.getValue() != null ? mWave.getValue().getTadelValue() : null,
-				mMode.getValue() == null ? 0 : (isTadel() ? mMode.getValue().getTadelValue() : mMode.getValue().getLobValue()),
-				mMinPower.getValue(), null, mPowerChangeDuration.getValue(),
+				mMode.getValue(), mMinPower.getValue(), null, mPowerChangeDuration.getValue(),
 				mCycleLength.getValue(), mRunningProbability.getValue(),
 				mAvgOffDuration.getValue(), mAvgOnDuration.getValue(), null);
 		writeBluetoothMessage(message);
