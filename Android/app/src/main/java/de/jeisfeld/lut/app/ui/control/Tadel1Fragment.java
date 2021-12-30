@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider;
  */
 public class Tadel1Fragment extends TadelFragment {
 	@Override
-	protected final ControlViewModel getLobViewModel() {
+	protected final ControlViewModel getControlViewModel() {
 		return new ViewModelProvider(requireActivity()).get(Tadel1ViewModel.class);
 	}
 }

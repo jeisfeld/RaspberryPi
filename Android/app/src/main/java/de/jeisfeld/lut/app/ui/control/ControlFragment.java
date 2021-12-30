@@ -37,7 +37,7 @@ public abstract class ControlFragment extends Fragment {
 	 *
 	 * @return The view model.
 	 */
-	protected abstract ControlViewModel getLobViewModel();
+	protected abstract ControlViewModel getControlViewModel();
 
 	/**
 	 * Get the values in mode spinner dropdown.
@@ -66,7 +66,7 @@ public abstract class ControlFragment extends Fragment {
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	public final View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-		mControlViewModel = getLobViewModel();
+		mControlViewModel = getControlViewModel();
 		mControlViewModel.setActivity((MainActivity) requireActivity());
 		View root = inflater.inflate(R.layout.fragment_control, container, false);
 
@@ -117,6 +117,13 @@ public abstract class ControlFragment extends Fragment {
 				mControlViewModel.updatePulseTrigger(pulseTrigger);
 				if (mControlViewModel.getMode().getValue() == Mode.PULSE) {
 					root.findViewById(R.id.tableRowPulseDuration).setVisibility(pulseTrigger.isWithDuration() ? View.VISIBLE : View.GONE);
+					root.findViewById(R.id.tableRowSensorSensitivity).setVisibility(pulseTrigger.isWithSensitivity() ? View.VISIBLE : View.GONE);
+				}
+				if (pulseTrigger == PulseTrigger.ACCELERATION) {
+					mControlViewModel.startAccelerationListener(getContext());
+				}
+				else {
+					mControlViewModel.stopAccelerationListener();
 				}
 			}
 
@@ -135,6 +142,7 @@ public abstract class ControlFragment extends Fragment {
 		prepareSeekbarAvgOffDuration(root);
 		prepareSeekbarAvgOnDuration(root);
 		prepareSeekbarPulseDuration(root);
+		prepareSeekbarSensorSensitivity(root);
 
 		switchBluetoothStatus.setOnTouchListener((v, event) -> true);
 
@@ -251,7 +259,7 @@ public abstract class ControlFragment extends Fragment {
 			textViewRunningProbability.setText(String.format(Locale.getDefault(), "%d%%", seekbarValue));
 		});
 		seekbarRunningProbability
-				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> //
+				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress ->
 						mControlViewModel.updateRunningProbability(progress / 100.0)); // MAGIC_NUMBER
 	}
 
@@ -317,7 +325,7 @@ public abstract class ControlFragment extends Fragment {
 			}
 		});
 		seekbarAvgOnDuration
-				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> //
+				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress ->
 						mControlViewModel.updateAvgOnDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
 	}
 
@@ -347,8 +355,28 @@ public abstract class ControlFragment extends Fragment {
 			}
 		});
 		seekbarPulseDuration
-				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> //
+				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress ->
 						mControlViewModel.updatePulseDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
+	}
+
+	/**
+	 * Prepare the sensor sensitivity seekbar.
+	 *
+	 * @param root The parent view.
+	 */
+	private void prepareSeekbarSensorSensitivity(final View root) {
+		final SeekBar seekbarSensorSensitivity = root.findViewById(R.id.seekBarSensorSensitivity);
+		final TextView textViewSensorSensitivity = root.findViewById(R.id.textViewSensorSensitivity);
+		double sensorSensitivity1 = seekbarSensorSensitivity.getProgress() * seekbarSensorSensitivity.getProgress() / 1000.0; // MAGIC_NUMBER
+		textViewSensorSensitivity.setText(String.format(Locale.getDefault(), "%.2f", sensorSensitivity1));
+		mControlViewModel.getSensorSensitivity().observe(getViewLifecycleOwner(), sensorSensitivity -> {
+			int seekbarValue = (int) Math.round(Math.sqrt(sensorSensitivity * 1000));
+			seekbarSensorSensitivity.setProgress(seekbarValue);
+			textViewSensorSensitivity.setText(String.format(Locale.getDefault(), "%.2f", sensorSensitivity));
+		});
+		seekbarSensorSensitivity
+				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress ->
+						mControlViewModel.updateSensorSensitivity(progress * progress / 1000.0)); // MAGIC_NUMBER
 	}
 
 	/**

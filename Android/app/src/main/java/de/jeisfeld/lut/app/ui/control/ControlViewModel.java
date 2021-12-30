@@ -1,5 +1,7 @@
 package de.jeisfeld.lut.app.ui.control;
 
+import android.content.Context;
+
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
@@ -7,6 +9,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import de.jeisfeld.lut.app.MainActivity;
+import de.jeisfeld.lut.app.util.AccelerationListener;
 import de.jeisfeld.lut.bluetooth.message.Message;
 import de.jeisfeld.lut.bluetooth.message.Mode;
 import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
@@ -80,6 +83,14 @@ public abstract class ControlViewModel extends ViewModel {
 	 * The pulse duration.
 	 */
 	private final MutableLiveData<Long> mPulseDuration = new MutableLiveData<>(1000L);
+	/**
+	 * The sensor sensitivity.
+	 */
+	private final MutableLiveData<Double> mSensorSensitivity = new MutableLiveData<>(1.0);
+	/**
+	 * The sensor listener.
+	 */
+	private AccelerationListener mAccelerationListener = null;
 
 	/**
 	 * Constructor.
@@ -183,7 +194,7 @@ public abstract class ControlViewModel extends ViewModel {
 	 * Write bluetooth message to trigger pulse based on external trigger, if applicable.
 	 *
 	 * @param pulseTrigger The pulse trigger.
-	 * @param isHighPower true for setting pulse, false for stopping pulse.
+	 * @param isHighPower  true for setting pulse, false for stopping pulse.
 	 */
 	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower) {
 		if (mMode.getValue() == Mode.PULSE && mPulseTrigger.getValue() == pulseTrigger) {
@@ -497,6 +508,55 @@ public abstract class ControlViewModel extends ViewModel {
 	protected void updatePulseDuration(final long pulseDuration) {
 		mPulseDuration.setValue(pulseDuration);
 		writeBluetoothMessage();
+	}
+
+	/**
+	 * Get the sensor sensitivity.
+	 *
+	 * @return The sensor sensitivity.
+	 */
+	protected MutableLiveData<Double> getSensorSensitivity() {
+		return mSensorSensitivity;
+	}
+
+	/**
+	 * Update the sensor sensitivity.
+	 *
+	 * @param sensorSensitivity The new sensor sensitivity.
+	 */
+	protected void updateSensorSensitivity(final double sensorSensitivity) {
+		mSensorSensitivity.setValue(sensorSensitivity);
+	}
+
+	/**
+	 * Start the sensor listener.
+	 *
+	 * @param context The context.
+	 */
+	protected void startAccelerationListener(final Context context) {
+		stopAccelerationListener();
+		mAccelerationListener = new AccelerationListener(context, acceleration -> {
+			if (acceleration > mSensorSensitivity.getValue()) {
+				writeBluetoothMessageOnExternalTrigger(PulseTrigger.ACCELERATION, true);
+			}
+		});
+		mAccelerationListener.register();
+	}
+
+	/**
+	 * Stop the sensor listener.
+	 */
+	public void stopAccelerationListener() {
+		if (mAccelerationListener != null) {
+			mAccelerationListener.unregister();
+			mAccelerationListener = null;
+		}
+	}
+
+	@Override
+	public void onCleared() {
+		stopAccelerationListener();
+		super.onCleared();
 	}
 
 	/**

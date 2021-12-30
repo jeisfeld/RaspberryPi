@@ -87,7 +87,7 @@ public class ChannelSender {
 	}
 
 	/**
-	 * Send af fixed "Tadel" message.
+	 * Send of fixed "Tadel" message.
 	 *
 	 * @param power The power
 	 * @param frequency The frequency

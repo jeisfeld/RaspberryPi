@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.WindowManager;
@@ -120,6 +119,12 @@ public class MainActivity extends AppCompatActivity {
 			mConnectThread.cancel();
 		}
 		unregisterReceiver(mTriggerReceiver);
+
+		ViewModelProvider viewModelProvider = new ViewModelProvider(this);
+		viewModelProvider.get(Lob0ViewModel.class).stopAccelerationListener();
+		viewModelProvider.get(Tadel0ViewModel.class).stopAccelerationListener();
+		viewModelProvider.get(Lob1ViewModel.class).stopAccelerationListener();
+		viewModelProvider.get(Tadel1ViewModel.class).stopAccelerationListener();
 	}
 
 	/**

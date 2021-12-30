@@ -7,24 +7,33 @@ public enum PulseTrigger {
 	/**
 	 * Trigger on display of Random Image.
 	 */
-	RANDOM_IMAGE_DISPLAY(true),
+	RANDOM_IMAGE_DISPLAY(true, false),
 	/**
 	 * Pulse during hold of breath training.
 	 */
-	BREATH_TRAINING_HOLD(false);
+	BREATH_TRAINING_HOLD(false, false),
+	/**
+	 * Pulse during device acceleration.
+	 */
+	ACCELERATION(true, true);
 
 	/**
 	 * Flag indicating if the trigger requires duration.
 	 */
 	private final boolean mIsWithDuration;
+	/**
+	 * Flag indicating if the trigger requires sensitivity.
+	 */
+	private final boolean mIsWithSensitivity;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param isWithDuration Flag indicating if the trigger requires duration.
 	 */
-	PulseTrigger(final boolean isWithDuration) {
+	PulseTrigger(final boolean isWithDuration, final boolean isWithSensitivity) {
 		mIsWithDuration = isWithDuration;
+		mIsWithSensitivity = isWithSensitivity;
 	}
 
 
@@ -50,5 +59,14 @@ public enum PulseTrigger {
 	 */
 	public boolean isWithDuration() {
 		return mIsWithDuration;
+	}
+
+	/**
+	 * Get the flag indicating if the trigger requires sensitivity.
+	 *
+	 * @return The flag indicating if the trigger requires sensitivity.
+	 */
+	public boolean isWithSensitivity() {
+		return mIsWithSensitivity;
 	}
 }

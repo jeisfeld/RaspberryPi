@@ -36,6 +36,7 @@ public abstract class TadelFragment extends ControlFragment {
 		TableRow tableRowAvgOnDuration = parentView.findViewById(R.id.tableRowAvgOnDuration);
 		TableRow tableRowPulseTrigger = parentView.findViewById(R.id.tableRowPulseTrigger);
 		TableRow tableRowPulseDuration = parentView.findViewById(R.id.tableRowPulseDuration);
+		TableRow tableRowSensorSensitivity = parentView.findViewById(R.id.tableRowSensorSensitivity);
 
 		return new OnItemSelectedListener() {
 			@Override
@@ -53,6 +54,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowAvgOnDuration.setVisibility(View.GONE);
 					tableRowPulseTrigger.setVisibility(View.GONE);
 					tableRowPulseDuration.setVisibility(View.GONE);
+					tableRowSensorSensitivity.setVisibility(View.GONE);
 					viewModel.updateActiveStatus(false);
 					break;
 				case FIXED:
@@ -66,6 +68,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowAvgOnDuration.setVisibility(View.GONE);
 					tableRowPulseTrigger.setVisibility(View.GONE);
 					tableRowPulseDuration.setVisibility(View.GONE);
+					tableRowSensorSensitivity.setVisibility(View.GONE);
 					viewModel.updateActiveStatus(true);
 					break;
 				case RANDOM_1:
@@ -79,6 +82,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowAvgOnDuration.setVisibility(View.GONE);
 					tableRowPulseTrigger.setVisibility(View.GONE);
 					tableRowPulseDuration.setVisibility(View.GONE);
+					tableRowSensorSensitivity.setVisibility(View.GONE);
 					viewModel.updateActiveStatus(true);
 					break;
 				case RANDOM_2:
@@ -92,6 +96,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowAvgOnDuration.setVisibility(View.VISIBLE);
 					tableRowPulseTrigger.setVisibility(View.GONE);
 					tableRowPulseDuration.setVisibility(View.GONE);
+					tableRowSensorSensitivity.setVisibility(View.GONE);
 					viewModel.updateActiveStatus(true);
 					break;
 				case PULSE:
@@ -106,12 +111,22 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowPulseTrigger.setVisibility(View.VISIBLE);
 					tableRowPulseDuration.setVisibility(
 							Objects.requireNonNull(viewModel.getPulseTrigger().getValue()).isWithDuration() ? View.VISIBLE : View.GONE);
+					tableRowSensorSensitivity.setVisibility(
+							Objects.requireNonNull(viewModel.getPulseTrigger().getValue()).isWithSensitivity() ? View.VISIBLE : View.GONE);
 					viewModel.updateActiveStatus(true);
 					break;
 				default:
 					break;
 				}
 				viewModel.updateMode(mode);
+				if (mode == Mode.PULSE ) {
+					if (getControlViewModel().getPulseTrigger().getValue() == PulseTrigger.ACCELERATION) {
+						getControlViewModel().startAccelerationListener(getContext());
+					}
+				}
+				else {
+					getControlViewModel().stopAccelerationListener();
+				}
 			}
 
 			@Override

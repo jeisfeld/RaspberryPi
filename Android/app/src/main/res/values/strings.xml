@@ -20,6 +20,7 @@
     <string name="text_avg_on_duration">Avg On Dur:</string>
     <string name="text_pulse_trigger">Trigger:</string>
     <string name="text_pulse_duration">Pulse Dur:</string>
+    <string name="text_sensor_sensitivity">Sensitivity:</string>
 
     <string name="menu_lob_0">Lob 0</string>
     <string name="menu_lob_1">Lob 1</string>
@@ -77,5 +78,6 @@ _
     <string-array name="values_pulse_trigger">
         <item>Random Image Display</item>
         <item>Breath Training Hold</item>
+        <item>Device Acceleration</item>
     </string-array>
 </resources>

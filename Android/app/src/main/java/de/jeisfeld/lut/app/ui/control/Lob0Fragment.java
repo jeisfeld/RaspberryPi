@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider;
  */
 public class Lob0Fragment extends LobFragment {
 	@Override
-	protected final ControlViewModel getLobViewModel() {
+	protected final ControlViewModel getControlViewModel() {
 		return new ViewModelProvider(requireActivity()).get(Lob0ViewModel.class);
 	}
 }
