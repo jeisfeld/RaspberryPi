@@ -1,6 +1,6 @@
 package de.jeisfeld.lut.app.ui.control;
 
-import android.content.Context;
+import android.app.Activity;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -10,6 +10,9 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.app.util.AccelerationListener;
+import de.jeisfeld.lut.app.util.AccelerationListener.AccelerationSensorListener;
+import de.jeisfeld.lut.app.util.MicrophoneListener;
+import de.jeisfeld.lut.app.util.MicrophoneListener.MicrophoneInputListener;
 import de.jeisfeld.lut.bluetooth.message.Message;
 import de.jeisfeld.lut.bluetooth.message.Mode;
 import de.jeisfeld.lut.bluetooth.message.ProcessingBluetoothMessage;
@@ -88,9 +91,13 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	private final MutableLiveData<Double> mSensorSensitivity = new MutableLiveData<>(1.0);
 	/**
-	 * The sensor listener.
+	 * The acceleration listener.
 	 */
 	private AccelerationListener mAccelerationListener = null;
+	/**
+	 * The microphone listener.
+	 */
+	private MicrophoneListener mMicrophoneListener = null;
 
 	/**
 	 * Constructor.
@@ -529,33 +536,93 @@ public abstract class ControlViewModel extends ViewModel {
 	}
 
 	/**
-	 * Start the sensor listener.
+	 * Start the acceleration listener.
 	 *
-	 * @param context The context.
+	 * @param activity The activity.
 	 */
-	protected void startAccelerationListener(final Context context) {
+	protected void startAccelerationListener(final Activity activity) {
 		stopAccelerationListener();
-		mAccelerationListener = new AccelerationListener(context, acceleration -> {
-			if (acceleration > mSensorSensitivity.getValue()) {
-				writeBluetoothMessageOnExternalTrigger(PulseTrigger.ACCELERATION, true);
+		mAccelerationListener = new AccelerationListener(activity, new AccelerationSensorListener() {
+			/**
+			 * Waiting time before retriggering.
+			 */
+			private static final long RETRIGGER_WAIT_TIME = 500;
+			/**
+			 * The last trigger time.
+			 */
+			private long lastTriggerTime = 0;
+
+			@Override
+			public void onAccelerate(double acceleration) {
+				if (acceleration > mSensorSensitivity.getValue() && System.currentTimeMillis() > lastTriggerTime + RETRIGGER_WAIT_TIME) {
+					ControlViewModel.this.writeBluetoothMessageOnExternalTrigger(PulseTrigger.ACCELERATION, true);
+					lastTriggerTime = System.currentTimeMillis();
+				}
 			}
 		});
 		mAccelerationListener.register();
 	}
 
 	/**
-	 * Stop the sensor listener.
+	 * Stop the acceleration listener.
 	 */
-	public void stopAccelerationListener() {
+	private void stopAccelerationListener() {
 		if (mAccelerationListener != null) {
 			mAccelerationListener.unregister();
 			mAccelerationListener = null;
 		}
 	}
 
+	/**
+	 * Start the microphone listener.
+	 *
+	 * @param activity The activity.
+	 */
+	protected void startMicrophoneListener(final Activity activity) {
+		stopMicrophoneListener();
+		mMicrophoneListener = new MicrophoneListener(activity, new MicrophoneInputListener() {
+			/**
+			 * Waiting time before retriggering.
+			 */
+			private static final long RETRIGGER_WAIT_TIME = 500;
+			/**
+			 * The last trigger time.
+			 */
+			private long lastTriggerTime = 0;
+
+			@Override
+			public void onMicrophoneInput(double input) {
+				if (input > mSensorSensitivity.getValue() && System.currentTimeMillis() > lastTriggerTime + RETRIGGER_WAIT_TIME) {
+					ControlViewModel.this.writeBluetoothMessageOnExternalTrigger(PulseTrigger.MICROPHONE, true);
+					lastTriggerTime = System.currentTimeMillis();
+				}
+			}
+		});
+		mMicrophoneListener.start();
+	}
+
+	/**
+	 * Stop the microphone listener.
+	 */
+	private void stopMicrophoneListener() {
+		if (mMicrophoneListener != null) {
+			mMicrophoneListener.stop();
+			mMicrophoneListener = null;
+		}
+	}
+
+	/**
+	 * Stop all sensor listeners.
+	 */
+	public void stopSensorListeners() {
+		stopAccelerationListener();
+		stopMicrophoneListener();
+	}
+
+
 	@Override
 	public void onCleared() {
-		stopAccelerationListener();
+		stopSensorListeners();
 		super.onCleared();
 	}
 

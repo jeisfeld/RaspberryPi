@@ -1,8 +1,10 @@
 package de.jeisfeld.lut.app;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -10,9 +12,11 @@ import android.view.WindowManager;
 
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -43,6 +47,11 @@ public class MainActivity extends AppCompatActivity {
 	 * Request code for enabling bluetooth.
 	 */
 	private static final int REQUEST_ENABLE_BLUETOOTH = 1;
+	/**
+	 * The request code used to query for permission.
+	 */
+	protected static final int REQUEST_CODE_PERMISSION = 2;
+
 
 	/**
 	 * The logging tag.
@@ -110,6 +119,10 @@ public class MainActivity extends AppCompatActivity {
 		registerReceiver(mTriggerReceiver, intentFilter);
 
 		connect();
+
+		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION);
+		}
 	}
 
 	@Override
@@ -121,10 +134,10 @@ public class MainActivity extends AppCompatActivity {
 		unregisterReceiver(mTriggerReceiver);
 
 		ViewModelProvider viewModelProvider = new ViewModelProvider(this);
-		viewModelProvider.get(Lob0ViewModel.class).stopAccelerationListener();
-		viewModelProvider.get(Tadel0ViewModel.class).stopAccelerationListener();
-		viewModelProvider.get(Lob1ViewModel.class).stopAccelerationListener();
-		viewModelProvider.get(Tadel1ViewModel.class).stopAccelerationListener();
+		viewModelProvider.get(Lob0ViewModel.class).stopSensorListeners();
+		viewModelProvider.get(Tadel0ViewModel.class).stopSensorListeners();
+		viewModelProvider.get(Lob1ViewModel.class).stopSensorListeners();
+		viewModelProvider.get(Tadel1ViewModel.class).stopSensorListeners();
 	}
 
 	/**
@@ -248,6 +261,17 @@ public class MainActivity extends AppCompatActivity {
 		}
 		else {
 			super.onActivityResult(requestCode, resultCode, data);
+		}
+	}
+
+	@Override
+	public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+		if (requestCode == REQUEST_CODE_PERMISSION) {
+			// If request is cancelled, the result arrays are empty.
+			if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+				DialogUtil.displayToast(this, R.string.toast_cannot_use_microphone);
+			}
 		}
 	}
 }

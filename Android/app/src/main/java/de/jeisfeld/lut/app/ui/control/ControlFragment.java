@@ -119,11 +119,12 @@ public abstract class ControlFragment extends Fragment {
 					root.findViewById(R.id.tableRowPulseDuration).setVisibility(pulseTrigger.isWithDuration() ? View.VISIBLE : View.GONE);
 					root.findViewById(R.id.tableRowSensorSensitivity).setVisibility(pulseTrigger.isWithSensitivity() ? View.VISIBLE : View.GONE);
 				}
+				mControlViewModel.stopSensorListeners();
 				if (pulseTrigger == PulseTrigger.ACCELERATION) {
-					mControlViewModel.startAccelerationListener(getContext());
+					mControlViewModel.startAccelerationListener(getActivity());
 				}
-				else {
-					mControlViewModel.stopAccelerationListener();
+				else if (pulseTrigger == PulseTrigger.MICROPHONE) {
+					mControlViewModel.startMicrophoneListener(getActivity());
 				}
 			}
 

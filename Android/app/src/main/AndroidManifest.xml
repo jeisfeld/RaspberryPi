@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="de.jeisfeld.lut.app">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
@@ -29,7 +31,8 @@
         </activity>
         <receiver
             android:name="de.jeisfeld.lut.app.util.ExternalTriggerReceiver"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="ExportedReceiver,Instantiatable">
             <intent-filter>
                 <action android:name="de.jeisfeld.randomimage.DISPLAY_RANDOM_IMAGE" />
             </intent-filter>

@@ -107,13 +107,15 @@ public abstract class LobFragment extends ControlFragment {
 					break;
 				}
 				viewModel.updateMode(mode);
+
+				getControlViewModel().stopSensorListeners();
 				if (mode == Mode.PULSE ) {
 					if (getControlViewModel().getPulseTrigger().getValue() == PulseTrigger.ACCELERATION) {
-						getControlViewModel().startAccelerationListener(getContext());
+						getControlViewModel().startAccelerationListener(getActivity());
 					}
-				}
-				else {
-					getControlViewModel().stopAccelerationListener();
+					else if (getControlViewModel().getPulseTrigger().getValue() == PulseTrigger.MICROPHONE) {
+						getControlViewModel().startMicrophoneListener(getActivity());
+					}
 				}
 			}
 

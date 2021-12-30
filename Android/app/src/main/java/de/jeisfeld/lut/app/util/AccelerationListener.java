@@ -1,5 +1,6 @@
 package de.jeisfeld.lut.app.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -13,12 +14,12 @@ public class AccelerationListener implements SensorEventListener {
 	/**
 	 * The min accelerometer value considered as change.
 	 */
-	private static final double MIN_CHANGE = 0.1;
+	private double mMinChange = 0.1;
 
 	/**
-	 * The context.
+	 * The activity.
 	 */
-	private final Context mContext;
+	private final Activity mActivity;
 	/**
 	 * The sensor manager.
 	 */
@@ -31,12 +32,12 @@ public class AccelerationListener implements SensorEventListener {
 	/**
 	 * Constructor.
 	 *
-	 * @param context The context.
+	 * @param activity The activity.
 	 * @param listener The listener.
 	 */
-	public AccelerationListener(final Context context, final AccelerationSensorListener listener) {
-		mContext = context;
-		mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
+	public AccelerationListener(final Activity activity, final AccelerationSensorListener listener) {
+		mActivity = activity;
+		mSensorManager = (SensorManager) mActivity.getSystemService(Context.SENSOR_SERVICE);
 		mListener = listener;
 	}
 
@@ -45,6 +46,10 @@ public class AccelerationListener implements SensorEventListener {
 	 */
 	public void register() {
 		Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+		// Logic to differentiate between TabS6 and S10e
+		if ("qualcomm".equals(sensor.getVendor())) {
+			mMinChange = 0.01;
+		}
 		mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
 	}
 
@@ -60,8 +65,8 @@ public class AccelerationListener implements SensorEventListener {
 	public void onSensorChanged(SensorEvent event) {
 		float[] values = event.values;
 		float value = (float) Math.sqrt(values[0] * values[0] + values[1] * values[1] + values[2] * values[2]);
-		if (value > MIN_CHANGE && mListener != null) {
-			mListener.onAccelerate(value - MIN_CHANGE);
+		if (value > mMinChange && mListener != null) {
+			mListener.onAccelerate(value - mMinChange);
 		}
 	}
 
