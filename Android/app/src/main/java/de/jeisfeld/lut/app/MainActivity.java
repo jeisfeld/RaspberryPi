@@ -1,16 +1,22 @@
 package de.jeisfeld.lut.app;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.WindowManager;
 
 import com.google.android.material.navigation.NavigationView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,6 +28,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.AppBarConfiguration.Builder;
 import androidx.navigation.ui.NavigationUI;
 import de.jeisfeld.lut.app.bluetooth.BluetoothMessageHandler;
 import de.jeisfeld.lut.app.bluetooth.ConnectThread;
@@ -86,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 		DrawerLayout drawer = findViewById(R.id.drawer_layout);
 		// Passing each menu ID as a set of Ids because each
 		// menu should be considered as top level destinations.
-		AppBarConfiguration.Builder builder = new AppBarConfiguration.Builder(
+		Builder builder = new Builder(
 				R.id.nav_status, R.id.nav_lob_0, R.id.nav_tadel_0, R.id.nav_lob_1, R.id.nav_tadel_1, R.id.nav_settings);
 		if (findViewById(R.id.tabletIntermediateLayout) == null) {
 			builder.setOpenableLayout(drawer);
@@ -120,8 +127,16 @@ public class MainActivity extends AppCompatActivity {
 
 		connect();
 
-		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-			ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION);
+		List<String> missingPermissions = new ArrayList<>();
+		if (ActivityCompat.checkSelfPermission(this, permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+			missingPermissions.add(permission.RECORD_AUDIO);
+		}
+		if (VERSION.SDK_INT >= VERSION_CODES.S
+				&& ActivityCompat.checkSelfPermission(this, permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+			missingPermissions.add(permission.BLUETOOTH_CONNECT);
+		}
+		if (missingPermissions.size() > 0) {
+			ActivityCompat.requestPermissions(this, missingPermissions.toArray(new String[0]), REQUEST_CODE_PERMISSION);
 		}
 	}
 
@@ -270,7 +285,8 @@ public class MainActivity extends AppCompatActivity {
 		if (requestCode == REQUEST_CODE_PERMISSION) {
 			// If request is cancelled, the result arrays are empty.
 			if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-				DialogUtil.displayToast(this, R.string.toast_cannot_use_microphone);
+				DialogUtil.displayToast(this, R.string.toast_permissions_missing);
+				finish();
 			}
 		}
 	}

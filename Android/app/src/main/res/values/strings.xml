@@ -36,7 +36,7 @@
     <string name="message_dialog_confirmation_shutdown">Do you really want to shut down?</string>
     <string name="toast_bluetooth_required">Bluetooth not available - closing app</string>
     <string name="toast_failed_send">Failed to send message - no connection available</string>
-    <string name="toast_cannot_use_microphone">Cannot use microphone - permission missing</string>
+    <string name="toast_permissions_missing">Permissions missing - the app cannot be used</string>
 
     <string name="key_statistics_initialversion" translatable="false">statistics_initialversion</string>
     <string name="key_statistics_firststarttime" translatable="false">statistics_firststarttime</string>

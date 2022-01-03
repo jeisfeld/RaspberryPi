@@ -69,7 +69,7 @@ public class MicrophoneListener {
 	 */
 	public void start() {
 		if (ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-			DialogUtil.displayToast(mActivity, R.string.toast_cannot_use_microphone);
+			DialogUtil.displayToast(mActivity, R.string.toast_permissions_missing);
 			return;
 		}
 		int BufferElements2Rec = 1024;
