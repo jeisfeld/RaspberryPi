@@ -1,13 +1,24 @@
 package de.jeisfeld.lut.app.util;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.media.MediaRecorder.AudioSource;
+import android.media.MicrophoneInfo;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
+import android.util.Log;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.core.app.ActivityCompat;
+import de.jeisfeld.lut.app.Application;
 import de.jeisfeld.lut.app.R;
 
 /**
@@ -29,7 +40,7 @@ public class MicrophoneListener {
 	/**
 	 * The min microphone value considered as change.
 	 */
-	private double mMinChange = 35;
+	private double mMinChange = 20; // MAGIC_NUMBER
 
 	/**
 	 * The activity.
@@ -68,38 +79,47 @@ public class MicrophoneListener {
 	 * Start listening.
 	 */
 	public void start() {
-		if (ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+		if (ActivityCompat.checkSelfPermission(mActivity, permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 			DialogUtil.displayToast(mActivity, R.string.toast_permissions_missing);
 			return;
 		}
-		int BufferElements2Rec = 1024;
-		int BytesPerElement = 2; // 2 bytes in 16bit format
-		mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
+		int bufferElements2Rec = 1024; // MAGIC_NUMBER
+		int bufferQuantile = 896; // MAGIC_NUMBER
+		int bytesPerElement = 2; // 2 bytes in 16bit format
+		mRecorder = new AudioRecord(AudioSource.MIC,
 				RECORDER_SAMPLERATE, RECORDER_CHANNELS,
-				RECORDER_AUDIO_ENCODING, BufferElements2Rec * BytesPerElement);
+				RECORDER_AUDIO_ENCODING, bufferElements2Rec * bytesPerElement);
 		String productName = mRecorder.getRoutedDevice().getProductName().toString();
+
 		// Logic to differentiate between TabS6 and S10e
-		if ("SM-T865".equals(productName)) {
-			mMinChange = 130;
-		}
-		else if ("SM-G970F".equals(productName)) {
-			mMinChange = 35;
+		switch (productName) {
+		case "SM-T865":
+			mMinChange = 60; // MAGIC_NUMBER
+			break;
+		case "SM-G970F":
+			mMinChange = 20; // MAGIC_NUMBER
+			break;
+		case "h2w":
+			mMinChange = 40; // MAGIC_NUMBER
+			break;
+		default:
+			mMinChange = 20; // MAGIC_NUMBER
 		}
 
 		mRecorder.startRecording();
 		mRecordingThread = new Thread(() -> {
-			short[] sData = new short[BufferElements2Rec];
+			short[] sData = new short[bufferElements2Rec];
 			while (!mIsStopped) {
-				mRecorder.read(sData, 0, BufferElements2Rec);
-				double value = 0;
+				mRecorder.read(sData, 0, bufferElements2Rec);
+				List<Integer> values = new ArrayList<>();
 				for (short sDatum : sData) {
-					if (Math.abs(sDatum) >=  value) {
-						 value = Math.abs(sDatum);
-					}
+					values.add(Math.abs(sDatum));
 				}
+				values.sort(Integer::compareTo);
+				double value = values.get(bufferQuantile);
 
 				if (value > mMinChange) {
-					value = Math.sqrt(value - mMinChange) / 20.0;
+					value = Math.sqrt(value - mMinChange) / 15.0; // MAGIC_NUMBER
 					if (mListener != null) {
 						mListener.onMicrophoneInput(value);
 					}
@@ -128,6 +148,7 @@ public class MicrophoneListener {
 	public interface MicrophoneInputListener {
 		/**
 		 * Callback message on microphone input.
+		 *
 		 * @param input The microphone input.
 		 */
 		void onMicrophoneInput
