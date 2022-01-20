@@ -1,5 +1,7 @@
 package de.jeisfeld.lut.app.ui.control;
 
+import java.util.Locale;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,14 +10,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import java.util.Locale;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
@@ -58,7 +58,7 @@ public abstract class ControlFragment extends Fragment {
 	 * Get the listener on mode change.
 	 *
 	 * @param parentView The parent view.
-	 * @param viewModel  The view model.
+	 * @param viewModel The view model.
 	 * @return The listener.
 	 */
 	protected abstract OnItemSelectedListener getOnModeSelectedListener(View parentView, ControlViewModel viewModel);
@@ -118,6 +118,7 @@ public abstract class ControlFragment extends Fragment {
 				if (mControlViewModel.getMode().getValue() == Mode.PULSE) {
 					root.findViewById(R.id.tableRowPulseDuration).setVisibility(pulseTrigger.isWithDuration() ? View.VISIBLE : View.GONE);
 					root.findViewById(R.id.tableRowSensorSensitivity).setVisibility(pulseTrigger.isWithSensitivity() ? View.VISIBLE : View.GONE);
+					root.findViewById(R.id.tableRowPulseInvert).setVisibility(pulseTrigger.isWithSensitivity() ? View.VISIBLE : View.GONE);
 				}
 				mControlViewModel.stopSensorListeners();
 				if (pulseTrigger == PulseTrigger.ACCELERATION) {
@@ -144,6 +145,7 @@ public abstract class ControlFragment extends Fragment {
 		prepareSeekbarAvgOnDuration(root);
 		prepareSeekbarPulseDuration(root);
 		prepareSeekbarSensorSensitivity(root);
+		prepareCheckboxPulseInvert(root);
 
 		switchBluetoothStatus.setOnTouchListener((v, event) -> true);
 
@@ -260,8 +262,8 @@ public abstract class ControlFragment extends Fragment {
 			textViewRunningProbability.setText(String.format(Locale.getDefault(), "%d%%", seekbarValue));
 		});
 		seekbarRunningProbability
-				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress ->
-						mControlViewModel.updateRunningProbability(progress / 100.0)); // MAGIC_NUMBER
+				.setOnSeekBarChangeListener(
+						(OnSeekBarProgressChangedListener) progress -> mControlViewModel.updateRunningProbability(progress / 100.0)); // MAGIC_NUMBER
 	}
 
 	/**
@@ -326,8 +328,8 @@ public abstract class ControlFragment extends Fragment {
 			}
 		});
 		seekbarAvgOnDuration
-				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress ->
-						mControlViewModel.updateAvgOnDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
+				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> mControlViewModel
+						.updateAvgOnDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
 	}
 
 	/**
@@ -356,8 +358,8 @@ public abstract class ControlFragment extends Fragment {
 			}
 		});
 		seekbarPulseDuration
-				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress ->
-						mControlViewModel.updatePulseDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
+				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> mControlViewModel
+						.updatePulseDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
 	}
 
 	/**
@@ -371,13 +373,24 @@ public abstract class ControlFragment extends Fragment {
 		double sensorSensitivity1 = seekbarSensorSensitivity.getProgress() * seekbarSensorSensitivity.getProgress() / 1000.0; // MAGIC_NUMBER
 		textViewSensorSensitivity.setText(String.format(Locale.getDefault(), "%.2f", sensorSensitivity1));
 		mControlViewModel.getSensorSensitivity().observe(getViewLifecycleOwner(), sensorSensitivity -> {
-			int seekbarValue = (int) Math.round(Math.sqrt(sensorSensitivity * 1000));
+			int seekbarValue = (int) Math.round(Math.sqrt(sensorSensitivity * 1000)); // MAGIC_NUMBER
 			seekbarSensorSensitivity.setProgress(seekbarValue);
 			textViewSensorSensitivity.setText(String.format(Locale.getDefault(), "%.2f", sensorSensitivity));
 		});
-		seekbarSensorSensitivity
-				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress ->
-						mControlViewModel.updateSensorSensitivity(progress * progress / 1000.0)); // MAGIC_NUMBER
+		seekbarSensorSensitivity.setOnSeekBarChangeListener(
+				(OnSeekBarProgressChangedListener) progress -> mControlViewModel.updateSensorSensitivity(
+						progress * progress / 1000.0)); // MAGIC_NUMBER
+	}
+
+	/**
+	 * Prepare the sensor pulse invert checkbox.
+	 *
+	 * @param root The parent view.
+	 */
+	private void prepareCheckboxPulseInvert(final View root) {
+		final CheckBox checkboxPulseInvert = root.findViewById(R.id.checkBoxPulseInvert);
+		mControlViewModel.getPulseInvert().observe(getViewLifecycleOwner(), checkboxPulseInvert::setChecked);
+		checkboxPulseInvert.setOnCheckedChangeListener((buttonView, isChecked) -> mControlViewModel.updatePulseInvert(isChecked));
 	}
 
 	/**

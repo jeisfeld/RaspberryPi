@@ -1,24 +1,15 @@
 package de.jeisfeld.lut.app.util;
 
-import android.Manifest;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.Manifest.permission;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.media.MediaRecorder.AudioSource;
-import android.media.MicrophoneInfo;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
-import android.util.Log;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import androidx.core.app.ActivityCompat;
-import de.jeisfeld.lut.app.Application;
+import androidx.core.content.ContextCompat;
 import de.jeisfeld.lut.app.R;
 
 /**
@@ -63,7 +54,6 @@ public class MicrophoneListener {
 	 */
 	private boolean mIsStopped = false;
 
-
 	/**
 	 * Constructor.
 	 *
@@ -71,7 +61,7 @@ public class MicrophoneListener {
 	 * @param listener The listener.
 	 */
 	public MicrophoneListener(final Activity activity, final MicrophoneInputListener listener) {
-		this.mActivity = activity;
+		mActivity = activity;
 		mListener = listener;
 	}
 
@@ -79,13 +69,13 @@ public class MicrophoneListener {
 	 * Start listening.
 	 */
 	public void start() {
-		if (ActivityCompat.checkSelfPermission(mActivity, permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+		if (ContextCompat.checkSelfPermission(mActivity, permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 			DialogUtil.displayToast(mActivity, R.string.toast_permissions_missing);
 			return;
 		}
-		int bufferElements2Rec = 1024; // MAGIC_NUMBER
-		int bufferQuantile = 896; // MAGIC_NUMBER
-		int bytesPerElement = 2; // 2 bytes in 16bit format
+		final int bufferElements2Rec = 1024; // MAGIC_NUMBER
+		final int bufferQuantile = 896; // MAGIC_NUMBER
+		final int bytesPerElement = 2; // 2 bytes in 16bit format
 		mRecorder = new AudioRecord(AudioSource.MIC,
 				RECORDER_SAMPLERATE, RECORDER_CHANNELS,
 				RECORDER_AUDIO_ENCODING, bufferElements2Rec * bytesPerElement);
@@ -151,7 +141,6 @@ public class MicrophoneListener {
 		 *
 		 * @param input The microphone input.
 		 */
-		void onMicrophoneInput
-		(double input);
+		void onMicrophoneInput(double input);
 	}
 }

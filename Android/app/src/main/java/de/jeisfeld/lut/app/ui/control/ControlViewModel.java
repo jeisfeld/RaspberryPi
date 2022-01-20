@@ -1,10 +1,9 @@
 package de.jeisfeld.lut.app.ui.control;
 
-import android.app.Activity;
-
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
+import android.app.Activity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -90,6 +89,10 @@ public abstract class ControlViewModel extends ViewModel {
 	 * The sensor sensitivity.
 	 */
 	private final MutableLiveData<Double> mSensorSensitivity = new MutableLiveData<>(1.0);
+	/**
+	 * The sensor pulse invert flag.
+	 */
+	private final MutableLiveData<Boolean> mPulseInvert = new MutableLiveData<>(false);
 	/**
 	 * The acceleration listener.
 	 */
@@ -201,7 +204,7 @@ public abstract class ControlViewModel extends ViewModel {
 	 * Write bluetooth message to trigger pulse based on external trigger, if applicable.
 	 *
 	 * @param pulseTrigger The pulse trigger.
-	 * @param isHighPower  true for setting pulse, false for stopping pulse.
+	 * @param isHighPower true for setting pulse, false for stopping pulse.
 	 */
 	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower) {
 		if (mMode.getValue() == Mode.PULSE && mPulseTrigger.getValue() == pulseTrigger) {
@@ -210,7 +213,7 @@ public abstract class ControlViewModel extends ViewModel {
 					isTadel() && mWave.getValue() != null ? mWave.getValue().getTadelValue() : null,
 					mMode.getValue(), mMinPower.getValue(), isHighPower, mPowerChangeDuration.getValue(), mCycleLength.getValue(),
 					mRunningProbability.getValue(), mAvgOffDuration.getValue(), mAvgOnDuration.getValue(),
-					Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? mPulseDuration.getValue() : Long.MAX_VALUE);
+					Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE);
 			writeBluetoothMessage(message);
 		}
 	}
@@ -508,6 +511,16 @@ public abstract class ControlViewModel extends ViewModel {
 	}
 
 	/**
+	 * Get the pulse duration value.
+	 *
+	 * @return The pulse duration value.
+	 */
+	private long getPulseDurationValue() {
+		Long value = mPulseDuration.getValue();
+		return value == null ? 1000L : value; // MAGIC_NUMBER
+	}
+
+	/**
 	 * Update the pulse duration.
 	 *
 	 * @param pulseDuration The new pulse duration
@@ -527,12 +540,50 @@ public abstract class ControlViewModel extends ViewModel {
 	}
 
 	/**
+	 * Get the sensor sensitivity value.
+	 *
+	 * @return The sensor sensitivity value.
+	 */
+	private double getSensorSensitivityValue() {
+		Double value = mSensorSensitivity.getValue();
+		return value == null ? 1.0 : value;
+	}
+
+	/**
 	 * Update the sensor sensitivity.
 	 *
 	 * @param sensorSensitivity The new sensor sensitivity.
 	 */
 	protected void updateSensorSensitivity(final double sensorSensitivity) {
 		mSensorSensitivity.setValue(sensorSensitivity);
+	}
+
+	/**
+	 * Get the pulse invert flag.
+	 *
+	 * @return The pulse invert flag.
+	 */
+	protected MutableLiveData<Boolean> getPulseInvert() {
+		return mPulseInvert;
+	}
+
+	/**
+	 * Get the pulse invert value.
+	 *
+	 * @return The pulse invert value.
+	 */
+	private boolean getPulseInvertValue() {
+		Boolean value = mPulseInvert.getValue();
+		return value != null && value;
+	}
+
+	/**
+	 * Update the pulse invert flag.
+	 *
+	 * @param pulseInvert The new pulse invert flag.
+	 */
+	protected void updatePulseInvert(final boolean pulseInvert) {
+		mPulseInvert.setValue(pulseInvert);
 	}
 
 	/**
@@ -550,13 +601,15 @@ public abstract class ControlViewModel extends ViewModel {
 			/**
 			 * The last trigger time.
 			 */
-			private long lastTriggerTime = 0;
+			private long mLastTriggerTime = 0;
 
 			@Override
-			public void onAccelerate(double acceleration) {
-				if (acceleration > mSensorSensitivity.getValue() && System.currentTimeMillis() > lastTriggerTime + RETRIGGER_WAIT_TIME) {
+			public void onAccelerate(final double acceleration) {
+				if (System.currentTimeMillis() > mLastTriggerTime + RETRIGGER_WAIT_TIME // SUPPRESS_CHECKSTYLE
+						&& (!getPulseInvertValue() && acceleration > getSensorSensitivityValue()
+								|| getPulseInvertValue() && acceleration < getSensorSensitivityValue())) {
 					ControlViewModel.this.writeBluetoothMessageOnExternalTrigger(PulseTrigger.ACCELERATION, true);
-					lastTriggerTime = System.currentTimeMillis();
+					mLastTriggerTime = System.currentTimeMillis();
 				}
 			}
 		});
@@ -588,13 +641,15 @@ public abstract class ControlViewModel extends ViewModel {
 			/**
 			 * The last trigger time.
 			 */
-			private long lastTriggerTime = 0;
+			private long mLastTriggerTime = 0;
 
 			@Override
-			public void onMicrophoneInput(double input) {
-				if (input > mSensorSensitivity.getValue() && System.currentTimeMillis() > lastTriggerTime + RETRIGGER_WAIT_TIME) {
+			public void onMicrophoneInput(final double input) {
+				if (System.currentTimeMillis() > mLastTriggerTime + RETRIGGER_WAIT_TIME // SUPPRESS_CHECKSTYLE
+						&& (!getPulseInvertValue() && input > getSensorSensitivityValue()
+								|| getPulseInvertValue() && input < getSensorSensitivityValue())) {
 					ControlViewModel.this.writeBluetoothMessageOnExternalTrigger(PulseTrigger.MICROPHONE, true);
-					lastTriggerTime = System.currentTimeMillis();
+					mLastTriggerTime = System.currentTimeMillis();
 				}
 			}
 		});
@@ -619,7 +674,7 @@ public abstract class ControlViewModel extends ViewModel {
 		stopMicrophoneListener();
 	}
 
-
+	// OVERRIDABLE
 	@Override
 	public void onCleared() {
 		stopSensorListeners();

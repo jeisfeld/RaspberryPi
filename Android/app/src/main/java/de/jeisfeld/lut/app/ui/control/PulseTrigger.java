@@ -34,12 +34,12 @@ public enum PulseTrigger {
 	 * Constructor.
 	 *
 	 * @param isWithDuration Flag indicating if the trigger requires duration.
+	 * @param isWithSensitivity Flag indicating if the trigger requires sensitivity value.
 	 */
 	PulseTrigger(final boolean isWithDuration, final boolean isWithSensitivity) {
 		mIsWithDuration = isWithDuration;
 		mIsWithSensitivity = isWithSensitivity;
 	}
-
 
 	/**
 	 * Get pulse trigger from its ordinal value.

@@ -1,6 +1,10 @@
 package de.jeisfeld.lut.app;
 
-import android.Manifest;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.android.material.navigation.NavigationView;
+
 import android.Manifest.permission;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
@@ -12,17 +16,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.WindowManager;
-
-import com.google.android.material.navigation.NavigationView;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -58,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
 	 * The request code used to query for permission.
 	 */
 	protected static final int REQUEST_CODE_PERMISSION = 2;
-
 
 	/**
 	 * The logging tag.
@@ -128,11 +126,11 @@ public class MainActivity extends AppCompatActivity {
 		connect();
 
 		List<String> missingPermissions = new ArrayList<>();
-		if (ActivityCompat.checkSelfPermission(this, permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+		if (ContextCompat.checkSelfPermission(this, permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 			missingPermissions.add(permission.RECORD_AUDIO);
 		}
 		if (VERSION.SDK_INT >= VERSION_CODES.S
-				&& ActivityCompat.checkSelfPermission(this, permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+				&& ContextCompat.checkSelfPermission(this, permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
 			missingPermissions.add(permission.BLUETOOTH_CONNECT);
 		}
 		if (missingPermissions.size() > 0) {
@@ -279,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
+	// OVERRIDABLE
 	@Override
 	public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);

@@ -1,12 +1,11 @@
 package de.jeisfeld.lut.app.ui.control;
 
+import java.util.Objects;
+
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.TableRow;
-
-import java.util.Objects;
-
 import de.jeisfeld.lut.app.R;
 import de.jeisfeld.lut.bluetooth.message.Mode;
 
@@ -37,6 +36,7 @@ public abstract class TadelFragment extends ControlFragment {
 		TableRow tableRowPulseTrigger = parentView.findViewById(R.id.tableRowPulseTrigger);
 		TableRow tableRowPulseDuration = parentView.findViewById(R.id.tableRowPulseDuration);
 		TableRow tableRowSensorSensitivity = parentView.findViewById(R.id.tableRowSensorSensitivity);
+		TableRow tableRowPulseInvert = parentView.findViewById(R.id.tableRowPulseInvert);
 
 		return new OnItemSelectedListener() {
 			@Override
@@ -55,6 +55,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowPulseTrigger.setVisibility(View.GONE);
 					tableRowPulseDuration.setVisibility(View.GONE);
 					tableRowSensorSensitivity.setVisibility(View.GONE);
+					tableRowPulseInvert.setVisibility(View.GONE);
 					viewModel.updateActiveStatus(false);
 					break;
 				case FIXED:
@@ -69,6 +70,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowPulseTrigger.setVisibility(View.GONE);
 					tableRowPulseDuration.setVisibility(View.GONE);
 					tableRowSensorSensitivity.setVisibility(View.GONE);
+					tableRowPulseInvert.setVisibility(View.GONE);
 					viewModel.updateActiveStatus(true);
 					break;
 				case RANDOM_1:
@@ -83,6 +85,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowPulseTrigger.setVisibility(View.GONE);
 					tableRowPulseDuration.setVisibility(View.GONE);
 					tableRowSensorSensitivity.setVisibility(View.GONE);
+					tableRowPulseInvert.setVisibility(View.GONE);
 					viewModel.updateActiveStatus(true);
 					break;
 				case RANDOM_2:
@@ -97,6 +100,7 @@ public abstract class TadelFragment extends ControlFragment {
 					tableRowPulseTrigger.setVisibility(View.GONE);
 					tableRowPulseDuration.setVisibility(View.GONE);
 					tableRowSensorSensitivity.setVisibility(View.GONE);
+					tableRowPulseInvert.setVisibility(View.GONE);
 					viewModel.updateActiveStatus(true);
 					break;
 				case PULSE:
@@ -113,6 +117,8 @@ public abstract class TadelFragment extends ControlFragment {
 							Objects.requireNonNull(viewModel.getPulseTrigger().getValue()).isWithDuration() ? View.VISIBLE : View.GONE);
 					tableRowSensorSensitivity.setVisibility(
 							Objects.requireNonNull(viewModel.getPulseTrigger().getValue()).isWithSensitivity() ? View.VISIBLE : View.GONE);
+					tableRowPulseInvert.setVisibility(
+							Objects.requireNonNull(viewModel.getPulseTrigger().getValue()).isWithSensitivity() ? View.VISIBLE : View.GONE);
 					viewModel.updateActiveStatus(true);
 					break;
 				default:
@@ -121,7 +127,7 @@ public abstract class TadelFragment extends ControlFragment {
 				viewModel.updateMode(mode);
 
 				getControlViewModel().stopSensorListeners();
-				if (mode == Mode.PULSE ) {
+				if (mode == Mode.PULSE) {
 					if (getControlViewModel().getPulseTrigger().getValue() == PulseTrigger.ACCELERATION) {
 						getControlViewModel().startAccelerationListener(getActivity());
 					}

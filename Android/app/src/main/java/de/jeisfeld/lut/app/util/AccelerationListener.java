@@ -14,7 +14,7 @@ public class AccelerationListener implements SensorEventListener {
 	/**
 	 * The min accelerometer value considered as change.
 	 */
-	private double mMinChange = 0.1;
+	private double mMinChange = 0.1; // MAGIC_NUMBER
 
 	/**
 	 * The activity.
@@ -48,7 +48,7 @@ public class AccelerationListener implements SensorEventListener {
 		Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 		// Logic to differentiate between TabS6 and S10e
 		if ("qualcomm".equals(sensor.getVendor())) {
-			mMinChange = 0.01;
+			mMinChange = 0.01; // MAGIC_NUMBER
 		}
 		mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
 	}
@@ -60,9 +60,9 @@ public class AccelerationListener implements SensorEventListener {
 		mSensorManager.unregisterListener(this);
 	}
 
-
+	// OVERRIDABLE
 	@Override
-	public void onSensorChanged(SensorEvent event) {
+	public void onSensorChanged(final SensorEvent event) {
 		float[] values = event.values;
 		float value = (float) Math.sqrt(values[0] * values[0] + values[1] * values[1] + values[2] * values[2]);
 		if (value > mMinChange && mListener != null) {
@@ -71,7 +71,7 @@ public class AccelerationListener implements SensorEventListener {
 	}
 
 	@Override
-	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+	public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
 	}
 
 	/**
@@ -80,6 +80,7 @@ public class AccelerationListener implements SensorEventListener {
 	public interface AccelerationSensorListener {
 		/**
 		 * Callback message on acceleration.
+		 *
 		 * @param acceleration The acceleration.
 		 */
 		void onAccelerate(double acceleration);

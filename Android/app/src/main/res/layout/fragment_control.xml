@@ -393,6 +393,26 @@
                     android:textAlignment="viewEnd" />
 
             </TableRow>
+
+            <TableRow android:id="@+id/tableRowPulseInvert">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_weight="@integer/selector_label_width"
+                    android:text="@string/text_sensor_pulse_invert" />
+
+                <CheckBox
+                    android:id="@+id/checkBoxPulseInvert"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/seekbar_height"
+                    android:layout_gravity="center_vertical"
+                    android:paddingStart="@dimen/non_seekbar_left_padding"
+                    android:layout_weight="@integer/selector_spinner_width"
+                    tools:ignore="RtlSymmetry" />
+
+            </TableRow>
         </TableLayout>
 
     </LinearLayout>
