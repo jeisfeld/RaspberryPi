@@ -128,11 +128,12 @@ public abstract class TadelFragment extends ControlFragment {
 
 				getControlViewModel().stopSensorListeners();
 				if (mode == Mode.PULSE) {
-					if (getControlViewModel().getPulseTrigger().getValue() == PulseTrigger.ACCELERATION) {
+					PulseTrigger pulseTrigger = getControlViewModel().getPulseTrigger().getValue();
+					if (pulseTrigger == PulseTrigger.ACCELERATION) {
 						getControlViewModel().startAccelerationListener(getActivity());
 					}
-					else if (getControlViewModel().getPulseTrigger().getValue() == PulseTrigger.MICROPHONE) {
-						getControlViewModel().startMicrophoneListener(getActivity());
+					else if (pulseTrigger == PulseTrigger.MICROPHONE || pulseTrigger == PulseTrigger.BREATH_TRAINING_MICROPHONE) {
+						getControlViewModel().startMicrophoneListener(getActivity(), pulseTrigger);
 					}
 				}
 			}

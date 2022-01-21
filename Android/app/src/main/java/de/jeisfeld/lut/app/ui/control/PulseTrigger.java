@@ -19,7 +19,11 @@ public enum PulseTrigger {
 	/**
 	 * Pulse during microphone input.
 	 */
-	MICROPHONE(false, true);
+	MICROPHONE(false, true),
+	/**
+	 * Pulse if microphone input is not in sync with breath training.
+	 */
+	BREATH_TRAINING_MICROPHONE(false, true);
 
 	/**
 	 * Flag indicating if the trigger requires duration.

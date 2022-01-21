@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.app.util.AccelerationListener;
 import de.jeisfeld.lut.app.util.AccelerationListener.AccelerationSensorListener;
+import de.jeisfeld.lut.app.util.Logger;
 import de.jeisfeld.lut.app.util.MicrophoneListener;
 import de.jeisfeld.lut.app.util.MicrophoneListener.MicrophoneInputListener;
 import de.jeisfeld.lut.bluetooth.message.Message;
@@ -102,6 +103,10 @@ public abstract class ControlViewModel extends ViewModel {
 	 * The microphone listener.
 	 */
 	private MicrophoneListener mMicrophoneListener = null;
+	/**
+	 * Expected value of high power.
+	 */
+	private boolean mExpectedHighPower = false;
 
 	/**
 	 * Constructor.
@@ -208,14 +213,19 @@ public abstract class ControlViewModel extends ViewModel {
 	 * @param isHighPower true for setting pulse, false for stopping pulse.
 	 */
 	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower) {
-		if (mMode.getValue() == Mode.PULSE && mPulseTrigger.getValue() == pulseTrigger) {
-			ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
-					mIsActive.getValue(), mPower.getValue(), mFrequency.getValue(),
-					isTadel() && mWave.getValue() != null ? mWave.getValue().getTadelValue() : null,
-					mMode.getValue(), mMinPower.getValue(), isHighPower, mPowerChangeDuration.getValue(), mCycleLength.getValue(),
-					mRunningProbability.getValue(), mAvgOffDuration.getValue(), mAvgOnDuration.getValue(),
-					Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE);
-			writeBluetoothMessage(message);
+		if (mMode.getValue() == Mode.PULSE) {
+			if (mPulseTrigger.getValue() == pulseTrigger) {
+				ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
+						mIsActive.getValue(), mPower.getValue(), mFrequency.getValue(),
+						isTadel() && mWave.getValue() != null ? mWave.getValue().getTadelValue() : null,
+						mMode.getValue(), mMinPower.getValue(), isHighPower, mPowerChangeDuration.getValue(), mCycleLength.getValue(),
+						mRunningProbability.getValue(), mAvgOffDuration.getValue(), mAvgOnDuration.getValue(),
+						Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE);
+				writeBluetoothMessage(message);
+			}
+			else if (mPulseTrigger.getValue() == PulseTrigger.BREATH_TRAINING_MICROPHONE && pulseTrigger == PulseTrigger.BREATH_TRAINING_HOLD) {
+				mExpectedHighPower = isHighPower;
+			}
 		}
 	}
 
@@ -638,8 +648,9 @@ public abstract class ControlViewModel extends ViewModel {
 	 * Start the microphone listener.
 	 *
 	 * @param activity The activity.
+	 * @param pulseTrigger The pulse trigger.
 	 */
-	protected void startMicrophoneListener(final Activity activity) {
+	protected void startMicrophoneListener(final Activity activity, final PulseTrigger pulseTrigger) {
 		stopMicrophoneListener();
 		mMicrophoneListener = new MicrophoneListener(activity, new MicrophoneInputListener() {
 			/**
@@ -654,15 +665,20 @@ public abstract class ControlViewModel extends ViewModel {
 			 * Flag storing if power is in high position.
 			 */
 			private boolean mIsHighPower = false;
+			/**
+			 * The pulse trigger.
+			 */
+			private PulseTrigger mPulseTrigger = pulseTrigger;
 
 			@Override
 			public void onMicrophoneInput(final double input) {
 				if (System.currentTimeMillis() > mLastTriggerTime + RETRIGGER_WAIT_TIME) {
-					boolean newIsHighPower = !getPulseInvertValue() && input > getSensorSensitivityValue()
+					boolean newPowerValue = !getPulseInvertValue() && input > getSensorSensitivityValue()
 							|| getPulseInvertValue() && input <= getSensorSensitivityValue();
+					boolean newIsHighPower = mPulseTrigger == PulseTrigger.MICROPHONE ? newPowerValue : newPowerValue != mExpectedHighPower;
 					if (newIsHighPower != mIsHighPower) {
 						mIsHighPower = newIsHighPower;
-						ControlViewModel.this.writeBluetoothMessageOnExternalTrigger(PulseTrigger.MICROPHONE, mIsHighPower);
+						ControlViewModel.this.writeBluetoothMessageOnExternalTrigger(mPulseTrigger, mIsHighPower);
 						mLastTriggerTime = System.currentTimeMillis();
 					}
 				}

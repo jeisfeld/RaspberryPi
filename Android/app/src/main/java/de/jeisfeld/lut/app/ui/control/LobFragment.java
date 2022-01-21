@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.TableRow;
+
 import de.jeisfeld.lut.app.R;
 import de.jeisfeld.lut.bluetooth.message.Mode;
 
@@ -116,11 +117,12 @@ public abstract class LobFragment extends ControlFragment {
 
 				getControlViewModel().stopSensorListeners();
 				if (mode == Mode.PULSE) {
-					if (getControlViewModel().getPulseTrigger().getValue() == PulseTrigger.ACCELERATION) {
+					PulseTrigger pulseTrigger = getControlViewModel().getPulseTrigger().getValue();
+					if (pulseTrigger == PulseTrigger.ACCELERATION) {
 						getControlViewModel().startAccelerationListener(getActivity());
 					}
-					else if (getControlViewModel().getPulseTrigger().getValue() == PulseTrigger.MICROPHONE) {
-						getControlViewModel().startMicrophoneListener(getActivity());
+					else if (pulseTrigger == PulseTrigger.MICROPHONE || pulseTrigger == PulseTrigger.BREATH_TRAINING_MICROPHONE) {
+						getControlViewModel().startMicrophoneListener(getActivity(), pulseTrigger);
 					}
 				}
 			}

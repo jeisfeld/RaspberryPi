@@ -82,5 +82,6 @@ _
         <item>Breath Training Hold</item>
         <item>Device Acceleration</item>
         <item>Microphone Input</item>
+        <item>Breath Training Microphone Input</item>
     </string-array>
 </resources>

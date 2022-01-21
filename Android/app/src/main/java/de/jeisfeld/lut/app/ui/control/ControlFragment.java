@@ -124,8 +124,8 @@ public abstract class ControlFragment extends Fragment {
 				if (pulseTrigger == PulseTrigger.ACCELERATION) {
 					mControlViewModel.startAccelerationListener(getActivity());
 				}
-				else if (pulseTrigger == PulseTrigger.MICROPHONE) {
-					mControlViewModel.startMicrophoneListener(getActivity());
+				else if (pulseTrigger == PulseTrigger.MICROPHONE || pulseTrigger == PulseTrigger.BREATH_TRAINING_MICROPHONE) {
+					mControlViewModel.startMicrophoneListener(getActivity(), pulseTrigger);
 				}
 			}
 
