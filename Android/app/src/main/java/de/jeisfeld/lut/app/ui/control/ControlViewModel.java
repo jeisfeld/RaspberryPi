@@ -1,9 +1,10 @@
 package de.jeisfeld.lut.app.ui.control;
 
+import android.app.Activity;
+
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
-import android.app.Activity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -602,14 +603,21 @@ public abstract class ControlViewModel extends ViewModel {
 			 * The last trigger time.
 			 */
 			private long mLastTriggerTime = 0;
+			/**
+			 * Flag storing if power is in high position.
+			 */
+			private boolean mIsHighPower = false;
 
 			@Override
 			public void onAccelerate(final double acceleration) {
-				if (System.currentTimeMillis() > mLastTriggerTime + RETRIGGER_WAIT_TIME // SUPPRESS_CHECKSTYLE
-						&& (!getPulseInvertValue() && acceleration > getSensorSensitivityValue()
-								|| getPulseInvertValue() && acceleration < getSensorSensitivityValue())) {
-					ControlViewModel.this.writeBluetoothMessageOnExternalTrigger(PulseTrigger.ACCELERATION, true);
-					mLastTriggerTime = System.currentTimeMillis();
+				if (System.currentTimeMillis() > mLastTriggerTime + RETRIGGER_WAIT_TIME) {
+					boolean newIsHighPower = !getPulseInvertValue() && acceleration > getSensorSensitivityValue()
+							|| getPulseInvertValue() && acceleration <= getSensorSensitivityValue();
+					if (newIsHighPower != mIsHighPower) {
+						mIsHighPower = newIsHighPower;
+						ControlViewModel.this.writeBluetoothMessageOnExternalTrigger(PulseTrigger.ACCELERATION, mIsHighPower);
+						mLastTriggerTime = System.currentTimeMillis();
+					}
 				}
 			}
 		});
@@ -642,14 +650,21 @@ public abstract class ControlViewModel extends ViewModel {
 			 * The last trigger time.
 			 */
 			private long mLastTriggerTime = 0;
+			/**
+			 * Flag storing if power is in high position.
+			 */
+			private boolean mIsHighPower = false;
 
 			@Override
 			public void onMicrophoneInput(final double input) {
-				if (System.currentTimeMillis() > mLastTriggerTime + RETRIGGER_WAIT_TIME // SUPPRESS_CHECKSTYLE
-						&& (!getPulseInvertValue() && input > getSensorSensitivityValue()
-								|| getPulseInvertValue() && input < getSensorSensitivityValue())) {
-					ControlViewModel.this.writeBluetoothMessageOnExternalTrigger(PulseTrigger.MICROPHONE, true);
-					mLastTriggerTime = System.currentTimeMillis();
+				if (System.currentTimeMillis() > mLastTriggerTime + RETRIGGER_WAIT_TIME) {
+					boolean newIsHighPower = !getPulseInvertValue() && input > getSensorSensitivityValue()
+							|| getPulseInvertValue() && input <= getSensorSensitivityValue();
+					if (newIsHighPower != mIsHighPower) {
+						mIsHighPower = newIsHighPower;
+						ControlViewModel.this.writeBluetoothMessageOnExternalTrigger(PulseTrigger.MICROPHONE, mIsHighPower);
+						mLastTriggerTime = System.currentTimeMillis();
+					}
 				}
 			}
 		});

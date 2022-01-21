@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder.AudioSource;
+
 import androidx.core.content.ContextCompat;
 import de.jeisfeld.lut.app.R;
 
@@ -108,11 +109,9 @@ public class MicrophoneListener {
 				values.sort(Integer::compareTo);
 				double value = values.get(bufferQuantile);
 
-				if (value > mMinChange) {
-					value = Math.sqrt(value - mMinChange) / 15.0; // MAGIC_NUMBER
-					if (mListener != null) {
-						mListener.onMicrophoneInput(value);
-					}
+				if (mListener != null) {
+					value = value > mMinChange ? Math.sqrt(value - mMinChange) / 15.0 : 0; // MAGIC_NUMBER
+					mListener.onMicrophoneInput(value);
 				}
 			}
 		}, "AudioRecorder Thread");

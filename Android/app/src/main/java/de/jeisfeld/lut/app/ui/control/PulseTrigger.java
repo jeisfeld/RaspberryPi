@@ -15,11 +15,11 @@ public enum PulseTrigger {
 	/**
 	 * Pulse during device acceleration.
 	 */
-	ACCELERATION(true, true),
+	ACCELERATION(false, true),
 	/**
 	 * Pulse during microphone input.
 	 */
-	MICROPHONE(true, true);
+	MICROPHONE(false, true);
 
 	/**
 	 * Flag indicating if the trigger requires duration.

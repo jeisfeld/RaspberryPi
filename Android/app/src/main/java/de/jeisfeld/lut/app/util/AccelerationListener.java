@@ -65,8 +65,8 @@ public class AccelerationListener implements SensorEventListener {
 	public void onSensorChanged(final SensorEvent event) {
 		float[] values = event.values;
 		float value = (float) Math.sqrt(values[0] * values[0] + values[1] * values[1] + values[2] * values[2]);
-		if (value > mMinChange && mListener != null) {
-			mListener.onAccelerate(value - mMinChange);
+		if (mListener != null) {
+			mListener.onAccelerate(value > mMinChange ? value - mMinChange : 0);
 		}
 	}
 
