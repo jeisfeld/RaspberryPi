@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="CheckStyle-IDEA">
-    <option name="configuration">
-      <map>
-        <entry key="active-configuration" value="LOCAL_FILE:D:/Git/Augendiagnose/je_checks.xml:JE Checks" />
-        <entry key="checkstyle-version" value="8.31" />
-        <entry key="copy-libs" value="true" />
-        <entry key="location-0" value="BUNDLED:(bundled):Sun Checks" />
-        <entry key="location-1" value="BUNDLED:(bundled):Google Checks" />
-        <entry key="location-2" value="LOCAL_FILE:D:/Git/Augendiagnose/je_checks.xml:JE Checks" />
-        <entry key="scan-before-checkin" value="false" />
-        <entry key="scanscope" value="JavaOnly" />
-        <entry key="suppress-errors" value="false" />
-        <entry key="thirdparty-classpath" value="$PRJ_DIR$/sevntu-checkstyle-idea-extension-1.37.1.jar" />
-      </map>
+  <component name="CheckStyle-IDEA" serialisationVersion="2">
+    <checkstyleVersion>8.31</checkstyleVersion>
+    <scanScope>JavaOnly</scanScope>
+    <copyLibs>true</copyLibs>
+    <option name="thirdPartyClasspath">
+      <option value="D:\Git\Augendiagnose\AugendiagnoseIdea\sevntu-checkstyle-idea-extension-1.37.1.jar" />
+    </option>
+    <option name="activeLocationIds">
+      <option value="bbe75af6-fee7-4671-81e2-57698320a56e" />
+    </option>
+    <option name="locations">
+      <list>
+        <ConfigurationLocation id="bundled-sun-checks" type="BUNDLED" scope="All" description="Sun Checks">(bundled)</ConfigurationLocation>
+        <ConfigurationLocation id="bundled-google-checks" type="BUNDLED" scope="All" description="Google Checks">(bundled)</ConfigurationLocation>
+        <ConfigurationLocation id="bbe75af6-fee7-4671-81e2-57698320a56e" type="LOCAL_FILE" scope="All" description="JE Checks">$PROJECT_DIR$/../../Augendiagnose/je_checks.xml</ConfigurationLocation>
+      </list>
     </option>
   </component>
 </project>
