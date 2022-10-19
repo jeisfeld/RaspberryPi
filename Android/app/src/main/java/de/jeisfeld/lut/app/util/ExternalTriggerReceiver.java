@@ -65,13 +65,25 @@ public class ExternalTriggerReceiver extends BroadcastReceiver {
 			Log.d(Application.TAG, "Breath training: " + playStatus + " - " + stepType + " - " + duration);
 			triggerBluetoothMessageOnExternalTrigger(PulseTrigger.BREATH_TRAINING_HOLD, "HOLD".equals(stepType) && "PLAYING".equals(playStatus));
 		}
+		else if ("de.jeisfeld.dsmessenger.TRIGGER_LUT".equals(action)) {
+			String messageType = intent.getStringExtra("de.jeisfeld.dsmessenger.lut.messageType");
+			double powerFactor = intent.getDoubleExtra("de.jeisfeld.dsmessenger.lut.powerFactor", 1);
+			long duration = intent.getLongExtra("de.jeisfeld.dsmessenger.lut.duration", -1);
+			Log.d(Application.TAG, "DS Messenger: " + messageType + " - " + powerFactor + " - " + duration);
+			if ("PULSE".equals(messageType)) {
+				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, true, duration, powerFactor);
+			}
+			else {
+				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, "ON".equals(messageType), Long.MAX_VALUE, 1);
+			}
+		}
 	}
 
 	/**
 	 * Write bluetooth message to trigger pulse based on external trigger, if applicable.
 	 *
 	 * @param pulseTrigger The pulse trigger.
-	 * @param isHighPower true for setting pulse, false for stopping pulse.
+	 * @param isHighPower  true for setting pulse, false for stopping pulse.
 	 */
 	private void triggerBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower) {
 		MainActivity activity = mActivity.get();
@@ -80,6 +92,29 @@ public class ExternalTriggerReceiver extends BroadcastReceiver {
 			new ViewModelProvider(activity).get(Lob1ViewModel.class).writeBluetoothMessageOnExternalTrigger(pulseTrigger, isHighPower);
 			new ViewModelProvider(activity).get(Tadel0ViewModel.class).writeBluetoothMessageOnExternalTrigger(pulseTrigger, isHighPower);
 			new ViewModelProvider(activity).get(Tadel1ViewModel.class).writeBluetoothMessageOnExternalTrigger(pulseTrigger, isHighPower);
+		}
+	}
+
+	/**
+	 * Write bluetooth message to trigger pulse based on external trigger, if applicable.
+	 *
+	 * @param pulseTrigger The pulse trigger.
+	 * @param isHighPower  true for setting pulse, false for stopping pulse.
+	 * @param duration     The duration of the pulse.
+	 * @param powerFactor A factor that is multipled with the power.
+	 */
+	private void triggerBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower,
+														  final long duration, final double powerFactor) {
+		MainActivity activity = mActivity.get();
+		if (activity != null) {
+			new ViewModelProvider(activity).get(Lob0ViewModel.class).writeBluetoothMessageOnExternalTrigger(
+					pulseTrigger, isHighPower, duration, powerFactor);
+			new ViewModelProvider(activity).get(Lob1ViewModel.class).writeBluetoothMessageOnExternalTrigger(
+					pulseTrigger, isHighPower, duration, powerFactor);
+			new ViewModelProvider(activity).get(Tadel0ViewModel.class).writeBluetoothMessageOnExternalTrigger(
+					pulseTrigger, isHighPower, duration, powerFactor);
+			new ViewModelProvider(activity).get(Tadel1ViewModel.class).writeBluetoothMessageOnExternalTrigger(
+					pulseTrigger, isHighPower, duration, powerFactor);
 		}
 	}
 

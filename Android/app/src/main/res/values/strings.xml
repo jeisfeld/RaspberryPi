@@ -83,5 +83,6 @@ _
         <item>Device Acceleration</item>
         <item>Microphone Input</item>
         <item>Breath Training Microphone Input</item>
+        <item>DS Messenger</item>
     </string-array>
 </resources>

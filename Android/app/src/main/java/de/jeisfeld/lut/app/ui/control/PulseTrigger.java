@@ -23,7 +23,11 @@ public enum PulseTrigger {
 	/**
 	 * Pulse if microphone input is not in sync with breath training.
 	 */
-	BREATH_TRAINING_MICROPHONE(false, true);
+	BREATH_TRAINING_MICROPHONE(false, true),
+	/**
+	 * Pulse based on trigger from DSMessenger.
+	 */
+	DSMESSENGER(true, false);
 
 	/**
 	 * Flag indicating if the trigger requires duration.
