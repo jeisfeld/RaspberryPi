@@ -128,12 +128,15 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 		// variables for mode 2-3
 		Random random = new Random();
 		long nextSignalChangeTime = System.currentTimeMillis();
+		double lastBluetoothMessageTime = 0;
 		double lastRunningProbability = 0;
 		double lastAvgOffDuration = 0;
 		double lastAvgOnDuration = 0;
 
 		try {
 			while (mIsRunning) {
+				int powerBefore = mPower;
+				boolean isPoweredBefore = mIsHighPower;
 				switch (mMode) {
 				case WAVE:
 					// Wave up and down
@@ -146,6 +149,7 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 					else {
 						cyclePoint = 0.5; // MAGIC_NUMBER
 					}
+					mIsHighPower = true;
 					break;
 				case RANDOM_1:
 					// Random change between high/low level. Avg signal duration 2s. Levels and Probability controllable.
@@ -210,15 +214,25 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 					break;
 				default:
 					mChannelSender.lob(0, 0, true);
+					mIsHighPower = false;
 					Thread.sleep(Sender.QUERY_DURATION);
 					break;
 				}
-
+				if (mPower != powerBefore || mIsHighPower != isPoweredBefore
+						|| System.currentTimeMillis() - lastBluetoothMessageTime > 5000) { // MAGIC_NUMBER
+					mConnectThread.write(new ProcessingBluetoothMessage(
+							mChannel, false, null, mPower, null, null, null, null, mIsHighPower, null, null, null, null, null, null));
+					lastBluetoothMessageTime = System.currentTimeMillis();
+				}
 			}
 			mChannelSender.lob(0, 0, true);
 		}
 		catch (InterruptedException e) {
 			Logger.error(e);
+		}
+		finally {
+			mConnectThread.write(new ProcessingBluetoothMessage(
+					mChannel, false, null, 0, null, null, null, null, false, null, null, null, null, null, null));
 		}
 	}
 

@@ -160,6 +160,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 					// constant power and frequency, both controllable. Serves to prepare base power for modes 2 and 3.
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
 					mChannelSender.tadel(mPower, mFrequency, mWave);
+					mIsPowered = true;
 					break;
 				case RANDOM_1:
 					// Random change between on/off level. Avg signal duration 2s. Power, frequency and Probability controllable.
@@ -241,6 +242,10 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 		}
 		catch (InterruptedException e) {
 			Logger.error(e);
+		}
+		finally {
+			mConnectThread.write(new ProcessingBluetoothMessage(
+					mChannel, true, null, 0, null, null, null, null, false, null, null, null, null, null, null));
 		}
 	}
 

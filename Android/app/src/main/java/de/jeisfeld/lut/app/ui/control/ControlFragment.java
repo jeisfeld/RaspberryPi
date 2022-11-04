@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -146,6 +147,7 @@ public abstract class ControlFragment extends Fragment {
 		prepareSeekbarPulseDuration(root);
 		prepareSeekbarSensorSensitivity(root);
 		prepareCheckboxPulseInvert(root);
+		prepareIconPowerStatus(root);
 
 		switchBluetoothStatus.setOnTouchListener((v, event) -> true);
 
@@ -391,6 +393,16 @@ public abstract class ControlFragment extends Fragment {
 		final CheckBox checkboxPulseInvert = root.findViewById(R.id.checkBoxPulseInvert);
 		mControlViewModel.getPulseInvert().observe(getViewLifecycleOwner(), checkboxPulseInvert::setChecked);
 		checkboxPulseInvert.setOnCheckedChangeListener((buttonView, isChecked) -> mControlViewModel.updatePulseInvert(isChecked));
+	}
+
+	/**
+	 * Prepare the icon for power status.
+	 * @param root The parent view.
+	 */
+	private void prepareIconPowerStatus(final View root) {
+		final ImageView iconPowerStatus = root.findViewById(R.id.iconPowerStatus);
+		mControlViewModel.getPowerStatus().observe(getViewLifecycleOwner(), isPowered ->
+				iconPowerStatus.setImageResource(isPowered ? R.drawable.ic_icon_power_on : R.drawable.ic_icon_power_off));
 	}
 
 	/**

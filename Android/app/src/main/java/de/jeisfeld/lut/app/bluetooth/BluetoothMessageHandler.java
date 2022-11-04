@@ -1,10 +1,11 @@
 package de.jeisfeld.lut.app.bluetooth;
 
-import java.lang.ref.WeakReference;
-
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
+import java.lang.ref.WeakReference;
+
 import de.jeisfeld.lut.app.MainActivity;
 
 /**
@@ -44,7 +45,6 @@ public class BluetoothMessageHandler extends Handler {
 		switch (messageType) {
 		case RECONNECT:
 			if (activity != null && !activity.isDestroyed() && !activity.isFinishing()) {
-				activity.updateConnectedStatus(false);
 				activity.connect();
 			}
 			break;
@@ -89,6 +89,10 @@ public class BluetoothMessageHandler extends Handler {
 	 * Send a reconnect message.
 	 */
 	protected void sendReconnect() {
+		MainActivity activity = mActivity.get();
+		if (activity != null && !activity.isDestroyed() && !activity.isFinishing()) {
+			activity.updateConnectedStatus(false);
+		}
 		Message message = new Message();
 		message.what = MessageType.RECONNECT.ordinal();
 		sendMessageDelayed(message, RECONNECT_DELAY);

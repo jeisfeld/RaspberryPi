@@ -165,7 +165,6 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 									threadMap.get(channel).stop();
 									threadMap.remove(channel);
 								}
-
 							}
 						}
 						break;

@@ -1,10 +1,5 @@
 package de.jeisfeld.lut.app;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.google.android.material.navigation.NavigationView;
-
 import android.Manifest.permission;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
@@ -16,6 +11,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.WindowManager;
+
+import com.google.android.material.navigation.NavigationView;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;

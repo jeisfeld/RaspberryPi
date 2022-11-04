@@ -95,6 +95,11 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	private final MutableLiveData<Boolean> mPulseInvert = new MutableLiveData<>(false);
 	/**
+	 * The power status.
+	 */
+	private final MutableLiveData<Boolean> mPowerStatus = new MutableLiveData<>(false);
+
+	/**
 	 * The acceleration listener.
 	 */
 	private AccelerationListener mAccelerationListener = null;
@@ -178,6 +183,9 @@ public abstract class ControlViewModel extends ViewModel {
 		if (processingBluetoothMessage.getPulseDuration() != null) {
 			mPulseDuration.postValue(processingBluetoothMessage.getPulseDuration());
 		}
+		if (processingBluetoothMessage.isHighPower() != null) {
+			mPowerStatus.postValue(processingBluetoothMessage.isHighPower());
+		}
 	}
 
 	/**
@@ -209,7 +217,7 @@ public abstract class ControlViewModel extends ViewModel {
 	 * Write bluetooth message to trigger pulse based on external trigger, if applicable.
 	 *
 	 * @param pulseTrigger The pulse trigger.
-	 * @param isHighPower true for setting pulse, false for stopping pulse.
+	 * @param isHighPower  true for setting pulse, false for stopping pulse.
 	 */
 	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower) {
 		writeBluetoothMessageOnExternalTrigger(pulseTrigger, isHighPower,
@@ -220,9 +228,9 @@ public abstract class ControlViewModel extends ViewModel {
 	 * Write bluetooth message to trigger pulse based on external trigger, if applicable.
 	 *
 	 * @param pulseTrigger The pulse trigger.
-	 * @param isHighPower true for setting pulse, false for stopping pulse.
-	 * @param duration The duration
-	 * @param powerFactor A factor that is multipled with the power.
+	 * @param isHighPower  true for setting pulse, false for stopping pulse.
+	 * @param duration     The duration
+	 * @param powerFactor  A factor that is multipled with the power.
 	 */
 	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower,
 													   final long duration, final double powerFactor) {
@@ -622,6 +630,24 @@ public abstract class ControlViewModel extends ViewModel {
 	}
 
 	/**
+	 * Get the power status.
+	 *
+	 * @return The power status.
+	 */
+	protected MutableLiveData<Boolean> getPowerStatus() {
+		return mPowerStatus;
+	}
+
+	/**
+	 * Update the power status.
+	 *
+	 * @param powerStatus The new power status.
+	 */
+	protected void updatePowerStatus(final boolean powerStatus) {
+		mPowerStatus.setValue(powerStatus);
+	}
+
+	/**
 	 * Start the acceleration listener.
 	 *
 	 * @param activity The activity.
@@ -671,7 +697,7 @@ public abstract class ControlViewModel extends ViewModel {
 	/**
 	 * Start the microphone listener.
 	 *
-	 * @param activity The activity.
+	 * @param activity     The activity.
 	 * @param pulseTrigger The pulse trigger.
 	 */
 	protected void startMicrophoneListener(final Activity activity, final PulseTrigger pulseTrigger) {

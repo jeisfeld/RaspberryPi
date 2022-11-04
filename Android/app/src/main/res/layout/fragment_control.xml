@@ -45,7 +45,7 @@
             android:textAlignment="center"
             android:textSize="@dimen/text_header_size" />
 
-        <FrameLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -53,9 +53,19 @@
                 android:id="@+id/switchActive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
+                android:layout_centerHorizontal="true"
                 app:switchMinWidth="64dp" />
-        </FrameLayout>
+
+            <ImageView
+                android:id="@+id/iconPowerStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_icon_power_off"
+                tools:ignore="ContentDescription" />
+
+        </RelativeLayout>
 
         <android.widget.Space
             android:layout_width="match_parent"
@@ -232,8 +242,8 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:paddingStart="@dimen/non_seekbar_left_padding"
                     android:layout_weight="@integer/selector_spinner_width"
+                    android:paddingStart="@dimen/non_seekbar_left_padding"
                     tools:ignore="RtlSymmetry" />
             </TableRow>
 
@@ -335,8 +345,8 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:paddingStart="@dimen/non_seekbar_left_padding"
                     android:layout_weight="@integer/selector_spinner_width"
+                    android:paddingStart="@dimen/non_seekbar_left_padding"
                     tools:ignore="RtlSymmetry" />
             </TableRow>
 
@@ -408,8 +418,8 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/seekbar_height"
                     android:layout_gravity="center_vertical"
-                    android:paddingStart="@dimen/non_seekbar_left_padding"
                     android:layout_weight="@integer/selector_spinner_width"
+                    android:paddingStart="@dimen/non_seekbar_left_padding"
                     tools:ignore="RtlSymmetry" />
 
             </TableRow>
