@@ -765,20 +765,22 @@ public abstract class ControlViewModel extends ViewModel {
 	/**
 	 * Convert seekbar value to value in ms for avg duration.
 	 *
-	 * @param seekbarValue the seekbar value
+	 * @param seekbarValue  the seekbar value
+	 * @param isOffDuration true if this is for seekbar off duration
 	 * @return The value
 	 */
-	protected static long avgDurationSeekbarToValue(final int seekbarValue) {
-		return Math.round(1000 * Math.exp(0.025 * seekbarValue)); // MAGIC_NUMBER
+	protected static long avgDurationSeekbarToValue(final int seekbarValue, final boolean isOffDuration) {
+		return Math.round(1000 * Math.exp((isOffDuration ? 0.041 : 0.025) * seekbarValue)); // MAGIC_NUMBER
 	}
 
 	/**
 	 * Convert value in ms to seekbar value for avg duration.
 	 *
-	 * @param value the value in ms
+	 * @param value         the value in ms
+	 * @param isOffDuration true if this is for seekbar off duration
 	 * @return The seekbar value
 	 */
-	protected static int avgDurationValueToSeekbar(final long value) {
-		return (int) Math.round(Math.log(value / 1000.0) / 0.025); // MAGIC_NUMBER
+	protected static int avgDurationValueToSeekbar(final long value, final boolean isOffDuration) {
+		return (int) Math.round(Math.log(value / 1000.0) / (isOffDuration ? 0.041 : 0.025)); // MAGIC_NUMBER
 	}
 }

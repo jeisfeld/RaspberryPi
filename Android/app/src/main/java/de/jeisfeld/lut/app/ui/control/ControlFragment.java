@@ -1,7 +1,5 @@
 package de.jeisfeld.lut.app.ui.control;
 
-import java.util.Locale;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,6 +15,9 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.util.Locale;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
@@ -276,17 +277,29 @@ public abstract class ControlFragment extends Fragment {
 	private void prepareSeekbarAvgOffDuration(final View root) {
 		final SeekBar seekbarAvgOffDuration = root.findViewById(R.id.seekBarAvgOffDuration);
 		final TextView textViewAvgOffDuration = root.findViewById(R.id.textViewAvgOffDuration);
-		long avgOffDuration1 = ControlViewModel.avgDurationSeekbarToValue(seekbarAvgOffDuration.getProgress());
-		if (avgOffDuration1 >= 99900) { // MAGIC_NUMBER
+		long avgOffDuration1 = ControlViewModel.avgDurationSeekbarToValue(seekbarAvgOffDuration.getProgress(), true);
+		if (avgOffDuration1 >= 6000000) { // MAGIC_NUMBER
+			textViewAvgOffDuration.setText(String.format(Locale.getDefault(), "%.2fh", avgOffDuration1 / 3600000.0)); // MAGIC_NUMBER
+		}
+		else if (avgOffDuration1 >= 600000) { // MAGIC_NUMBER
+			textViewAvgOffDuration.setText(String.format(Locale.getDefault(), "%.1fm", avgOffDuration1 / 60000.0)); // MAGIC_NUMBER
+		}
+		else if (avgOffDuration1 >= 99900) { // MAGIC_NUMBER
 			textViewAvgOffDuration.setText(String.format(Locale.getDefault(), "%.2fm", avgOffDuration1 / 60000.0)); // MAGIC_NUMBER
 		}
 		else {
 			textViewAvgOffDuration.setText(String.format(Locale.getDefault(), "%.1fs", avgOffDuration1 / 1000.0)); // MAGIC_NUMBER
 		}
 		mControlViewModel.getAvgOffDuration().observe(getViewLifecycleOwner(), avgOffDuration -> {
-			int seekbarValue = ControlViewModel.avgDurationValueToSeekbar(avgOffDuration);
+			int seekbarValue = ControlViewModel.avgDurationValueToSeekbar(avgOffDuration, true);
 			seekbarAvgOffDuration.setProgress(seekbarValue);
-			if (avgOffDuration >= 99900) { // MAGIC_NUMBER
+			if (avgOffDuration >= 6000000) { // MAGIC_NUMBER
+				textViewAvgOffDuration.setText(String.format(Locale.getDefault(), "%.2fh", avgOffDuration / 3600000.0)); // MAGIC_NUMBER
+			}
+			else if (avgOffDuration >= 600000) { // MAGIC_NUMBER
+				textViewAvgOffDuration.setText(String.format(Locale.getDefault(), "%.1fm", avgOffDuration / 60000.0)); // MAGIC_NUMBER
+			}
+			else if (avgOffDuration >= 99900) { // MAGIC_NUMBER
 				textViewAvgOffDuration.setText(String.format(Locale.getDefault(), "%.2fm", avgOffDuration / 60000.0)); // MAGIC_NUMBER
 			}
 			else {
@@ -295,9 +308,9 @@ public abstract class ControlFragment extends Fragment {
 		});
 		seekbarAvgOffDuration.setOnSeekBarChangeListener(
 				(OnSeekBarProgressChangedListener) progress -> {
-					long avgOffDuration = ControlViewModel.avgDurationSeekbarToValue(progress);
+					long avgOffDuration = ControlViewModel.avgDurationSeekbarToValue(progress, true);
 					Long oldPowerChangeDuration = mControlViewModel.getPowerChangeDuration().getValue();
-					if (oldPowerChangeDuration != null && avgOffDuration > oldPowerChangeDuration) {
+					if (oldPowerChangeDuration != null && oldPowerChangeDuration > 0 && avgOffDuration > oldPowerChangeDuration) {
 						mControlViewModel.getPowerChangeDuration().setValue(avgOffDuration);
 					}
 					mControlViewModel.updateAvgOffDuration(avgOffDuration);
@@ -312,7 +325,7 @@ public abstract class ControlFragment extends Fragment {
 	private void prepareSeekbarAvgOnDuration(final View root) {
 		final SeekBar seekbarAvgOnDuration = root.findViewById(R.id.seekBarAvgOnDuration);
 		final TextView textViewAvgOnDuration = root.findViewById(R.id.textViewAvgOnDuration);
-		long avgOnDuration1 = ControlViewModel.avgDurationSeekbarToValue(seekbarAvgOnDuration.getProgress());
+		long avgOnDuration1 = ControlViewModel.avgDurationSeekbarToValue(seekbarAvgOnDuration.getProgress(), false);
 		if (avgOnDuration1 >= 99900) { // MAGIC_NUMBER
 			textViewAvgOnDuration.setText(String.format(Locale.getDefault(), "%.2fm", avgOnDuration1 / 60000.0)); // MAGIC_NUMBER
 		}
@@ -320,7 +333,7 @@ public abstract class ControlFragment extends Fragment {
 			textViewAvgOnDuration.setText(String.format(Locale.getDefault(), "%.1fs", avgOnDuration1 / 1000.0)); // MAGIC_NUMBER
 		}
 		mControlViewModel.getAvgOnDuration().observe(getViewLifecycleOwner(), avgOnDuration -> {
-			int seekbarValue = ControlViewModel.avgDurationValueToSeekbar(avgOnDuration);
+			int seekbarValue = ControlViewModel.avgDurationValueToSeekbar(avgOnDuration, false);
 			seekbarAvgOnDuration.setProgress(seekbarValue);
 			if (avgOnDuration >= 99900) { // MAGIC_NUMBER
 				textViewAvgOnDuration.setText(String.format(Locale.getDefault(), "%.2fm", avgOnDuration / 60000.0)); // MAGIC_NUMBER
@@ -331,7 +344,7 @@ public abstract class ControlFragment extends Fragment {
 		});
 		seekbarAvgOnDuration
 				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> mControlViewModel
-						.updateAvgOnDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
+						.updateAvgOnDuration(ControlViewModel.avgDurationSeekbarToValue(progress, false)));
 	}
 
 	/**
@@ -342,7 +355,7 @@ public abstract class ControlFragment extends Fragment {
 	private void prepareSeekbarPulseDuration(final View root) {
 		final SeekBar seekbarPulseDuration = root.findViewById(R.id.seekBarPulseDuration);
 		final TextView textViewPulseDuration = root.findViewById(R.id.textViewPulseDuration);
-		long pulseDuration1 = ControlViewModel.avgDurationSeekbarToValue(seekbarPulseDuration.getProgress());
+		long pulseDuration1 = ControlViewModel.avgDurationSeekbarToValue(seekbarPulseDuration.getProgress(), false);
 		if (pulseDuration1 >= 99900) { // MAGIC_NUMBER
 			textViewPulseDuration.setText(String.format(Locale.getDefault(), "%.2fm", pulseDuration1 / 60000.0)); // MAGIC_NUMBER
 		}
@@ -350,7 +363,7 @@ public abstract class ControlFragment extends Fragment {
 			textViewPulseDuration.setText(String.format(Locale.getDefault(), "%.1fs", pulseDuration1 / 1000.0)); // MAGIC_NUMBER
 		}
 		mControlViewModel.getPulseDuration().observe(getViewLifecycleOwner(), pulseDuration -> {
-			int seekbarValue = ControlViewModel.avgDurationValueToSeekbar(pulseDuration);
+			int seekbarValue = ControlViewModel.avgDurationValueToSeekbar(pulseDuration, false);
 			seekbarPulseDuration.setProgress(seekbarValue);
 			if (pulseDuration >= 99900) { // MAGIC_NUMBER
 				textViewPulseDuration.setText(String.format(Locale.getDefault(), "%.2fm", pulseDuration / 60000.0)); // MAGIC_NUMBER
@@ -361,7 +374,7 @@ public abstract class ControlFragment extends Fragment {
 		});
 		seekbarPulseDuration
 				.setOnSeekBarChangeListener((OnSeekBarProgressChangedListener) progress -> mControlViewModel
-						.updatePulseDuration(ControlViewModel.avgDurationSeekbarToValue(progress))); // MAGIC_NUMBER
+						.updatePulseDuration(ControlViewModel.avgDurationSeekbarToValue(progress, false))); // MAGIC_NUMBER
 	}
 
 	/**
