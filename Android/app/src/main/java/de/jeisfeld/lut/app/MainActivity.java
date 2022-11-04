@@ -2,12 +2,15 @@ package de.jeisfeld.lut.app;
 
 import android.Manifest.permission;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
 import android.view.WindowManager;
@@ -58,11 +61,22 @@ public class MainActivity extends AppCompatActivity {
 	 * The request code used to query for permission.
 	 */
 	protected static final int REQUEST_CODE_PERMISSION = 2;
-
 	/**
 	 * The logging tag.
 	 */
 	private static final String TAG = "LuT.JE.MainActivity";
+	/**
+	 * Vibration when connected.
+	 */
+	private static final VibrationEffect VIBRATION_CONNECTED = VibrationEffect.createWaveform(
+			new long[]{100, 200, 100}, new int[]{255, 0, 255}, -1);
+	/**
+	 * Vibration when disconnected.
+	 */
+	private static final VibrationEffect VIBRATION_DISCONNECTED = VibrationEffect.createWaveform(
+			new long[]{100, 200, 500, 600, 100, 200, 600, 600, 100, 200, 900},
+			new int[]{255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255}, -1);
+
 	/**
 	 * The navigation bar configuration.
 	 */
@@ -261,6 +275,9 @@ public class MainActivity extends AppCompatActivity {
 		viewModelProvider.get(Tadel0ViewModel.class).setBluetoothStatus(connected);
 		viewModelProvider.get(Lob1ViewModel.class).setBluetoothStatus(connected);
 		viewModelProvider.get(Tadel1ViewModel.class).setBluetoothStatus(connected);
+
+		Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		vibrator.vibrate(connected ? VIBRATION_CONNECTED : VIBRATION_DISCONNECTED);
 	}
 
 	@Override
