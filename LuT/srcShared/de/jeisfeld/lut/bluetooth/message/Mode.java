@@ -27,17 +27,21 @@ public enum Mode {
 	/**
 	 * Individual pulses controlled by client.
 	 */
-	PULSE(4, 4);
+	PULSE(4, 4),
+	/**
+	 * Manual change of power which is normally set randomly.
+	 */
+	MANUAL_OVERRIDE(5, 5);
 
 	/**
 	 * The integer value / dropdown position for Lob.
 	 */
-	private int mLobValue;
+	private final int mLobValue;
 
 	/**
 	 * The integer value / dropdown position for Tadel.
 	 */
-	private int mTadelValue;
+	private final int mTadelValue;
 
 	/**
 	 * Get the int value for lob.

@@ -119,7 +119,7 @@ public class ChannelSender {
 	 */
 	public void tadel(final int power, final int frequency, final int wave) {
 		try {
-			tadel(power, frequency, wave, Sender.SEND_DURATION * mSender.getChannelCount(new Tadel(mChannel, 0, 0, 0)), false);
+			tadel(power, frequency, wave, Sender.SEND_DURATION * mSender.getChannelCount(new Tadel(mChannel, 0, 0, 0)), true);
 		}
 		catch (InterruptedException e) {
 			// ignore

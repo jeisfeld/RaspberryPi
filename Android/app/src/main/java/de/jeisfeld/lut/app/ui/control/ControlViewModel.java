@@ -234,7 +234,27 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower,
 													   final long duration, final double powerFactor) {
-		if (mMode.getValue() == Mode.PULSE) {
+		if (mMode.getValue() == null) {
+			return;
+		}
+		Mode bluetoothMode = null;
+		switch (mMode.getValue()) {
+		case PULSE:
+			bluetoothMode = Mode.PULSE;
+			break;
+		case RANDOM_1:
+		case RANDOM_2:
+			bluetoothMode = Mode.MANUAL_OVERRIDE;
+			break;
+		case OFF:
+		case FIXED:
+		case WAVE:
+		case MANUAL_OVERRIDE:
+		default:
+			break;
+		}
+
+		if (bluetoothMode != null) {
 			if (mPulseTrigger.getValue() == pulseTrigger || pulseTrigger == PulseTrigger.DSMESSENGER) {
 				int power = (int) Math.round(mPower.getValue() * powerFactor);
 				if (powerFactor > 1 && power == mPower.getValue()) {
@@ -250,7 +270,7 @@ public abstract class ControlViewModel extends ViewModel {
 				ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
 						mIsActive.getValue(), power, mFrequency.getValue(),
 						isTadel() && mWave.getValue() != null ? mWave.getValue().getTadelValue() : null,
-						mMode.getValue(), mMinPower.getValue(), isHighPower, mPowerChangeDuration.getValue(), mCycleLength.getValue(),
+						bluetoothMode, mMinPower.getValue(), isHighPower, mPowerChangeDuration.getValue(), mCycleLength.getValue(),
 						mRunningProbability.getValue(), mAvgOffDuration.getValue(), mAvgOnDuration.getValue(),
 						durationValue);
 				writeBluetoothMessage(message);

@@ -90,7 +90,14 @@ public final class RandomizedLobBluetooth implements BluetoothRunnable {
 	@Override
 	public void updateValues(final ProcessingBluetoothMessage message) {
 		if (message.getMode() != null) {
-			mMode = message.getMode();
+			if (message.getMode() == Mode.MANUAL_OVERRIDE) {
+				if (mMode == Mode.RANDOM_1 || mMode == Mode.RANDOM_2) {
+					mIsHighPower = !mIsHighPower;
+				}
+			}
+			else {
+				mMode = message.getMode();
+			}
 			if (mMode == Mode.PULSE && message.isHighPower() != null) {
 				mIsHighPower = message.isHighPower();
 			}

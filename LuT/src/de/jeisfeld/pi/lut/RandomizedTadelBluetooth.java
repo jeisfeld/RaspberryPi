@@ -87,6 +87,10 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	 * Flag indicating if power is on.
 	 */
 	private boolean mIsPowered = false;
+	/**
+	 * Flag indicating that current signal is manual override.
+	 */
+	private boolean mIsManualOverride = false;
 
 	/**
 	 * Constructor.
@@ -106,7 +110,15 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	@Override
 	public void updateValues(final ProcessingBluetoothMessage message) {
 		if (message.getMode() != null) {
-			mMode = message.getMode();
+			if (message.getMode() == Mode.MANUAL_OVERRIDE) {
+				if (mMode == Mode.RANDOM_1 || mMode == Mode.RANDOM_2) {
+					mIsPowered = !mIsPowered;
+					mIsManualOverride = true;
+				}
+			}
+			else {
+				mMode = message.getMode();
+			}
 			if (mMode == Mode.PULSE && message.isHighPower() != null) {
 				mIsPowered = message.isHighPower();
 			}
@@ -164,8 +176,11 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 					break;
 				case RANDOM_1:
 					// Random change between on/off level. Avg signal duration 2s. Power, frequency and Probability controllable.
-					if (System.currentTimeMillis() > nextSignalChangeTime || mRunningProbability != lastRunningProbability) {
+					if (System.currentTimeMillis() > nextSignalChangeTime
+							|| mRunningProbability != lastRunningProbability
+							|| mIsManualOverride) {
 						lastRunningProbability = mRunningProbability;
+						mIsManualOverride = false;
 						long duration;
 						try {
 							duration = (int) (-AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
@@ -183,9 +198,11 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 					// Random change between on/off. On level and avg off/on duration controllable.
 					if (System.currentTimeMillis() > nextSignalChangeTime // BOOLEAN_EXPRESSION_COMPLEXITY
 							|| mIsPowered && mAvgOnDuration != lastAvgOnDuration
-							|| !mIsPowered && mAvgOffDuration != lastAvgOffDuration) {
+							|| !mIsPowered && mAvgOffDuration != lastAvgOffDuration
+							|| mIsManualOverride) {
 						lastAvgOffDuration = mAvgOffDuration;
 						lastAvgOnDuration = mAvgOnDuration;
+						mIsManualOverride = false;
 						if (System.currentTimeMillis() > nextSignalChangeTime) {
 							mIsPowered = !mIsPowered;
 						}
