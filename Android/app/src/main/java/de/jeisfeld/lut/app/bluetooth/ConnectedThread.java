@@ -1,5 +1,9 @@
 package de.jeisfeld.lut.app.bluetooth;
 
+import android.bluetooth.BluetoothSocket;
+import android.content.Context;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -7,9 +11,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
-import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.util.Log;
 import de.jeisfeld.lut.app.bluetooth.BluetoothMessageHandler.MessageType;
 import de.jeisfeld.lut.bluetooth.message.ConnectedMessage;
 
@@ -70,7 +71,12 @@ public class ConnectedThread extends Thread {
 		mWriter = tmpOut;
 		// update local GUI with connection
 		mHandler.sendMessage(MessageType.CONNECTED, null);
-		write(new ConnectedMessage().toString());
+		try {
+			write(new ConnectedMessage().toString());
+		}
+		catch (IOException e) {
+			Log.e(TAG, "Failed to confirm connection", e);
+		}
 	}
 
 	@Override
@@ -96,16 +102,11 @@ public class ConnectedThread extends Thread {
 	 *
 	 * @param data The data to be written.
 	 */
-	protected synchronized void write(final String data) {
-		try {
-			mWriter.write(data);
-			mWriter.newLine();
-			mWriter.flush();
-			mHandler.sendMessage(MessageType.WRITE, data);
-		}
-		catch (IOException e) {
-			Log.e(TAG, "Error occurred when sending data", e);
-		}
+	protected synchronized void write(final String data) throws IOException {
+		mWriter.write(data);
+		mWriter.newLine();
+		mWriter.flush();
+		mHandler.sendMessage(MessageType.WRITE, data);
 	}
 
 }

@@ -123,7 +123,6 @@ public class ConnectThread extends Thread {
 		catch (IOException connectException) {
 			Log.e(TAG, "Unable to connect: " + connectException.getMessage());
 			cancel();
-			mHandler.sendReconnect();
 			return;
 		}
 
@@ -136,7 +135,7 @@ public class ConnectThread extends Thread {
 	 *
 	 * @param message The message.
 	 */
-	private void write(final String message) {
+	private void write(final String message) throws IOException {
 		if (mConnectedThread == null) {
 			DialogUtil.displayToast(mContext, R.string.toast_failed_send);
 			Log.e(TAG, "Failed to send message - no connection available");
@@ -152,7 +151,14 @@ public class ConnectThread extends Thread {
 	 * @param message The message.
 	 */
 	public void write(final Message message) {
-		write(message.toString());
+		try {
+			write(message.toString());
+		}
+		catch (IOException e) {
+			Log.e(TAG, "Failed to send message", e);
+			cancel();
+			mHandler.sendReconnect();
+		}
 	}
 
 	/**
