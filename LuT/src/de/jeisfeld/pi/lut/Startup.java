@@ -227,9 +227,6 @@ public class Startup { // SUPPRESS_CHECKSTYLE
 			}
 		});
 
-		new Thread(mLobs[mChannel]).start();
-		mIsStandaloneActive = true;
-
 		sender.setButtonStatusUpdateListener(new ButtonStatusUpdateListener() {
 			@Override
 			public void onButtonStatusUpdated(final ButtonStatus status) {
