@@ -1,11 +1,11 @@
 package de.jeisfeld.lut.app.util;
 
-import java.lang.ref.WeakReference;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+
+import java.lang.ref.WeakReference;
 
 import androidx.lifecycle.ViewModelProvider;
 import de.jeisfeld.lut.app.Application;
@@ -67,14 +67,18 @@ public class ExternalTriggerReceiver extends BroadcastReceiver {
 		}
 		else if ("de.jeisfeld.dsmessenger.TRIGGER_LUT".equals(action)) {
 			String messageType = intent.getStringExtra("de.jeisfeld.dsmessenger.lut.messageType");
-			double powerFactor = intent.getDoubleExtra("de.jeisfeld.dsmessenger.lut.powerFactor", 1);
 			long duration = intent.getLongExtra("de.jeisfeld.dsmessenger.lut.duration", -1);
-			Log.d(Application.TAG, "DS Messenger: " + messageType + " - " + powerFactor + " - " + duration);
+			int channel = intent.getIntExtra("de.jeisfeld.dsmessenger.lut.channel", -1);
+			int power = intent.getIntExtra("de.jeisfeld.dsmessenger.lut.power", -1);
+			double powerFactor = intent.getDoubleExtra("de.jeisfeld.dsmessenger.lut.powerFactor", 1);
+			Log.d(Application.TAG, "DS Messenger: " + messageType + " - " + duration + " - " + channel
+					+ " - " + power + " - " + powerFactor);
 			if ("PULSE".equals(messageType)) {
-				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, true, duration, powerFactor);
+				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, true, duration, channel, power, powerFactor);
 			}
 			else {
-				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, "ON".equals(messageType), Long.MAX_VALUE, 1);
+				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, "ON".equals(messageType), Long.MAX_VALUE, channel,
+						power, powerFactor);
 			}
 		}
 	}
@@ -101,20 +105,27 @@ public class ExternalTriggerReceiver extends BroadcastReceiver {
 	 * @param pulseTrigger The pulse trigger.
 	 * @param isHighPower  true for setting pulse, false for stopping pulse.
 	 * @param duration     The duration of the pulse.
-	 * @param powerFactor A factor that is multipled with the power.
+	 * @param channel      The channel on which to apply the trigger.
+	 * @param power        The power to be applied.
+	 * @param powerFactor  A factor that is multipled with the power.
 	 */
 	private void triggerBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower,
-														  final long duration, final double powerFactor) {
+														  final long duration, final int channel,
+														  final int power, final double powerFactor) {
 		MainActivity activity = mActivity.get();
 		if (activity != null) {
-			new ViewModelProvider(activity).get(Lob0ViewModel.class).writeBluetoothMessageOnExternalTrigger(
-					pulseTrigger, isHighPower, duration, powerFactor);
-			new ViewModelProvider(activity).get(Lob1ViewModel.class).writeBluetoothMessageOnExternalTrigger(
-					pulseTrigger, isHighPower, duration, powerFactor);
-			new ViewModelProvider(activity).get(Tadel0ViewModel.class).writeBluetoothMessageOnExternalTrigger(
-					pulseTrigger, isHighPower, duration, powerFactor);
-			new ViewModelProvider(activity).get(Tadel1ViewModel.class).writeBluetoothMessageOnExternalTrigger(
-					pulseTrigger, isHighPower, duration, powerFactor);
+			if (channel != 1) {
+				new ViewModelProvider(activity).get(Lob0ViewModel.class).writeBluetoothMessageOnExternalTrigger(
+						pulseTrigger, isHighPower, duration, power, powerFactor);
+				new ViewModelProvider(activity).get(Tadel0ViewModel.class).writeBluetoothMessageOnExternalTrigger(
+						pulseTrigger, isHighPower, duration, power, powerFactor);
+			}
+			if (channel != 0) {
+				new ViewModelProvider(activity).get(Lob1ViewModel.class).writeBluetoothMessageOnExternalTrigger(
+						pulseTrigger, isHighPower, duration, power, powerFactor);
+				new ViewModelProvider(activity).get(Tadel1ViewModel.class).writeBluetoothMessageOnExternalTrigger(
+						pulseTrigger, isHighPower, duration, power, powerFactor);
+			}
 		}
 	}
 

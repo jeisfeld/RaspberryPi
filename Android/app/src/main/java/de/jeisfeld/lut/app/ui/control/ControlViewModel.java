@@ -221,7 +221,7 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower) {
 		writeBluetoothMessageOnExternalTrigger(pulseTrigger, isHighPower,
-				Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE, 1);
+				Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE, -1, 1);
 	}
 
 	/**
@@ -230,10 +230,11 @@ public abstract class ControlViewModel extends ViewModel {
 	 * @param pulseTrigger The pulse trigger.
 	 * @param isHighPower  true for setting pulse, false for stopping pulse.
 	 * @param duration     The duration
+	 * @param power        The power.
 	 * @param powerFactor  A factor that is multipled with the power.
 	 */
 	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower,
-													   final long duration, final double powerFactor) {
+													   final long duration, final int power, final double powerFactor) {
 		if (mMode.getValue() == null) {
 			return;
 		}
@@ -254,21 +255,28 @@ public abstract class ControlViewModel extends ViewModel {
 			break;
 		}
 
+		if (duration > 0) {
+			mPulseDuration.postValue(duration);
+		}
+
 		if (bluetoothMode != null) {
 			if (mPulseTrigger.getValue() == pulseTrigger || pulseTrigger == PulseTrigger.DSMESSENGER) {
-				int power = (int) Math.round(mPower.getValue() * powerFactor);
-				if (powerFactor > 1 && power == mPower.getValue()) {
-					power++;
+				int newPower = power;
+				if (newPower < 0) {
+					newPower = (int) Math.round(mPower.getValue() * powerFactor);
+					if (powerFactor > 1 && newPower == mPower.getValue()) {
+						newPower++;
+					}
+					if (powerFactor < 1 && newPower == mPower.getValue()) {
+						newPower--;
+					}
 				}
-				if (powerFactor < 1 && power == mPower.getValue()) {
-					power--;
-				}
-				power = Math.min(255, power); //MAGIC_NUMBER
+				newPower = Math.min(255, newPower); //MAGIC_NUMBER
 
 				long durationValue = duration > 0 ? duration
 						: Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE;
 				ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
-						mIsActive.getValue(), power, mFrequency.getValue(),
+						mIsActive.getValue(), newPower, mFrequency.getValue(),
 						isTadel() && mWave.getValue() != null ? mWave.getValue().getTadelValue() : null,
 						bluetoothMode, mMinPower.getValue(), isHighPower, mPowerChangeDuration.getValue(), mCycleLength.getValue(),
 						mRunningProbability.getValue(), mAvgOffDuration.getValue(), mAvgOnDuration.getValue(),
