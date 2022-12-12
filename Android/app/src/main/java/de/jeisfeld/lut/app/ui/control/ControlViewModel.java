@@ -29,7 +29,7 @@ public abstract class ControlViewModel extends ViewModel {
 	/**
 	 * A reference to the starting activity.
 	 */
-	private WeakReference<MainActivity> mMainActivity;
+	private WeakReference<MainActivity> mMainActivity = null;
 	/**
 	 * The status of bluetooth connection.
 	 */
@@ -194,6 +194,9 @@ public abstract class ControlViewModel extends ViewModel {
 	 * @param message The message to be written.
 	 */
 	private void writeBluetoothMessage(final Message message) {
+		if (mMainActivity == null) {
+			return;
+		}
 		MainActivity activity = mMainActivity.get();
 		if (activity != null) {
 			activity.writeBluetoothMessage(message);
@@ -221,7 +224,7 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower) {
 		writeBluetoothMessageOnExternalTrigger(pulseTrigger, isHighPower,
-				Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE, -1, 1);
+				Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE, -1, 1, -1, null);
 	}
 
 	/**
@@ -232,9 +235,12 @@ public abstract class ControlViewModel extends ViewModel {
 	 * @param duration     The duration
 	 * @param power        The power.
 	 * @param powerFactor  A factor that is multipled with the power.
+	 * @param frequency    The frequency
+	 * @param wave         The wave
 	 */
 	public void writeBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower,
-													   final long duration, final int power, final double powerFactor) {
+													   final long duration, final int power, final double powerFactor,
+													   final int frequency, final Wave wave) {
 		if (mMode.getValue() == null) {
 			return;
 		}
@@ -272,12 +278,14 @@ public abstract class ControlViewModel extends ViewModel {
 					}
 				}
 				newPower = Math.min(255, newPower); //MAGIC_NUMBER
+				int newFrequency = frequency > 0 ? frequency : mFrequency.getValue();
+				Wave newWave = wave != null ? wave : mWave.getValue();
 
 				long durationValue = duration > 0 ? duration
 						: Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE;
 				ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
-						mIsActive.getValue(), newPower, mFrequency.getValue(),
-						isTadel() && mWave.getValue() != null ? mWave.getValue().getTadelValue() : null,
+						mIsActive.getValue(), newPower, newFrequency,
+						isTadel() && newWave != null ? newWave.getTadelValue() : null,
 						bluetoothMode, mMinPower.getValue(), isHighPower, mPowerChangeDuration.getValue(), mCycleLength.getValue(),
 						mRunningProbability.getValue(), mAvgOffDuration.getValue(), mAvgOnDuration.getValue(),
 						durationValue);

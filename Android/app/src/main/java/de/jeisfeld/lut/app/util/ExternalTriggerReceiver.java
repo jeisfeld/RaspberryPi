@@ -15,6 +15,7 @@ import de.jeisfeld.lut.app.ui.control.Lob1ViewModel;
 import de.jeisfeld.lut.app.ui.control.PulseTrigger;
 import de.jeisfeld.lut.app.ui.control.Tadel0ViewModel;
 import de.jeisfeld.lut.app.ui.control.Tadel1ViewModel;
+import de.jeisfeld.lut.app.ui.control.Wave;
 
 /**
  * Receiver for broadcasts for other applications.
@@ -71,14 +72,18 @@ public class ExternalTriggerReceiver extends BroadcastReceiver {
 			int channel = intent.getIntExtra("de.jeisfeld.dsmessenger.lut.channel", -1);
 			int power = intent.getIntExtra("de.jeisfeld.dsmessenger.lut.power", -1);
 			double powerFactor = intent.getDoubleExtra("de.jeisfeld.dsmessenger.lut.powerFactor", 1);
+			int frequency = intent.getIntExtra("de.jeisfeld.dsmessenger.lut.frequency", -1);
+			String waveName = intent.getStringExtra("de.jeisfeld.dsmessenger.lut.wave");
+			Wave wave = waveName == null ? null : Wave.valueOf(waveName);
 			Log.d(Application.TAG, "DS Messenger: " + messageType + " - " + duration + " - " + channel
-					+ " - " + power + " - " + powerFactor);
+					+ " - " + power + " - " + powerFactor + " - " + frequency + " - " + wave);
 			if ("PULSE".equals(messageType)) {
-				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, true, duration, channel, power, powerFactor);
+				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, true, duration, channel,
+						power, powerFactor, frequency, wave);
 			}
 			else {
 				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, "ON".equals(messageType), Long.MAX_VALUE, channel,
-						power, powerFactor);
+						power, powerFactor, frequency, wave);
 			}
 		}
 	}
@@ -108,23 +113,26 @@ public class ExternalTriggerReceiver extends BroadcastReceiver {
 	 * @param channel      The channel on which to apply the trigger.
 	 * @param power        The power to be applied.
 	 * @param powerFactor  A factor that is multipled with the power.
+	 * @param frequency    The frequency
+	 * @param wave         The wave
 	 */
 	private void triggerBluetoothMessageOnExternalTrigger(final PulseTrigger pulseTrigger, final boolean isHighPower,
 														  final long duration, final int channel,
-														  final int power, final double powerFactor) {
+														  final int power, final double powerFactor,
+														  final int frequency, final Wave wave) {
 		MainActivity activity = mActivity.get();
 		if (activity != null) {
 			if (channel != 1) {
 				new ViewModelProvider(activity).get(Lob0ViewModel.class).writeBluetoothMessageOnExternalTrigger(
-						pulseTrigger, isHighPower, duration, power, powerFactor);
+						pulseTrigger, isHighPower, duration, power, powerFactor, frequency, wave);
 				new ViewModelProvider(activity).get(Tadel0ViewModel.class).writeBluetoothMessageOnExternalTrigger(
-						pulseTrigger, isHighPower, duration, power, powerFactor);
+						pulseTrigger, isHighPower, duration, power, powerFactor, frequency, wave);
 			}
 			if (channel != 0) {
 				new ViewModelProvider(activity).get(Lob1ViewModel.class).writeBluetoothMessageOnExternalTrigger(
-						pulseTrigger, isHighPower, duration, power, powerFactor);
+						pulseTrigger, isHighPower, duration, power, powerFactor, frequency, wave);
 				new ViewModelProvider(activity).get(Tadel1ViewModel.class).writeBluetoothMessageOnExternalTrigger(
-						pulseTrigger, isHighPower, duration, power, powerFactor);
+						pulseTrigger, isHighPower, duration, power, powerFactor, frequency, wave);
 			}
 		}
 	}
