@@ -82,8 +82,8 @@ public class ExternalTriggerReceiver extends BroadcastReceiver {
 						power, powerFactor, frequency, wave);
 			}
 			else {
-				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, "ON".equals(messageType), Long.MAX_VALUE, channel,
-						power, powerFactor, frequency, wave);
+				triggerBluetoothMessageOnExternalTrigger(PulseTrigger.DSMESSENGER, "ON".equals(messageType),
+						duration == -1 ? Long.MAX_VALUE : duration, channel, power, powerFactor, frequency, wave);
 			}
 		}
 	}

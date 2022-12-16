@@ -88,9 +88,13 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 	 */
 	private boolean mIsPowered = false;
 	/**
-	 * Flag indicating that current signal is manual override.
+	 * Flag indicating that system is in manual override mode.
 	 */
 	private boolean mIsManualOverride = false;
+	/**
+	 * Flag indicating that manual override is removed.
+	 */
+	private boolean mRemoveManualOverride = false;
 
 	/**
 	 * Constructor.
@@ -112,8 +116,13 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 		if (message.getMode() != null) {
 			if (message.getMode() == Mode.MANUAL_OVERRIDE) {
 				if (mMode == Mode.RANDOM_1 || mMode == Mode.RANDOM_2) {
-					mIsPowered = !mIsPowered;
-					mIsManualOverride = true;
+					mIsManualOverride = message.getPulseDuration() > 0;
+					if (mIsManualOverride) {
+						mIsPowered = message.isHighPower();
+					}
+					else {
+						mRemoveManualOverride = true;
+					}
 				}
 			}
 			else {
@@ -167,6 +176,10 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 			while (mIsRunning) {
 				int powerBefore = mPower;
 				boolean isPoweredBefore = mIsPowered;
+				if (mRemoveManualOverride) {
+					nextSignalChangeTime = System.currentTimeMillis();
+					mRemoveManualOverride = false;
+				}
 				switch (mMode) {
 				case FIXED:
 					// constant power and frequency, both controllable. Serves to prepare base power for modes 2 and 3.
@@ -180,7 +193,6 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 							|| mRunningProbability != lastRunningProbability
 							|| mIsManualOverride) {
 						lastRunningProbability = mRunningProbability;
-						mIsManualOverride = false;
 						long duration;
 						try {
 							duration = (int) (-AVERAGE_SIGNAL_DURATION * Math.log(random.nextFloat()));
@@ -189,7 +201,10 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 							duration = Integer.MAX_VALUE;
 						}
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
-						mIsPowered = random.nextDouble() < mRunningProbability;
+						if (!mIsManualOverride && !mRemoveManualOverride) {
+							mIsPowered = random.nextDouble() < mRunningProbability;
+						}
+						mRemoveManualOverride = false;
 					}
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
 					mChannelSender.tadel(mIsPowered ? mPower : (int) (mMinPower * mPower), mFrequency, mWave);
@@ -202,8 +217,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 							|| mIsManualOverride) {
 						lastAvgOffDuration = mAvgOffDuration;
 						lastAvgOnDuration = mAvgOnDuration;
-						mIsManualOverride = false;
-						if (System.currentTimeMillis() > nextSignalChangeTime) {
+						if (System.currentTimeMillis() > nextSignalChangeTime && !mIsManualOverride) {
 							mIsPowered = !mIsPowered;
 						}
 						double avgDuration = mIsPowered ? mAvgOnDuration : mAvgOffDuration; // MAGIC_NUMBER

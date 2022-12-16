@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.app.util.AccelerationListener;
 import de.jeisfeld.lut.app.util.AccelerationListener.AccelerationSensorListener;
+import de.jeisfeld.lut.app.util.Logger;
 import de.jeisfeld.lut.app.util.MicrophoneListener;
 import de.jeisfeld.lut.app.util.MicrophoneListener.MicrophoneInputListener;
 import de.jeisfeld.lut.bluetooth.message.Message;
@@ -261,10 +262,6 @@ public abstract class ControlViewModel extends ViewModel {
 			break;
 		}
 
-		if (duration > 0) {
-			mPulseDuration.postValue(duration);
-		}
-
 		if (bluetoothMode != null) {
 			if (mPulseTrigger.getValue() == pulseTrigger || pulseTrigger == PulseTrigger.DSMESSENGER) {
 				int newPower = power;
@@ -278,11 +275,14 @@ public abstract class ControlViewModel extends ViewModel {
 					}
 				}
 				newPower = Math.min(255, newPower); //MAGIC_NUMBER
-				int newFrequency = frequency > 0 ? frequency : mFrequency.getValue();
+				int newFrequency = frequency >= 0 ? frequency : mFrequency.getValue();
 				Wave newWave = wave != null ? wave : mWave.getValue();
 
-				long durationValue = duration > 0 ? duration
+				long durationValue = duration >= 0 ? duration
 						: Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE;
+
+				Logger.log("Durations: " + duration + " - " + durationValue);
+
 				ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
 						mIsActive.getValue(), newPower, newFrequency,
 						isTadel() && newWave != null ? newWave.getTadelValue() : null,
