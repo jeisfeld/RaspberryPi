@@ -207,7 +207,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 						mRemoveManualOverride = false;
 					}
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
-					mChannelSender.tadel(mIsPowered ? mPower : (int) (mMinPower * mPower), mFrequency, mWave);
+					mChannelSender.tadel(getEffectivePower(mIsPowered, mPower, mMinPower), mFrequency, mWave);
 					break;
 				case RANDOM_2: // MAGIC_NUMBER
 					// Random change between on/off. On level and avg off/on duration controllable.
@@ -231,7 +231,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 						nextSignalChangeTime = System.currentTimeMillis() + duration;
 					}
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
-					mChannelSender.tadel(mIsPowered ? mPower : (int) (mMinPower * mPower), mFrequency, mWave);
+					mChannelSender.tadel(getEffectivePower(mIsPowered, mPower, mMinPower), mFrequency, mWave);
 					break;
 				case PULSE:
 					if (mIsPowered) {
@@ -253,7 +253,7 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 						nextSignalChangeTime = 0;
 					}
 					mPower = getUpdatedPower(mPower, mPowerChangeDuration);
-					mChannelSender.tadel(mIsPowered ? mPower : (int) (mMinPower * mPower), mFrequency, mWave);
+					mChannelSender.tadel(getEffectivePower(mIsPowered, mPower, mMinPower), mFrequency, mWave);
 					break;
 				default:
 					mPower = 0;
@@ -305,6 +305,18 @@ public final class RandomizedTadelBluetooth implements BluetoothRunnable {
 			newPower = 0;
 		}
 		return newPower;
+	}
+
+	/**
+	 * Returns the effective power to be sent in randomized mode.
+	 *
+	 * @param isPowered The flag indicating if power is on.
+	 * @param power The configured power.
+	 * @param minPower The min power (as percentage of configured power).
+	 * @return The effective power.
+	 */
+	private int getEffectivePower(final boolean isPowered, final int power, final double minPower) {
+		return isPowered ? power : Math.max((int) (minPower * power), 1);
 	}
 
 	@Override
