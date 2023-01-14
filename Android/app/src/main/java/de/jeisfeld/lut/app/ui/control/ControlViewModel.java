@@ -3,6 +3,8 @@ package de.jeisfeld.lut.app.ui.control;
 import android.app.Activity;
 
 import java.lang.ref.WeakReference;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 
 import androidx.lifecycle.LiveData;
@@ -11,7 +13,6 @@ import androidx.lifecycle.ViewModel;
 import de.jeisfeld.lut.app.MainActivity;
 import de.jeisfeld.lut.app.util.AccelerationListener;
 import de.jeisfeld.lut.app.util.AccelerationListener.AccelerationSensorListener;
-import de.jeisfeld.lut.app.util.Logger;
 import de.jeisfeld.lut.app.util.MicrophoneListener;
 import de.jeisfeld.lut.app.util.MicrophoneListener.MicrophoneInputListener;
 import de.jeisfeld.lut.bluetooth.message.Message;
@@ -99,6 +100,10 @@ public abstract class ControlViewModel extends ViewModel {
 	 * The power status.
 	 */
 	private final MutableLiveData<Boolean> mPowerStatus = new MutableLiveData<>(false);
+	/**
+	 * The end time.
+	 */
+	private final MutableLiveData<Date> mEndTime = new MutableLiveData<>(null);
 
 	/**
 	 * The acceleration listener.
@@ -143,50 +148,17 @@ public abstract class ControlViewModel extends ViewModel {
 	}
 
 	/**
-	 * Set the status from processing status message.
+	 * Get a calendar for a given date, defaulting to current date.
 	 *
-	 * @param processingBluetoothMessage The processing status message.
+	 * @param date The date
+	 * @return The calendar
 	 */
-	public void setProcessingStatus(final ProcessingBluetoothMessage processingBluetoothMessage) {
-		if (processingBluetoothMessage.isActive() != null) {
-			mIsActive.postValue(processingBluetoothMessage.isActive());
+	protected static Calendar getCalendarForDate(final Date date) {
+		Calendar calendar = Calendar.getInstance();
+		if (date != null) {
+			calendar.setTime(date);
 		}
-		if (processingBluetoothMessage.getMode() != null) {
-			mMode.postValue(processingBluetoothMessage.getMode());
-		}
-		if (processingBluetoothMessage.getPower() != null && mMode.getValue() != Mode.OFF) {
-			mPower.postValue(processingBluetoothMessage.getPower());
-		}
-		if (processingBluetoothMessage.getMinPower() != null) {
-			mMinPower.postValue(processingBluetoothMessage.getMinPower());
-		}
-		if (processingBluetoothMessage.getPowerChangeDuration() != null) {
-			mPowerChangeDuration.postValue(processingBluetoothMessage.getPowerChangeDuration());
-		}
-		if (processingBluetoothMessage.getCycleLength() != null) {
-			mCycleLength.postValue(processingBluetoothMessage.getCycleLength());
-		}
-		if (processingBluetoothMessage.getFrequency() != null) {
-			mFrequency.postValue(processingBluetoothMessage.getFrequency());
-		}
-		if (processingBluetoothMessage.getWave() != null) {
-			mWave.postValue(Wave.fromTadelValue(processingBluetoothMessage.getWave()));
-		}
-		if (processingBluetoothMessage.getRunningProbability() != null) {
-			mRunningProbability.postValue(processingBluetoothMessage.getRunningProbability());
-		}
-		if (processingBluetoothMessage.getAvgOffDuration() != null) {
-			mAvgOffDuration.postValue(processingBluetoothMessage.getAvgOffDuration());
-		}
-		if (processingBluetoothMessage.getAvgOnDuration() != null) {
-			mAvgOnDuration.postValue(processingBluetoothMessage.getAvgOnDuration());
-		}
-		if (processingBluetoothMessage.getPulseDuration() != null) {
-			mPulseDuration.postValue(processingBluetoothMessage.getPulseDuration());
-		}
-		if (processingBluetoothMessage.isHighPower() != null) {
-			mPowerStatus.postValue(processingBluetoothMessage.isHighPower());
-		}
+		return calendar;
 	}
 
 	/**
@@ -280,8 +252,6 @@ public abstract class ControlViewModel extends ViewModel {
 
 				long durationValue = duration >= 0 ? duration
 						: Objects.requireNonNull(mPulseTrigger.getValue()).isWithDuration() ? getPulseDurationValue() : Long.MAX_VALUE;
-
-				Logger.log("Durations: " + duration + " - " + durationValue);
 
 				ProcessingBluetoothMessage message = new ProcessingBluetoothMessage(getChannel(), isTadel(),
 						mIsActive.getValue(), newPower, newFrequency,
@@ -681,6 +651,95 @@ public abstract class ControlViewModel extends ViewModel {
 	 */
 	protected void updatePowerStatus(final boolean powerStatus) {
 		mPowerStatus.setValue(powerStatus);
+	}
+
+	/**
+	 * Set the status from processing status message.
+	 *
+	 * @param processingBluetoothMessage The processing status message.
+	 */
+	public void setProcessingStatus(final ProcessingBluetoothMessage processingBluetoothMessage) {
+		if (processingBluetoothMessage.isActive() != null) {
+			mIsActive.postValue(processingBluetoothMessage.isActive());
+		}
+		if (processingBluetoothMessage.getMode() != null) {
+			mMode.postValue(processingBluetoothMessage.getMode());
+		}
+		if (processingBluetoothMessage.getPower() != null && mMode.getValue() != Mode.OFF) {
+			mPower.postValue(processingBluetoothMessage.getPower());
+		}
+		if (processingBluetoothMessage.getMinPower() != null) {
+			mMinPower.postValue(processingBluetoothMessage.getMinPower());
+		}
+		if (processingBluetoothMessage.getPowerChangeDuration() != null) {
+			mPowerChangeDuration.postValue(processingBluetoothMessage.getPowerChangeDuration());
+		}
+		if (processingBluetoothMessage.getCycleLength() != null) {
+			mCycleLength.postValue(processingBluetoothMessage.getCycleLength());
+		}
+		if (processingBluetoothMessage.getFrequency() != null) {
+			mFrequency.postValue(processingBluetoothMessage.getFrequency());
+		}
+		if (processingBluetoothMessage.getWave() != null) {
+			mWave.postValue(Wave.fromTadelValue(processingBluetoothMessage.getWave()));
+		}
+		if (processingBluetoothMessage.getRunningProbability() != null) {
+			mRunningProbability.postValue(processingBluetoothMessage.getRunningProbability());
+		}
+		if (processingBluetoothMessage.getAvgOffDuration() != null) {
+			mAvgOffDuration.postValue(processingBluetoothMessage.getAvgOffDuration());
+		}
+		if (processingBluetoothMessage.getAvgOnDuration() != null) {
+			mAvgOnDuration.postValue(processingBluetoothMessage.getAvgOnDuration());
+		}
+		if (processingBluetoothMessage.getPulseDuration() != null) {
+			mPulseDuration.postValue(processingBluetoothMessage.getPulseDuration());
+		}
+		if (processingBluetoothMessage.isHighPower() != null) {
+			mPowerStatus.postValue(processingBluetoothMessage.isHighPower());
+		}
+
+		if (mEndTime.getValue() != null && new Date().after(mEndTime.getValue())) {
+			updateActiveStatus(false);
+			updateMode(Mode.OFF);
+			mEndTime.postValue(null);
+		}
+	}
+
+	/**
+	 * Get the end time.
+	 *
+	 * @return The end time.
+	 */
+	protected MutableLiveData<Date> getEndTime() {
+		return mEndTime;
+	}
+
+	/**
+	 * Get a calendar object representing the end time, defaulting current time.
+	 *
+	 * @return The end time as calendar.
+	 */
+	protected Calendar getEndTimeCalendar() {
+		return getCalendarForDate(mEndTime.getValue());
+	}
+
+	/**
+	 * Update the end time.
+	 *
+	 * @param hour   the hour.
+	 * @param minute the minute.
+	 */
+	protected void updateEndTime(final int hour, final int minute) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.HOUR_OF_DAY, hour);
+		calendar.set(Calendar.MINUTE, minute);
+		calendar.set(Calendar.SECOND, 0);
+		Calendar now = Calendar.getInstance();
+		if (calendar.before(now)) {
+			calendar.add(Calendar.DATE, 1);
+		}
+		mEndTime.setValue(calendar.getTime());
 	}
 
 	/**

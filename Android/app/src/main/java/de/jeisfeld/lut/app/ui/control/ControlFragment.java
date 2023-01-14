@@ -1,6 +1,7 @@
 package de.jeisfeld.lut.app.ui.control;
 
 import android.annotation.SuppressLint;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.util.Calendar;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
@@ -149,6 +151,7 @@ public abstract class ControlFragment extends Fragment {
 		prepareSeekbarSensorSensitivity(root);
 		prepareCheckboxPulseInvert(root);
 		prepareIconPowerStatus(root);
+		prepareEndTimeButton(root);
 
 		switchBluetoothStatus.setOnTouchListener((v, event) -> true);
 
@@ -410,12 +413,50 @@ public abstract class ControlFragment extends Fragment {
 
 	/**
 	 * Prepare the icon for power status.
+	 *
 	 * @param root The parent view.
 	 */
 	private void prepareIconPowerStatus(final View root) {
 		final ImageView iconPowerStatus = root.findViewById(R.id.iconPowerStatus);
 		mControlViewModel.getPowerStatus().observe(getViewLifecycleOwner(), isPowered ->
 				iconPowerStatus.setImageResource(isPowered ? R.drawable.ic_icon_power_on : R.drawable.ic_icon_power_off));
+	}
+
+	/**
+	 * Prepare the setup of the end time.
+	 *
+	 * @param root The parent view.
+	 */
+	private void prepareEndTimeButton(final View root) {
+		final TextView textViewEndTime = root.findViewById(R.id.textViewEndTime);
+
+		int hour = mControlViewModel.getEndTimeCalendar().get(Calendar.HOUR_OF_DAY);
+		int minute = mControlViewModel.getEndTimeCalendar().get(Calendar.MINUTE);
+
+		if (mControlViewModel.getEndTime().getValue() != null) {
+			textViewEndTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hour, minute));
+		}
+
+		mControlViewModel.getEndTime().observe(getViewLifecycleOwner(), endTime -> {
+			if (mControlViewModel.getEndTime().getValue() == null) {
+				textViewEndTime.setText(R.string.text_end_time);
+			}
+			else {
+				textViewEndTime.setText(String.format(Locale.getDefault(), "%02d:%02d",
+						ControlViewModel.getCalendarForDate(endTime).get(Calendar.HOUR_OF_DAY),
+						ControlViewModel.getCalendarForDate(endTime).get(Calendar.MINUTE)));
+			}
+		});
+
+		textViewEndTime.setOnClickListener(v -> {
+			TimePickerDialog mTimePicker = new TimePickerDialog(getContext(),
+					(timePicker, selectedHour, selectedMinute) -> {
+						textViewEndTime.setText(String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute));
+						mControlViewModel.updateEndTime(selectedHour, selectedMinute);
+					},
+					hour, minute, true);
+			mTimePicker.show();
+		});
 	}
 
 	/**

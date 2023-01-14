@@ -22,6 +22,7 @@
     <string name="text_pulse_duration">Pulse Dur:</string>
     <string name="text_sensor_sensitivity">Sensitivity:</string>
     <string name="text_sensor_pulse_invert">Pulse inv:</string>
+    <string name="text_end_time">(End Time)</string>
 
     <string name="menu_lob_0">Lob 0</string>
     <string name="menu_lob_1">Lob 1</string>
