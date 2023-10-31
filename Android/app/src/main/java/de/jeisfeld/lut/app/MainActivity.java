@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
 		intentFilter.addAction("de.jeisfeld.randomimage.DISPLAY_NOTIFICATION");
 		intentFilter.addAction("de.jeisfeld.breathtraining.BREATH_EXERCISE");
 		intentFilter.addAction("de.jeisfeld.dsmessenger.TRIGGER_LUT");
-		registerReceiver(mTriggerReceiver, intentFilter);
+		ContextCompat.registerReceiver(this, mTriggerReceiver, intentFilter, ContextCompat.RECEIVER_EXPORTED);
 
 		connect();
 
