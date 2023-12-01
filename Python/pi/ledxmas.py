@@ -60,7 +60,7 @@ def getNewCandleMatrix(brightness):
     elif month == 11:
         candleCount = 1 if date >= 27 else 3
     elif month == 12:
-        candleCount = 4 if date >= 18 else 3 if date >= 11 else 2 if date >= 4 else 1
+        candleCount = 4 if date >= 24 else 3 if date >= 17 else 2 if date >= 10 else 1 if date >= 3 else 3
     else:
         candleCount = 3
 
